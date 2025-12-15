@@ -1,0 +1,12 @@
+{{ template "layout" . }}
+
+{{ define "content" }}
+        <div class="eyebrow">Selamat Datang di Postmatic!</div>
+        <div class="email-body">
+            <p>Hi <strong>{{.Name}}</strong>,</p>
+            <p>Terima kasih telah mendaftar di Postmatic. Akun Anda berhasil dibuat dengan email {{.Email}}.</p>
+            <p>Silakan klik tombol di bawah untuk memulai:</p>
+            {{ template "button" dict "Url" .Link "Label" "Jelajahi Postmatic" }}
+            <p>Cheers,<br>The Postmatic Team</p>
+        </div>
+{{ end }}

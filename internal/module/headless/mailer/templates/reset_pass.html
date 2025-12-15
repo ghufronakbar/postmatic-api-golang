@@ -1,0 +1,16 @@
+{{ template "layout" . }}
+
+{{ define "content" }}
+  <div class="eyebrow">Reset Password</div>
+
+  <div class="email-body">
+    <h1>Halo {{ .Name }}!</h1>
+    <p>Anda menerima email ini karena ada permintaan untuk mengatur ulang password akun Anda di <strong>{{ .AppName }}</strong>.</p>
+    <p>Silakan klik tombol di bawah ini untuk mengatur ulang password Anda:</p>
+
+    {{ template "button" dict "Url" .ResetUrl "Label" "Reset Password" }}
+
+    <div class="divider"></div>
+    <p class="muted">Jika Anda tidak meminta reset password, abaikan email ini. Password Anda akan tetap aman dan tidak berubah.</p>
+  </div>
+{{ end }}

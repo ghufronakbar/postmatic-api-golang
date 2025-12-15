@@ -1,0 +1,22 @@
+{{ template "layout" . }}
+
+{{ define "content" }}
+  <div class="eyebrow">Verifikasi Email</div>
+
+  <div class="email-body">
+    <h1>Halo {{ .Name }}!</h1>
+    <p>Terima kasih telah mendaftar di <strong>{{ .AppName }}</strong>.</p>
+    <p>{{ .Subject }}</p>
+    <p>Silakan klik tombol di bawah ini untuk mengonfirmasi alamat email Anda:</p>
+    
+    {{/* Panggil component button dengan parameter */}}
+    {{ template "button" dict "Url" .ConfirmUrl "Label" "Konfirmasi Email" }}
+
+    <p class="muted">Jika tombol di atas tidak berfungsi, Anda dapat menyalin dan menempelkan tautan berikut ke browser Anda:</p>
+    <p class="muted break-all">{{ .ConfirmUrl }}</p>
+
+
+    <div class="divider"></div>
+    <p class="muted">Jika Anda tidak merasa mendaftar, abaikan email ini.</p>
+  </div>
+{{ end }}
