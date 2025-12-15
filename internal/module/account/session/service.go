@@ -19,14 +19,31 @@ func NewService(sessionRepo *sessionRepository.SessionRepository) *SessionServic
 	}
 }
 
-func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId string) error {
+func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId string) (*sessionRepository.RedisSession, error) {
 	sessionId := input.SessionID
-	err := s.sessionRepo.DeleteSessionByID(ctx, sessionId, profileId)
+	sess, err := s.sessionRepo.GetSessionsByProfileID(ctx, profileId)
 	if err != nil {
-		return errs.NewInternalServerError(errors.New("FAILED_TO_LOG_OUT_OTHER_DEVICE"))
+		return nil, errs.NewInternalServerError(errors.New("FAILED_TO_LOG_OUT"))
+	}
+
+	var check *sessionRepository.RedisSession
+	for _, session := range sess {
+		if session.ID == sessionId {
+			check = &session
+			break
+		}
+	}
+
+	if check == nil {
+		return nil, errs.NewUnauthorized("INVALID_SESSION_ID")
+	}
+
+	err = s.sessionRepo.DeleteSessionByID(ctx, profileId, sessionId)
+	if err != nil {
+		return nil, errs.NewInternalServerError(errors.New("FAILED_TO_LOG_OUT"))
 	}
 	// TODO: web socket to notify client and force logout
-	return nil
+	return check, nil
 }
 
 func (s *SessionService) LogoutAll(ctx context.Context, input LogoutAllInput) error {

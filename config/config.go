@@ -41,11 +41,12 @@ type Config struct {
 	JWT_REFRESH_TOKEN_SECRET        string
 	JWT_CREATE_ACCOUNT_TOKEN_SECRET string
 
-	// JWT EXPIRED
+	// TIME
 	JWT_ACCESS_TOKEN_EXPIRED         time.Duration // minutes
 	JWT_REFRESH_TOKEN_EXPIRED        time.Duration // days
 	JWT_REFRESH_TOKEN_RENEWAL        time.Duration // days
 	JWT_CREATE_ACCOUNT_TOKEN_EXPIRED time.Duration // minutes
+	CAN_RESEND_EMAIL_AFTER           int64         // minutes
 
 	// SMTP
 	SMTP_HOST        string
@@ -74,11 +75,13 @@ func Load() *Config {
 	jwtRefreshTokenExpired, _ := strconv.Atoi(getEnv("JWT_REFRESH_TOKEN_EXPIRED"))
 	jwtRefreshTokenRenewal, _ := strconv.Atoi(getEnv("JWT_REFRESH_TOKEN_RENEWAL"))
 	jwtCreateAccountTokenExpired, _ := strconv.Atoi(getEnv("JWT_CREATE_ACCOUNT_TOKEN_EXPIRED"))
+	canResendEmailAfter, _ := strconv.Atoi(getEnv("CAN_RESEND_EMAIL_AFTER"))
 
 	jwtAccessTokenExpiredDuration := time.Duration(jwtAccessTokenExpired) * time.Minute
 	jwtRefreshTokenExpiredDuration := time.Duration(jwtRefreshTokenExpired) * time.Hour * 24
 	jwtRefreshTokenRenewalDuration := time.Duration(jwtRefreshTokenRenewal) * time.Hour * 24
 	jwtCreateAccountTokenExpiredDuration := time.Duration(jwtCreateAccountTokenExpired) * time.Minute
+	canResendEmailAfterDuration := int64(canResendEmailAfter * 60)
 
 	return &Config{
 		// COMMON
@@ -111,11 +114,12 @@ func Load() *Config {
 		JWT_REFRESH_TOKEN_SECRET:        getEnv("JWT_REFRESH_TOKEN_SECRET"),
 		JWT_CREATE_ACCOUNT_TOKEN_SECRET: getEnv("JWT_CREATE_ACCOUNT_TOKEN_SECRET"),
 
-		// JWT EXPIRED
+		// TIME
 		JWT_ACCESS_TOKEN_EXPIRED:         jwtAccessTokenExpiredDuration,
 		JWT_REFRESH_TOKEN_EXPIRED:        jwtRefreshTokenExpiredDuration,
 		JWT_REFRESH_TOKEN_RENEWAL:        jwtRefreshTokenRenewalDuration,
 		JWT_CREATE_ACCOUNT_TOKEN_EXPIRED: jwtCreateAccountTokenExpiredDuration,
+		CAN_RESEND_EMAIL_AFTER:           canResendEmailAfterDuration,
 
 		// SMTP
 		SMTP_HOST:        getEnv("SMTP_HOST"),

@@ -13,10 +13,11 @@ type LoginResponse struct {
 
 type RegisterResponse struct {
 	// Profile ID
-	ID       string  `json:"id"`
-	Name     string  `json:"name"`
-	Email    string  `json:"email"`
-	ImageUrl *string `json:"imageUrl"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Email      string  `json:"email"`
+	ImageUrl   *string `json:"imageUrl"`
+	RetryAfter int64   `json:"retryAfter"`
 }
 
 type VerifyCreateAccountTokenResponse struct {
@@ -47,4 +48,13 @@ type SessionResponse struct {
 	ImageUrl     *string `json:"imageUrl"`
 	AccessToken  string  `json:"accessToken"`
 	RefreshToken string  `json:"refreshToken"`
+}
+
+type ResendEmailVerificationResponse struct {
+	// Profile ID
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Email      string  `json:"email"`
+	ImageUrl   *string `json:"imageUrl"`
+	RetryAfter int64   `json:"retryAfter"`
 }

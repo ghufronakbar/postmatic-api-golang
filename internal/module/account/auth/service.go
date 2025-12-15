@@ -51,8 +51,10 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 
 		// A. Cek User (Gunakan 'q', bukan 's.store')
 		checkUser, err := q.GetUserByEmailProfile(ctx, input.Email)
-		if err == nil && checkUser.Provider == "credentials" {
-			return errs.NewBadRequest("EMAIL_ALREADY_EXISTS")
+		for _, u := range checkUser {
+			if u.Provider == "credentials" {
+				return errs.NewBadRequest("EMAIL_ALREADY_EXISTS")
+			}
 		}
 
 		// B. Cek Profile
@@ -92,7 +94,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken)
+		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.Locale)
 		if err != nil {
 			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
@@ -104,14 +106,18 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 
 	if err != nil {
 		// Error sudah dibungkus dari dalam ExecTx
-		return RegisterResponse{}, errs.NewInternalServerError(err)
+		return RegisterResponse{}, err
 	}
 
+	// TODO: add bucket redis for retry
+	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+
 	return RegisterResponse{
-		ID:       finalProfile.ID.String(),
-		Name:     finalProfile.Name,
-		Email:    finalProfile.Email,
-		ImageUrl: nil,
+		ID:         finalProfile.ID.String(),
+		Name:       finalProfile.Name,
+		Email:      finalProfile.Email,
+		ImageUrl:   nil,
+		RetryAfter: retryAfter,
 	}, nil
 }
 
@@ -173,7 +179,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken)
+		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.Locale)
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -388,7 +394,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 func (s *AuthService) SubmitVerifyToken(ctx context.Context, input string, session SessionInput) (VerifyCreateAccountResponse, error) {
 	valid, err := s.CheckVerifyToken(ctx, input)
 	if err != nil {
-		return VerifyCreateAccountResponse{}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
+		return VerifyCreateAccountResponse{}, err
 	}
 
 	if valid.ID == nil {
@@ -502,8 +508,78 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input string, sessi
 	}, nil
 }
 
-func (s *AuthService) sendVerificationEmail(ctx context.Context, name string, to string, token string) error {
-	confirmUrl := s.cfg.DASHBOARD_URL + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token
+func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendEmailVerificationInput) (ResendEmailVerificationResponse, error) {
+	email := input.Email
+
+	users, err := s.store.GetUserByEmailProfile(ctx, email)
+	if err != nil {
+		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
+	}
+
+	if len(users) == 0 {
+		return ResendEmailVerificationResponse{}, errs.NewBadRequest("USER_NOT_FOUND")
+	}
+
+	var user entity.User
+	var profile entity.Profile
+	for _, u := range users {
+		if u.Provider == "credentials" {
+			user = entity.User{
+				ID:         u.ID,
+				VerifiedAt: u.VerifiedAt,
+			}
+			profile = entity.Profile{
+				ID:       u.ProfileID,
+				Name:     u.Name,
+				Email:    u.Email,
+				ImageUrl: u.ImageUrl,
+			}
+			break
+		}
+	}
+
+	if user.ID == uuid.Nil {
+		return ResendEmailVerificationResponse{}, errs.NewBadRequest("USER_NOT_FOUND")
+	}
+
+	if user.VerifiedAt.Valid {
+		return ResendEmailVerificationResponse{}, errs.NewBadRequest("USER_ALREADY_VERIFIED")
+	}
+
+	if profile.ID == uuid.Nil {
+		return ResendEmailVerificationResponse{}, errs.NewBadRequest("USER_NOT_FOUND")
+	}
+
+	var imageUrl *string
+	if profile.ImageUrl.Valid {
+		imageUrl = &profile.ImageUrl.String
+	}
+
+	token, err := token.GenerateCreateAccountToken(user.ID.String(), profile.Email, profile.Name, imageUrl)
+	if err != nil {
+		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
+	}
+
+	err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, token, input.Locale)
+	if err != nil {
+		return ResendEmailVerificationResponse{}, err
+	}
+
+	// TODO: add bucket redis for retry
+	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+
+	return ResendEmailVerificationResponse{
+		ID:         profile.ID.String(),
+		Name:       profile.Name,
+		Email:      profile.Email,
+		ImageUrl:   imageUrl,
+		RetryAfter: retryAfter,
+	}, nil
+
+}
+
+func (s *AuthService) sendVerificationEmail(ctx context.Context, name, to, token, locale string) error {
+	confirmUrl := s.cfg.DASHBOARD_URL + locale + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token
 	templateData := mailer.VerificationInput{
 		Name:       name,
 		ConfirmUrl: confirmUrl,

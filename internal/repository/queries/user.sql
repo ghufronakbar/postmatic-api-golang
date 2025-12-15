@@ -1,7 +1,7 @@
--- name: GetUserByEmailProfile :one
+-- name: GetUserByEmailProfile :many
 SELECT * FROM users
 INNER JOIN profiles ON users.profile_id = profiles.id
-WHERE profiles.email = $1 LIMIT 1;
+WHERE profiles.email = $1;
 
 -- name: GetUserById :one
 SELECT * FROM users

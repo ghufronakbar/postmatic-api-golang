@@ -39,10 +39,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
-const getUserByEmailProfile = `-- name: GetUserByEmailProfile :one
+const getUserByEmailProfile = `-- name: GetUserByEmailProfile :many
 SELECT users.id, password, provider, verified_at, profile_id, users.created_at, users.updated_at, profiles.id, name, email, image_url, country_code, phone, description, profiles.created_at, profiles.updated_at FROM users
 INNER JOIN profiles ON users.profile_id = profiles.id
-WHERE profiles.email = $1 LIMIT 1
+WHERE profiles.email = $1
 `
 
 type GetUserByEmailProfileRow struct {
@@ -64,28 +64,44 @@ type GetUserByEmailProfileRow struct {
 	UpdatedAt_2 sql.NullTime   `json:"updated_at_2"`
 }
 
-func (q *Queries) GetUserByEmailProfile(ctx context.Context, email string) (GetUserByEmailProfileRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmailProfile, email)
-	var i GetUserByEmailProfileRow
-	err := row.Scan(
-		&i.ID,
-		&i.Password,
-		&i.Provider,
-		&i.VerifiedAt,
-		&i.ProfileID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.ID_2,
-		&i.Name,
-		&i.Email,
-		&i.ImageUrl,
-		&i.CountryCode,
-		&i.Phone,
-		&i.Description,
-		&i.CreatedAt_2,
-		&i.UpdatedAt_2,
-	)
-	return i, err
+func (q *Queries) GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserByEmailProfile, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserByEmailProfileRow
+	for rows.Next() {
+		var i GetUserByEmailProfileRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Password,
+			&i.Provider,
+			&i.VerifiedAt,
+			&i.ProfileID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ID_2,
+			&i.Name,
+			&i.Email,
+			&i.ImageUrl,
+			&i.CountryCode,
+			&i.Phone,
+			&i.Description,
+			&i.CreatedAt_2,
+			&i.UpdatedAt_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserById = `-- name: GetUserById :one

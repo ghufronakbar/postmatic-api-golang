@@ -18,7 +18,7 @@ type Querier interface {
 	GetProductById(ctx context.Context, id uuid.UUID) (Product, error)
 	GetProfileByEmail(ctx context.Context, email string) (Profile, error)
 	GetProfileById(ctx context.Context, id uuid.UUID) (Profile, error)
-	GetUserByEmailProfile(ctx context.Context, email string) (GetUserByEmailProfileRow, error)
+	GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (User, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)

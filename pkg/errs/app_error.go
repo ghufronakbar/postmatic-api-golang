@@ -56,7 +56,7 @@ func NewInternalServerError(err error) *AppError {
 	fmt.Println(err.Error())
 	return &AppError{
 		Code:    http.StatusInternalServerError,
-		Message: "Internal Server Error",
+		Message: "INTERNAL_SERVER_ERROR",
 		Err:     err, // Simpan error asli untuk keperluan logging nanti
 	}
 }

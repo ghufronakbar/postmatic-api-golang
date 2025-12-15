@@ -72,14 +72,14 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	// 4. Panggil Service
 	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
-	err = h.sessSvc.Logout(r.Context(), req, profileId)
+	res, err := h.sessSvc.Logout(r.Context(), req, profileId)
 
 	if err != nil {
 		response.Error(w, err)
 		return
 	}
 
-	response.OK(w, "LOGOUT_SUCCESS", nil)
+	response.OK(w, "LOGOUT_SUCCESS", res)
 }
 
 func (h *AuthHandler) GetSession(w http.ResponseWriter, r *http.Request) {

@@ -29,6 +29,7 @@ func (h *AuthHandler) AuthRoutes() chi.Router {
 	r.Post("/refresh-token", h.RefreshToken)
 	r.Get("/verify/{createAccountToken}", h.CheckVerifyToken)
 	r.Post("/verify/{createAccountToken}", h.SubmitVerifyToken)
+	r.Post("/resend-email-verification", h.ResendEmailVerification)
 
 	return r
 }
@@ -155,4 +156,33 @@ func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	response.OK(w, "SUBMIT_VERIFY_TOKEN_SUCCESS", res)
+}
+
+func (h *AuthHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
+	// 1. Gunakan Struct dari DTO
+	var req auth.ResendEmailVerificationInput
+
+	// 2. Decode langsung ke struct tersebut
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.InvalidJsonFormat(w)
+		return
+	}
+
+	// 3. Validasi struct tersebut
+	// Validator akan membaca tag `validate` yang ada di DTO
+	if errsMap := utils.ValidateStruct(req); errsMap != nil {
+		response.ValidationFailed(w, errsMap)
+		return
+	}
+
+	// 4. Panggil Service
+	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
+	res, err := h.authSvc.ResendEmailVerification(r.Context(), req)
+
+	if err != nil {
+		response.Error(w, err)
+		return
+	}
+
+	response.OK(w, "RESEND_EMAIL_VERIFICATION_SUCCESS", res)
 }
