@@ -60,7 +60,7 @@ func (h *AuthHandler) LoginCredentials(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.LoginCredentials(r.Context(), req, sessionInput)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, err, res)
 		return
 	}
 

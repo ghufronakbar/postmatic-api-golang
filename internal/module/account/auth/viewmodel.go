@@ -9,6 +9,7 @@ type LoginResponse struct {
 	ImageUrl     *string `json:"imageUrl"`
 	AccessToken  string  `json:"accessToken"`
 	RefreshToken string  `json:"refreshToken"`
+	RetryAfter   int64   `json:"retryAfter"`
 }
 
 type RegisterResponse struct {

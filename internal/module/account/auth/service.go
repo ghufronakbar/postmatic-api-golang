@@ -194,25 +194,39 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		// A. CEK LIMITER DULU
 		checkLimiter, _ := s.emailLimiterRepo.GetLimiterEmail(ctx, profile.Email)
 
-		// Jika belum kena limit, baru kirim email
-		if checkLimiter == nil {
-			createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
-			if err != nil {
-				return LoginResponse{}, errs.NewInternalServerError(err)
-			}
-
-			// Kirim Email
-			err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
-			if err != nil {
-				return LoginResponse{}, errs.NewInternalServerError(err)
-			}
-
-			// SET LIMITER (PENTING)
-			retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
-			_ = s.emailLimiterRepo.SaveLimiterEmail(ctx, profile.Email, time.Duration(retryAfter)*time.Second)
+		if checkLimiter != nil {
+			return LoginResponse{
+				Email:      input.Email,
+				RetryAfter: checkLimiter.RetryAfterSeconds,
+				ID:         profile.ID.String(),
+				Name:       profile.Name,
+				ImageUrl:   nil,
+			}, errs.NewBadRequest("PLEASE_WAIT")
 		}
 
-		return LoginResponse{}, errs.NewUnauthorized("EMAIL_NOT_VERIFIED")
+		// Jika belum kena limit, baru kirim email
+		createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
+		if err != nil {
+			return LoginResponse{}, errs.NewInternalServerError(err)
+		}
+
+		// Kirim Email
+		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+		if err != nil {
+			return LoginResponse{}, errs.NewInternalServerError(err)
+		}
+
+		// SET LIMITER (PENTING)
+		retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+		_ = s.emailLimiterRepo.SaveLimiterEmail(ctx, profile.Email, time.Duration(retryAfter)*time.Second)
+
+		return LoginResponse{
+			Email:      input.Email,
+			RetryAfter: retryAfter,
+			ID:         profile.ID.String(),
+			Name:       profile.Name,
+			ImageUrl:   nil,
+		}, errs.NewUnauthorized("EMAIL_NOT_VERIFIED")
 	}
 
 	// 3. Generate Tokens
@@ -262,6 +276,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		Name:         profile.Name,
 		Email:        profile.Email,
 		ImageUrl:     imageUrl,
+		RetryAfter:   0,
 	}, nil
 }
 func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput) (LoginResponse, error) {
