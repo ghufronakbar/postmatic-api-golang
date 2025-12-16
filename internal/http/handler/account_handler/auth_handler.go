@@ -142,13 +142,19 @@ func (h *AuthHandler) CheckVerifyToken(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	createAccountToken := chi.URLParam(r, "createAccountToken")
+	from := r.URL.Query().Get("from")
 	clientInfo := utils.ExtractClientInfo(r)
 
 	session := auth.SessionInput{
 		DeviceInfo: clientInfo,
 	}
 
-	res, err := h.authSvc.SubmitVerifyToken(r.Context(), createAccountToken, session)
+	input := auth.SubmitVerifyTokenInput{
+		Token: createAccountToken,
+		From:  from,
+	}
+
+	res, err := h.authSvc.SubmitVerifyToken(r.Context(), input, session)
 
 	if err != nil {
 		response.Error(w, err)

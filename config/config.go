@@ -23,6 +23,7 @@ type Config struct {
 	API_URL       string
 	LANDING_URL   string
 	DASHBOARD_URL string
+	AUTH_URL      string
 
 	// ROUTE
 	VERIFY_EMAIL_ROUTE string
@@ -96,6 +97,7 @@ func Load() *Config {
 		API_URL:       getEnv("API_URL"),
 		LANDING_URL:   getEnv("LANDING_URL"),
 		DASHBOARD_URL: getEnv("DASHBOARD_URL"),
+		AUTH_URL:      getEnv("AUTH_URL"),
 
 		// ROUTE
 		VERIFY_EMAIL_ROUTE: getEnv("VERIFY_EMAIL_ROUTE"),

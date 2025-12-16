@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	"postmatic-api/config"
@@ -94,7 +95,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.Locale)
+		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
 		if err != nil {
 			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
@@ -179,7 +180,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.Locale)
+		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -391,8 +392,8 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 	}, nil
 }
 
-func (s *AuthService) SubmitVerifyToken(ctx context.Context, input string, session SessionInput) (VerifyCreateAccountResponse, error) {
-	valid, err := s.CheckVerifyToken(ctx, input)
+func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyTokenInput, session SessionInput) (VerifyCreateAccountResponse, error) {
+	valid, err := s.CheckVerifyToken(ctx, input.Token)
 	if err != nil {
 		return VerifyCreateAccountResponse{}, err
 	}
@@ -453,15 +454,8 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input string, sessi
 	go func() {
 		bgCtx := context.Background()
 
-		suffix := ""
+		link := s.cfg.AUTH_URL + "&from=" + url.QueryEscape(input.From)
 
-		if s.cfg.MODE != "production" {
-			suffix = s.cfg.MODE
-		}
-
-		link := s.cfg.DASHBOARD_URL + "?postmaticAccessToken" + suffix + "=" + accessToken + "&postmaticRefreshToken" + suffix + "=" + refreshToken
-
-		// TODO: save refresh token to redis
 		sessionID := uuid.New().String()
 
 		newSession := repositoryRedis.RedisSession{
@@ -560,7 +554,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
 	}
 
-	err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, token, input.Locale)
+	err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, token, input.From)
 	if err != nil {
 		return ResendEmailVerificationResponse{}, err
 	}
@@ -578,17 +572,24 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 
 }
 
-func (s *AuthService) sendVerificationEmail(ctx context.Context, name, to, token, locale string) error {
-	confirmUrl := s.cfg.DASHBOARD_URL + locale + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token
+func (s *AuthService) sendVerificationEmail(ctx context.Context, name, to, token, from string) error {
+	u, err := url.Parse(s.cfg.AUTH_URL + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token)
+	if err != nil {
+		return errs.NewInternalServerError(err)
+	}
+
+	q := u.Query()
+	q.Set("from", from)
+	u.RawQuery = q.Encode()
+
+	confirmUrl := u.String()
+	fmt.Println(confirmUrl)
 	templateData := mailer.VerificationInput{
 		Name:       name,
 		ConfirmUrl: confirmUrl,
 	}
 
-	fmt.Println(confirmUrl)
-	fmt.Println(templateData)
-
-	err := s.mailer.SendEmail(ctx, mailer.SendEmailInput{
+	err = s.mailer.SendEmail(ctx, mailer.SendEmailInput{
 		To:           to,
 		Subject:      "Konfirmasi Pendaftaran Akun",
 		TemplateName: "verification.html",
