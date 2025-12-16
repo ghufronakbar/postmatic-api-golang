@@ -1,4 +1,4 @@
-// internal/module/account/auth/res.go
+// internal/module/account/auth/viewmodel.go
 package auth
 
 type LoginResponse struct {

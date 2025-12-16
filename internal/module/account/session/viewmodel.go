@@ -1,3 +1,4 @@
+// internal/module/account/session/viewmodel.go
 package session
 
 import (
