@@ -2,17 +2,17 @@
 package session
 
 import (
-	"postmatic-api/internal/repository/redis"
+	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"time"
 )
 
 type SessionResponse struct {
-	ID       string             `json:"id"`
-	Email    string             `json:"email"`
-	Name     string             `json:"name"`
-	ImageUrl *string            `json:"imageUrl"`
-	Exp      int64              `json:"exp"`
-	Session  redis.RedisSession `json:"session"`
+	ID       string                `json:"id"`
+	Email    string                `json:"email"`
+	Name     string                `json:"name"`
+	ImageUrl *string               `json:"imageUrl"`
+	Exp      int64                 `json:"exp"`
+	Session  sessRepo.RedisSession `json:"session"`
 }
 
 type SessionListResponse struct {

@@ -4,29 +4,29 @@ import (
 	"context"
 	"errors"
 
-	sessionRepository "postmatic-api/internal/repository/redis"
+	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/token"
 )
 
 type SessionService struct {
-	sessionRepo *sessionRepository.SessionRepository
+	sessionRepo *sessRepo.SessionRepository
 }
 
-func NewService(sessionRepo *sessionRepository.SessionRepository) *SessionService {
+func NewService(sessionRepo *sessRepo.SessionRepository) *SessionService {
 	return &SessionService{
 		sessionRepo: sessionRepo,
 	}
 }
 
-func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId string) (*sessionRepository.RedisSession, error) {
+func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId string) (*sessRepo.RedisSession, error) {
 	sessionId := input.SessionID
 	sess, err := s.sessionRepo.GetSessionsByProfileID(ctx, profileId)
 	if err != nil {
 		return nil, errs.NewInternalServerError(errors.New("FAILED_TO_LOG_OUT"))
 	}
 
-	var check *sessionRepository.RedisSession
+	var check *sessRepo.RedisSession
 	for _, session := range sess {
 		if session.ID == sessionId {
 			check = &session
@@ -82,7 +82,7 @@ func (s *SessionService) GetSession(ctx context.Context, claims *token.Claims, r
 		imageUrl = claims.ImageUrl
 	}
 
-	session := sessionRepository.RedisSession{
+	session := sessRepo.RedisSession{
 		ID:           sess.ID,
 		ProfileID:    profileId,
 		RefreshToken: refreshToken,

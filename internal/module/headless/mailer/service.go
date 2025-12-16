@@ -78,9 +78,17 @@ func (s *MailerService) SendEmail(ctx context.Context, input SendEmailInput) err
 	contentType := "text/plain"
 
 	if input.TemplateName != "" {
+		if !input.TemplateName.IsValid() {
+			return errs.NewInternalServerError(errors.New("INVALID_TEMPLATE_NAME"))
+		}
 		// 1. Parse Layout DAN Template Spesifik
 		// Kita butuh layout.html untuk kerangka, dan input.TemplateName untuk isinya
-		tmpl, err := template.New("").Funcs(funcMap).ParseFS(templateFS, "templates/layout.html", "templates/"+input.TemplateName)
+		// 1. Parse Layout DAN Template Spesifik
+		// UBAH DISINI: Cast input.TemplateName menjadi string() agar aman digabung path
+		targetTemplate := "templates/" + string(input.TemplateName)
+		layoutTemplate := "templates/" + string(LayoutTemplate)
+
+		tmpl, err := template.New("").Funcs(funcMap).ParseFS(templateFS, layoutTemplate, targetTemplate)
 		if err != nil {
 			return err
 		}

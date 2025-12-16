@@ -62,7 +62,7 @@ func OK(w http.ResponseWriter, message string, data interface{}) {
 }
 
 // Helper khusus untuk Error
-func Error(w http.ResponseWriter, err error) {
+func Error(w http.ResponseWriter, err error, data interface{}) {
 	// Default error (jika bukan AppError) -> 500
 	code := http.StatusInternalServerError
 	msg := "INTERNAL_SERVER_ERROR"
@@ -79,7 +79,7 @@ func Error(w http.ResponseWriter, err error) {
 		}
 	}
 
-	JSON(w, code, msg, nil)
+	JSON(w, code, msg, data)
 }
 
 func ValidationFailed(w http.ResponseWriter, errsMap map[string]string) {

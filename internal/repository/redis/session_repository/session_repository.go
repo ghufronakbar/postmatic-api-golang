@@ -1,5 +1,5 @@
-// internal/repository/redis/session_repository.go
-package redis
+// internal/repository/redis/redis_session/session_repository.go
+package session_repository
 
 import (
 	"context"

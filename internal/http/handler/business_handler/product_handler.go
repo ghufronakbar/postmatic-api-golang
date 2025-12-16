@@ -52,7 +52,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	res, err := h.svc.Create(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *ProductHandler) List(w http.ResponseWriter, r *http.Request) {
 	res, err := h.svc.GetAll(r.Context())
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 	response.OK(w, "Berhasil mendapatkan list produk", res)
@@ -78,8 +78,7 @@ func (h *ProductHandler) One(w http.ResponseWriter, r *http.Request) {
 	res, err := h.svc.GetOne(r.Context(), uuidId)
 
 	if err != nil {
-		// Gunakan response.Error agar konsisten
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -96,7 +95,7 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	res, err := h.svc.Delete(r.Context(), uuidId)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 

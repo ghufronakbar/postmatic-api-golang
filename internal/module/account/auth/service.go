@@ -12,7 +12,8 @@ import (
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/repository/entity"
-	repositoryRedis "postmatic-api/internal/repository/redis"
+	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
+	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/token"
 	"postmatic-api/pkg/utils"
@@ -21,19 +22,21 @@ import (
 )
 
 type AuthService struct {
-	store       entity.Store
-	mailer      mailer.MailerService
-	cfg         config.Config
-	sessionRepo *repositoryRedis.SessionRepository
+	store            entity.Store
+	mailer           mailer.MailerService
+	cfg              config.Config
+	sessionRepo      *sessRepo.SessionRepository
+	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, sessionRepo *repositoryRedis.SessionRepository) *AuthService {
+func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, sessionRepo *sessRepo.SessionRepository, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo) *AuthService {
 	return &AuthService{
-		store:       store,
-		mailer:      mailer,
-		cfg:         cfg,
-		sessionRepo: sessionRepo,
+		store:            store,
+		mailer:           mailer,
+		cfg:              cfg,
+		sessionRepo:      sessionRepo,
+		emailLimiterRepo: emailLimiterRepo,
 	}
 }
 
@@ -51,18 +54,21 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	err := s.store.ExecTx(ctx, func(q *entity.Queries) error {
 
 		// A. Cek User (Gunakan 'q', bukan 's.store')
-		checkUser, err := q.GetUserByEmailProfile(ctx, input.Email)
+		checkUser, e := q.GetUserByEmailProfile(ctx, input.Email)
+		if e != nil {
+			return e
+		}
 		for _, u := range checkUser {
-			if u.Provider == "credentials" {
+			if u.Provider == ProviderCredentials {
 				return errs.NewBadRequest("EMAIL_ALREADY_EXISTS")
 			}
 		}
 
 		// B. Cek Profile
-		profile, err := q.GetProfileByEmail(ctx, input.Email)
+		profile, e := q.GetProfileByEmail(ctx, input.Email)
 
 		// Logic Profile Baru vs Lama
-		if err == sql.ErrNoRows {
+		if e == sql.ErrNoRows {
 			newProfile, err := q.CreateProfile(ctx, entity.CreateProfileParams{
 				Name:        input.Name,
 				Email:       input.Email,
@@ -75,29 +81,29 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 				return err // Otomatis Rollback
 			}
 			profile = newProfile
-		} else if err != nil {
-			return err // Otomatis Rollback
+		} else if e != nil {
+			return e // Otomatis Rollback
 		}
 
 		// C. Buat User (Sekarang aman, profile pasti ada)
-		_, err = q.CreateUser(ctx, entity.CreateUserParams{
+		_, e = q.CreateUser(ctx, entity.CreateUserParams{
 			ProfileID: profile.ID,
 			Password:  sql.NullString{String: hashedPassword, Valid: true},
-			Provider:  "credentials",
+			Provider:  ProviderCredentials,
 		})
 
-		if err != nil {
-			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
+		if e != nil {
+			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
-		if err != nil {
-			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
+		createAccountToken, e := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
+		if e != nil {
+			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
-		if err != nil {
-			return err // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
+		e = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+		if e != nil {
+			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
 		// Assign ke variable luar agar bisa di-return
@@ -110,8 +116,17 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 		return RegisterResponse{}, err
 	}
 
-	// TODO: add bucket redis for retry
-	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+	//  SET RATE LIMITER BARU
+	// Gunakan duration dari Config
+	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER // misal 60 detik
+	retryAfterDuration := time.Duration(retryAfter) * time.Second
+
+	// Simpan ke Redis (Hanya Email & TTL)
+	err = s.emailLimiterRepo.SaveLimiterEmail(ctx, input.Email, retryAfterDuration)
+	if err != nil {
+		// Log error saja, jangan gagalkan response karena email sudah terkirim
+		fmt.Printf("Failed to set email limiter: %v\n", err)
+	}
 
 	return RegisterResponse{
 		ID:         finalProfile.ID.String(),
@@ -144,7 +159,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 
 	// Cari user dengan provider 'credentials'
 	for _, u := range users {
-		if u.Provider == "credentials" {
+		if u.Provider == ProviderCredentials {
 			targetUser = u
 			userCredFound = true
 			break
@@ -162,7 +177,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		createdUser, err := s.store.CreateUser(ctx, entity.CreateUserParams{
 			ProfileID: profile.ID,
 			Password:  sql.NullString{String: hashedPassword, Valid: true},
-			Provider:  "credentials",
+			Provider:  ProviderCredentials,
 		})
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
@@ -176,14 +191,27 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 	}
 
 	if !targetUser.VerifiedAt.Valid {
-		createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
-		if err != nil {
-			return LoginResponse{}, errs.NewInternalServerError(err)
+		// A. CEK LIMITER DULU
+		checkLimiter, _ := s.emailLimiterRepo.GetLimiterEmail(ctx, profile.Email)
+
+		// Jika belum kena limit, baru kirim email
+		if checkLimiter == nil {
+			createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
+			if err != nil {
+				return LoginResponse{}, errs.NewInternalServerError(err)
+			}
+
+			// Kirim Email
+			err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+			if err != nil {
+				return LoginResponse{}, errs.NewInternalServerError(err)
+			}
+
+			// SET LIMITER (PENTING)
+			retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+			_ = s.emailLimiterRepo.SaveLimiterEmail(ctx, profile.Email, time.Duration(retryAfter)*time.Second)
 		}
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
-		if err != nil {
-			return LoginResponse{}, errs.NewInternalServerError(err)
-		}
+
 		return LoginResponse{}, errs.NewUnauthorized("EMAIL_NOT_VERIFIED")
 	}
 
@@ -208,7 +236,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 
 	sessionID := uuid.New().String()
 
-	newSession := repositoryRedis.RedisSession{
+	newSession := sessRepo.RedisSession{
 		ID:           sessionID,
 		RefreshToken: refreshToken,
 		Browser:      session.DeviceInfo.Browser,
@@ -359,7 +387,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 
 	credUser := entity.User{}
 	for _, u := range users {
-		if u.Provider == "credentials" {
+		if u.Provider == ProviderCredentials {
 			credUser = u
 			break
 		}
@@ -415,7 +443,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 	var user entity.User
 
 	for _, u := range users {
-		if u.Provider == "credentials" {
+		if u.Provider == ProviderCredentials {
 			user = u
 			break
 		}
@@ -450,27 +478,30 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
 
+	sessionID := uuid.New().String()
+
+	newSession := sessRepo.RedisSession{
+		ID:           sessionID,
+		RefreshToken: refreshToken,
+		Browser:      session.DeviceInfo.Browser,
+		Platform:     session.DeviceInfo.Platform, // OS
+		Device:       session.DeviceInfo.Device,
+		ClientIP:     session.DeviceInfo.ClientIP,
+		ProfileID:    profileId.String(),
+		CreatedAt:    time.Now(),
+		ExpiredAt:    time.Now().Add(s.cfg.JWT_REFRESH_TOKEN_EXPIRED),
+	}
+
+	err = s.sessionRepo.SaveSession(ctx, newSession, s.cfg.JWT_REFRESH_TOKEN_EXPIRED)
+	if err != nil {
+		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
+	}
+
 	// GO ROUTINE FOR SENDING EMAIL IN BACKGROUND
 	go func() {
 		bgCtx := context.Background()
 
 		link := s.cfg.AUTH_URL + "&from=" + url.QueryEscape(input.From)
-
-		sessionID := uuid.New().String()
-
-		newSession := repositoryRedis.RedisSession{
-			ID:           sessionID,
-			RefreshToken: refreshToken,
-			Browser:      session.DeviceInfo.Browser,
-			Platform:     session.DeviceInfo.Platform, // OS
-			Device:       session.DeviceInfo.Device,
-			ClientIP:     session.DeviceInfo.ClientIP,
-			ProfileID:    profileId.String(),
-			CreatedAt:    time.Now(),
-			ExpiredAt:    time.Now().Add(s.cfg.JWT_REFRESH_TOKEN_EXPIRED),
-		}
-
-		err = s.sessionRepo.SaveSession(ctx, newSession, s.cfg.JWT_REFRESH_TOKEN_EXPIRED)
 
 		// Data yang mau dikirim ke HTML {{.Name}}, {{.Email}}, {{.Link}}
 		templateData := mailer.WelcomeInput{
@@ -482,7 +513,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		emailInput := mailer.SendEmailInput{
 			To:           *valid.Email,
 			Subject:      "Selamat Datang di Postmatic!",
-			TemplateName: "welcome.html",
+			TemplateName: mailer.WelcomeTemplate,
 			Data:         templateData,
 		}
 
@@ -505,6 +536,22 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendEmailVerificationInput) (ResendEmailVerificationResponse, error) {
 	email := input.Email
 
+	// 1. CEK RATE LIMITER
+	// Kita panggil fungsi yang sudah diperbaiki
+	checkLimiter, err := s.emailLimiterRepo.GetLimiterEmail(ctx, email)
+	if err != nil {
+		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
+	}
+
+	// LOGIC: Jika checkLimiter TIDAK NIL, artinya Key masih ada di Redis.
+	// Berarti user harus menunggu.
+	if checkLimiter != nil {
+		return ResendEmailVerificationResponse{
+			Email:      input.Email,
+			RetryAfter: checkLimiter.RetryAfterSeconds,
+		}, errs.NewBadRequest("PLEASE_WAIT")
+	}
+
 	users, err := s.store.GetUserByEmailProfile(ctx, email)
 	if err != nil {
 		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
@@ -517,7 +564,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 	var user entity.User
 	var profile entity.Profile
 	for _, u := range users {
-		if u.Provider == "credentials" {
+		if u.Provider == ProviderCredentials {
 			user = entity.User{
 				ID:         u.ID,
 				VerifiedAt: u.VerifiedAt,
@@ -559,8 +606,17 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		return ResendEmailVerificationResponse{}, err
 	}
 
-	// TODO: add bucket redis for retry
-	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
+	//  SET RATE LIMITER BARU
+	// Gunakan duration dari Config
+	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER // misal 60 detik
+	retryAfterDuration := time.Duration(retryAfter) * time.Second
+
+	// Simpan ke Redis (Hanya Email & TTL)
+	err = s.emailLimiterRepo.SaveLimiterEmail(ctx, profile.Email, retryAfterDuration)
+	if err != nil {
+		// Log error saja, jangan gagalkan response karena email sudah terkirim
+		fmt.Printf("Failed to set email limiter: %v\n", err)
+	}
 
 	return ResendEmailVerificationResponse{
 		ID:         profile.ID.String(),
@@ -592,7 +648,7 @@ func (s *AuthService) sendVerificationEmail(ctx context.Context, name, to, token
 	err = s.mailer.SendEmail(ctx, mailer.SendEmailInput{
 		To:           to,
 		Subject:      "Konfirmasi Pendaftaran Akun",
-		TemplateName: "verification.html",
+		TemplateName: mailer.VerificationTemplate,
 		Type:         "html",
 		Data:         templateData,
 	})

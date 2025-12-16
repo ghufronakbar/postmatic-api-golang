@@ -11,7 +11,8 @@ import (
 	"postmatic-api/internal/module/business/product"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
-	repositoryRedis "postmatic-api/internal/repository/redis"
+	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
+	sessionRepo "postmatic-api/internal/repository/redis/session_repository"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -24,13 +25,14 @@ func NewRouter(db *sql.DB) chi.Router {
 	if err != nil {
 		panic("Cannot connect to Redis" + err.Error())
 	}
-	redisRepo := repositoryRedis.NewSessionRepository(rdb)
+	sessionRepo := sessionRepo.NewSessionRepository(rdb)
+	emailLimiterRepo := emailLimiterRepo.NewLimiterEmailRepository(rdb)
 
 	// 2. =========== INITIAL SERVICE ===========
 	mailerSvc := mailer.NewService(cfg)
 	productSvc := product.NewService(store)
-	authSvc := auth.NewService(store, *mailerSvc, *cfg, redisRepo)
-	sessSvc := session.NewService(redisRepo)
+	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
+	sessSvc := session.NewService(sessionRepo)
 
 	// 3. =========== INITIAL HANDLER ===========
 	productHandler := business_handler.NewProductHandler(productSvc)

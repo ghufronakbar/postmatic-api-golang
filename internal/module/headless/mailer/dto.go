@@ -10,8 +10,8 @@ type SendEmailInput struct {
 	Type string `json:"type"` // "html" or "text"
 
 	// Opsi 2: Pakai Template (Logic baru)
-	TemplateName string      `json:"templateName"` // contoh: "welcome.html"
-	Data         interface{} `json:"data"`         // data untuk di-inject ke template
+	TemplateName EmailTemplate `json:"templateName"`
+	Data         interface{}   `json:"data"` // data untuk di-inject ke template
 }
 
 type VerificationInput struct {

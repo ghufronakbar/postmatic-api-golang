@@ -60,7 +60,7 @@ func (h *AuthHandler) LoginCredentials(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.LoginCredentials(r.Context(), req, sessionInput)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -89,7 +89,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.Register(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -118,7 +118,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.RefreshToken(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -132,7 +132,7 @@ func (h *AuthHandler) CheckVerifyToken(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.CheckVerifyToken(r.Context(), createAccountToken)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -157,7 +157,7 @@ func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) 
 	res, err := h.authSvc.SubmitVerifyToken(r.Context(), input, session)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, nil)
 		return
 	}
 
@@ -186,7 +186,7 @@ func (h *AuthHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Req
 	res, err := h.authSvc.ResendEmailVerification(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err)
+		response.Error(w, err, res)
 		return
 	}
 
