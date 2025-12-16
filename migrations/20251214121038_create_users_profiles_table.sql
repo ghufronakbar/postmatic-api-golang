@@ -1,6 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 
+CREATE TYPE auth_provider AS ENUM ('google', 'credential');
 CREATE TABLE IF NOT EXISTS profiles (
     -- Tambahkan DEFAULT gen_random_uuid()
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
@@ -26,7 +27,7 @@ EXECUTE FUNCTION set_updated_at();
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     password VARCHAR(255),
-    provider VARCHAR(20) NOT NULL,
+    provider auth_provider NOT NULL,
     verified_at TIMESTAMP,
 
     -- Tambahkan NOT NULL agar di Go tipenya uuid.UUID (bukan NullUUID)

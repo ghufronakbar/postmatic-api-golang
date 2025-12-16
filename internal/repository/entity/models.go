@@ -6,10 +6,54 @@ package entity
 
 import (
 	"database/sql"
+	"database/sql/driver"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type AuthProvider string
+
+const (
+	AuthProviderGoogle     AuthProvider = "google"
+	AuthProviderCredential AuthProvider = "credential"
+)
+
+func (e *AuthProvider) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthProvider(s)
+	case string:
+		*e = AuthProvider(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthProvider: %T", src)
+	}
+	return nil
+}
+
+type NullAuthProvider struct {
+	AuthProvider AuthProvider `json:"auth_provider"`
+	Valid        bool         `json:"valid"` // Valid is true if AuthProvider is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthProvider) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthProvider, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthProvider.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthProvider) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthProvider), nil
+}
 
 type Product struct {
 	ID        uuid.UUID `json:"id"`
@@ -34,7 +78,7 @@ type Profile struct {
 type User struct {
 	ID         uuid.UUID      `json:"id"`
 	Password   sql.NullString `json:"password"`
-	Provider   string         `json:"provider"`
+	Provider   AuthProvider   `json:"provider"`
 	VerifiedAt sql.NullTime   `json:"verified_at"`
 	ProfileID  uuid.UUID      `json:"profile_id"`
 	CreatedAt  sql.NullTime   `json:"created_at"`

@@ -59,7 +59,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return e
 		}
 		for _, u := range checkUser {
-			if u.Provider == ProviderCredentials {
+			if u.Provider == entity.AuthProviderCredential {
 				return errs.NewBadRequest("EMAIL_ALREADY_EXISTS")
 			}
 		}
@@ -89,7 +89,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 		_, e = q.CreateUser(ctx, entity.CreateUserParams{
 			ProfileID: profile.ID,
 			Password:  sql.NullString{String: hashedPassword, Valid: true},
-			Provider:  ProviderCredentials,
+			Provider:  entity.AuthProviderCredential,
 		})
 
 		if e != nil {
@@ -137,7 +137,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	}, nil
 }
 
-func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentialsInput, session SessionInput) (LoginResponse, error) {
+func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredentialInput, session SessionInput) (LoginResponse, error) {
 
 	// 1. Ambil Profile (Read Only - Tidak perlu Tx)
 	profile, err := s.store.GetProfileByEmail(ctx, input.Email)
@@ -157,16 +157,16 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 	var targetUser entity.User
 	userCredFound := false
 
-	// Cari user dengan provider 'credentials'
+	// Cari user dengan provider 'credential'
 	for _, u := range users {
-		if u.Provider == ProviderCredentials {
+		if u.Provider == entity.AuthProviderCredential {
 			targetUser = u
 			userCredFound = true
 			break
 		}
 	}
 
-	// LOGIC: Jika user credentials belum ada, tapi input password -> Create User (Link Account)
+	// LOGIC: Jika user credential belum ada, tapi input password -> Create User (Link Account)
 	if !userCredFound {
 		hashedPassword, err := utils.HashPassword(input.Password)
 		if err != nil {
@@ -177,7 +177,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		createdUser, err := s.store.CreateUser(ctx, entity.CreateUserParams{
 			ProfileID: profile.ID,
 			Password:  sql.NullString{String: hashedPassword, Valid: true},
-			Provider:  ProviderCredentials,
+			Provider:  entity.AuthProviderCredential,
 		})
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
@@ -243,7 +243,7 @@ func (s *AuthService) LoginCredentials(ctx context.Context, input LoginCredentia
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
 
-	refreshToken, err := token.GenerateRefreshToken(pID, profile.Email, profile.Name, imageUrl)
+	refreshToken, err := token.GenerateRefreshToken(pID, profile.Email)
 	if err != nil {
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
@@ -312,7 +312,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 	// Jika sisa waktu kurang dari batas renewal (misal kurang dari 1 hari), ROTASI TOKEN
 	if timeLeft < s.cfg.JWT_REFRESH_TOKEN_RENEWAL {
 		// A. Generate Token Baru
-		newRefreshToken, err := token.GenerateRefreshToken(valid.ID, valid.Email, valid.Name, valid.ImageUrl)
+		newRefreshToken, err := token.GenerateRefreshToken(valid.ID, valid.Email)
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -402,7 +402,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 
 	credUser := entity.User{}
 	for _, u := range users {
-		if u.Provider == ProviderCredentials {
+		if u.Provider == entity.AuthProviderCredential {
 			credUser = u
 			break
 		}
@@ -458,7 +458,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 	var user entity.User
 
 	for _, u := range users {
-		if u.Provider == ProviderCredentials {
+		if u.Provider == entity.AuthProviderCredential {
 			user = u
 			break
 		}
@@ -488,7 +488,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
 
-	refreshToken, err := token.GenerateRefreshToken(profileId.String(), *valid.Email, *valid.Name, imageUrl)
+	refreshToken, err := token.GenerateRefreshToken(profileId.String(), *valid.Email)
 	if err != nil {
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
@@ -579,7 +579,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 	var user entity.User
 	var profile entity.Profile
 	for _, u := range users {
-		if u.Provider == ProviderCredentials {
+		if u.Provider == entity.AuthProviderCredential {
 			user = entity.User{
 				ID:         u.ID,
 				VerifiedAt: u.VerifiedAt,

@@ -21,7 +21,7 @@ RETURNING id, password, provider, verified_at, profile_id, created_at, updated_a
 type CreateUserParams struct {
 	ProfileID uuid.UUID      `json:"profile_id"`
 	Password  sql.NullString `json:"password"`
-	Provider  string         `json:"provider"`
+	Provider  AuthProvider   `json:"provider"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -48,7 +48,7 @@ WHERE profiles.email = $1
 type GetUserByEmailProfileRow struct {
 	ID          uuid.UUID      `json:"id"`
 	Password    sql.NullString `json:"password"`
-	Provider    string         `json:"provider"`
+	Provider    AuthProvider   `json:"provider"`
 	VerifiedAt  sql.NullTime   `json:"verified_at"`
 	ProfileID   uuid.UUID      `json:"profile_id"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
@@ -159,6 +159,32 @@ func (q *Queries) ListUsersByProfileId(ctx context.Context, profileID uuid.UUID)
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users
+SET password = $2
+WHERE id = $1 RETURNING id, password, provider, verified_at, profile_id, created_at, updated_at
+`
+
+type UpdateUserPasswordParams struct {
+	ID       uuid.UUID      `json:"id"`
+	Password sql.NullString `json:"password"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUserPassword, arg.ID, arg.Password)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Password,
+		&i.Provider,
+		&i.VerifiedAt,
+		&i.ProfileID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const verifyUser = `-- name: VerifyUser :one

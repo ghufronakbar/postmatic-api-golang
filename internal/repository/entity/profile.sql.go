@@ -94,3 +94,43 @@ func (q *Queries) GetProfileById(ctx context.Context, id uuid.UUID) (Profile, er
 	)
 	return i, err
 }
+
+const updateProfile = `-- name: UpdateProfile :one
+UPDATE profiles
+SET name = $2, image_url = $3, country_code = $4, phone = $5, description = $6
+WHERE id = $1
+RETURNING id, name, email, image_url, country_code, phone, description, created_at, updated_at
+`
+
+type UpdateProfileParams struct {
+	ID          uuid.UUID      `json:"id"`
+	Name        string         `json:"name"`
+	ImageUrl    sql.NullString `json:"image_url"`
+	CountryCode sql.NullString `json:"country_code"`
+	Phone       sql.NullString `json:"phone"`
+	Description sql.NullString `json:"description"`
+}
+
+func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, updateProfile,
+		arg.ID,
+		arg.Name,
+		arg.ImageUrl,
+		arg.CountryCode,
+		arg.Phone,
+		arg.Description,
+	)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.ImageUrl,
+		&i.CountryCode,
+		&i.Phone,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

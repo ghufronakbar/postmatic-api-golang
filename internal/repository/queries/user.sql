@@ -21,3 +21,8 @@ RETURNING *;
 UPDATE users
 SET verified_at = now()
 WHERE id = $1 RETURNING *;
+
+-- name: UpdateUserPassword :one
+UPDATE users
+SET password = $2
+WHERE id = $1 RETURNING *;

@@ -5,7 +5,7 @@ import (
 	"postmatic-api/pkg/utils"
 )
 
-type LoginCredentialsInput struct {
+type LoginCredentialInput struct {
 	From     string `json:"from" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`

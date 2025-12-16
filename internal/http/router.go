@@ -7,6 +7,7 @@ import (
 	"postmatic-api/internal/http/handler/business_handler"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/auth"
+	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/business/product"
 	"postmatic-api/internal/module/headless/mailer"
@@ -33,10 +34,12 @@ func NewRouter(db *sql.DB) chi.Router {
 	productSvc := product.NewService(store)
 	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	sessSvc := session.NewService(sessionRepo)
+	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
 
 	// 3. =========== INITIAL HANDLER ===========
 	productHandler := business_handler.NewProductHandler(productSvc)
 	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
+	profileHandler := account_handler.NewProfileHandler(profSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -53,6 +56,10 @@ func NewRouter(db *sql.DB) chi.Router {
 		r.Route("/session", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
 			r.Mount("/", authHandler.SessionRoutes())
+		})
+		r.Route("/profile", func(r chi.Router) {
+			r.Use(middleware.AuthMiddleware)
+			r.Mount("/", profileHandler.ProfileRoutes())
 		})
 	})
 

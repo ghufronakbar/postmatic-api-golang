@@ -24,7 +24,7 @@ func NewAuthHandler(authSvc *auth.AuthService, sessSvc *session.SessionService) 
 func (h *AuthHandler) AuthRoutes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/login", h.LoginCredentials)
+	r.Post("/login", h.LoginCredential)
 	r.Post("/register", h.Register)
 	r.Post("/refresh-token", h.RefreshToken)
 	r.Get("/verify/{createAccountToken}", h.CheckVerifyToken)
@@ -34,9 +34,9 @@ func (h *AuthHandler) AuthRoutes() chi.Router {
 	return r
 }
 
-func (h *AuthHandler) LoginCredentials(w http.ResponseWriter, r *http.Request) {
+func (h *AuthHandler) LoginCredential(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
-	var req auth.LoginCredentialsInput
+	var req auth.LoginCredentialInput
 
 	// 2. Decode langsung ke struct tersebut
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -57,7 +57,7 @@ func (h *AuthHandler) LoginCredentials(w http.ResponseWriter, r *http.Request) {
 	sessionInput := auth.SessionInput{
 		DeviceInfo: clientInfo,
 	}
-	res, err := h.authSvc.LoginCredentials(r.Context(), req, sessionInput)
+	res, err := h.authSvc.LoginCredential(r.Context(), req, sessionInput)
 
 	if err != nil {
 		response.Error(w, err, res)

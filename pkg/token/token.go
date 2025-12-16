@@ -18,6 +18,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+type RefreshTokenClaims struct {
+	ID    string `json:"id"`
+	Email string `json:"email"`
+	jwt.RegisteredClaims
+}
+
 // JWT AUTH
 func GenerateAccessToken(ID, email, name string, imageUrl *string) (string, error) {
 	expirationTime := time.Now().Add(config.Load().JWT_ACCESS_TOKEN_EXPIRED)
@@ -35,13 +41,11 @@ func GenerateAccessToken(ID, email, name string, imageUrl *string) (string, erro
 	return token.SignedString([]byte(config.Load().JWT_ACCESS_TOKEN_SECRET))
 }
 
-func GenerateRefreshToken(ID, email, name string, imageUrl *string) (string, error) {
+func GenerateRefreshToken(ID, email string) (string, error) {
 	expirationTime := time.Now().Add(config.Load().JWT_REFRESH_TOKEN_EXPIRED)
-	claims := &Claims{
-		ID:       ID,
-		Email:    email,
-		Name:     name,
-		ImageUrl: imageUrl,
+	claims := &RefreshTokenClaims{
+		ID:    ID,
+		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},

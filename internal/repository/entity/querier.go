@@ -23,6 +23,8 @@ type Querier interface {
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
+	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
+	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 	VerifyUser(ctx context.Context, id uuid.UUID) (User, error)
 }
 
