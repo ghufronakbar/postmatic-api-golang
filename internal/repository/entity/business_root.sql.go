@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 const countJoinedBusinessesByProfileID = `-- name: CountJoinedBusinessesByProfileID :one
@@ -41,65 +40,6 @@ func (q *Queries) CountJoinedBusinessesByProfileID(ctx context.Context, arg Coun
 	var total int64
 	err := row.Scan(&total)
 	return total, err
-}
-
-const getBusinessMembersByBusinessRootIDs = `-- name: GetBusinessMembersByBusinessRootIDs :many
-SELECT
-  bm.business_root_id,
-  bm.status,
-  bm.role,
-
-  p.id        AS profile_id,
-  p.name      AS profile_name,
-  p.image_url AS profile_image_url,
-  p.email     AS profile_email
-
-FROM business_members bm
-JOIN profiles p ON p.id = bm.profile_id
-WHERE
-  bm.business_root_id = ANY($1::uuid[])
-ORDER BY bm.business_root_id, bm.created_at ASC
-`
-
-type GetBusinessMembersByBusinessRootIDsRow struct {
-	BusinessRootID  uuid.UUID            `json:"business_root_id"`
-	Status          BusinessMemberStatus `json:"status"`
-	Role            BusinessMemberRole   `json:"role"`
-	ProfileID       uuid.UUID            `json:"profile_id"`
-	ProfileName     string               `json:"profile_name"`
-	ProfileImageUrl sql.NullString       `json:"profile_image_url"`
-	ProfileEmail    string               `json:"profile_email"`
-}
-
-func (q *Queries) GetBusinessMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetBusinessMembersByBusinessRootIDsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getBusinessMembersByBusinessRootIDs, pq.Array(businessRootIds))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetBusinessMembersByBusinessRootIDsRow
-	for rows.Next() {
-		var i GetBusinessMembersByBusinessRootIDsRow
-		if err := rows.Scan(
-			&i.BusinessRootID,
-			&i.Status,
-			&i.Role,
-			&i.ProfileID,
-			&i.ProfileName,
-			&i.ProfileImageUrl,
-			&i.ProfileEmail,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getJoinedBusinessesByProfileID = `-- name: GetJoinedBusinessesByProfileID :many

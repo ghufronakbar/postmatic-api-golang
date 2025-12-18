@@ -16,7 +16,6 @@ type Querier interface {
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error)
-	GetBusinessMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetBusinessMembersByBusinessRootIDsRow, error)
 	GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoinedBusinessesByProfileIDParams) ([]GetJoinedBusinessesByProfileIDRow, error)
 	GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetMembersByBusinessRootIDsRow, error)
 	GetProductById(ctx context.Context, id uuid.UUID) (Product, error)
