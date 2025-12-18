@@ -2,7 +2,6 @@
 package account_handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"postmatic-api/internal/module/account/auth"
 	"postmatic-api/internal/module/account/session"
@@ -38,20 +37,11 @@ func (h *AuthHandler) LoginCredential(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	var req auth.LoginCredentialInput
 
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
 		return
 	}
 
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
-		return
-	}
-
-	// 4. Panggil Service
 	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
 	clientInfo := utils.ExtractClientInfo(r)
 	sessionInput := auth.SessionInput{
@@ -71,21 +61,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	var req auth.RegisterInput
 
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
 		return
 	}
 
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
-		return
-	}
-
-	// 4. Panggil Service
-	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
 	res, err := h.authSvc.Register(r.Context(), req)
 
 	if err != nil {
@@ -100,21 +80,11 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	var req auth.RefreshTokenInput
 
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
 		return
 	}
 
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
-		return
-	}
-
-	// 4. Panggil Service
-	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
 	res, err := h.authSvc.RefreshToken(r.Context(), req)
 
 	if err != nil {
@@ -168,21 +138,11 @@ func (h *AuthHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Req
 	// 1. Gunakan Struct dari DTO
 	var req auth.ResendEmailVerificationInput
 
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
 		return
 	}
 
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
-		return
-	}
-
-	// 4. Panggil Service
-	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
 	res, err := h.authSvc.ResendEmailVerification(r.Context(), req)
 
 	if err != nil {

@@ -8,9 +8,10 @@ import (
 
 // AppError adalah custom error struct kita
 type AppError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Err     error  `json:"-"` // error asli (untuk logging, tidak dikirim ke json)
+	Code             int               `json:"code"`
+	Message          string            `json:"message"`
+	Err              error             `json:"-"` // error asli (untuk logging, tidak dikirim ke json)
+	ValidationErrors map[string]string `json:"validationErrors"`
 }
 
 // Implement interface error bawaan Go
@@ -58,5 +59,13 @@ func NewInternalServerError(err error) *AppError {
 		Code:    http.StatusInternalServerError,
 		Message: "INTERNAL_SERVER_ERROR",
 		Err:     err, // Simpan error asli untuk keperluan logging nanti
+	}
+}
+
+func NewValidationFailed(validationErrors map[string]string) *AppError {
+	return &AppError{
+		Code:             http.StatusBadRequest,
+		Message:          "VALIDATION_FAILED",
+		ValidationErrors: validationErrors,
 	}
 }

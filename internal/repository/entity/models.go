@@ -55,6 +55,166 @@ func (ns NullAuthProvider) Value() (driver.Value, error) {
 	return string(ns.AuthProvider), nil
 }
 
+type BusinessMemberRole string
+
+const (
+	BusinessMemberRoleOwner  BusinessMemberRole = "owner"
+	BusinessMemberRoleAdmin  BusinessMemberRole = "admin"
+	BusinessMemberRoleMember BusinessMemberRole = "member"
+)
+
+func (e *BusinessMemberRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = BusinessMemberRole(s)
+	case string:
+		*e = BusinessMemberRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for BusinessMemberRole: %T", src)
+	}
+	return nil
+}
+
+type NullBusinessMemberRole struct {
+	BusinessMemberRole BusinessMemberRole `json:"business_member_role"`
+	Valid              bool               `json:"valid"` // Valid is true if BusinessMemberRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullBusinessMemberRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.BusinessMemberRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.BusinessMemberRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullBusinessMemberRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.BusinessMemberRole), nil
+}
+
+type BusinessMemberStatus string
+
+const (
+	BusinessMemberStatusPending  BusinessMemberStatus = "pending"
+	BusinessMemberStatusAccepted BusinessMemberStatus = "accepted"
+	BusinessMemberStatusRejected BusinessMemberStatus = "rejected"
+	BusinessMemberStatusLeft     BusinessMemberStatus = "left"
+	BusinessMemberStatusKicked   BusinessMemberStatus = "kicked"
+)
+
+func (e *BusinessMemberStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = BusinessMemberStatus(s)
+	case string:
+		*e = BusinessMemberStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for BusinessMemberStatus: %T", src)
+	}
+	return nil
+}
+
+type NullBusinessMemberStatus struct {
+	BusinessMemberStatus BusinessMemberStatus `json:"business_member_status"`
+	Valid                bool                 `json:"valid"` // Valid is true if BusinessMemberStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullBusinessMemberStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.BusinessMemberStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.BusinessMemberStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullBusinessMemberStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.BusinessMemberStatus), nil
+}
+
+type BusinessKnowledge struct {
+	ID                 uuid.UUID      `json:"id"`
+	Name               string         `json:"name"`
+	PrimaryLogoUrl     sql.NullString `json:"primary_logo_url"`
+	Category           string         `json:"category"`
+	Description        sql.NullString `json:"description"`
+	UniqueSellingPoint sql.NullString `json:"unique_selling_point"`
+	WebsiteUrl         sql.NullString `json:"website_url"`
+	VisionMission      sql.NullString `json:"vision_mission"`
+	Location           sql.NullString `json:"location"`
+	ColorTone          sql.NullString `json:"color_tone"`
+	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	DeletedAt          sql.NullTime   `json:"deleted_at"`
+}
+
+type BusinessMember struct {
+	ID             uuid.UUID            `json:"id"`
+	Status         BusinessMemberStatus `json:"status"`
+	Role           BusinessMemberRole   `json:"role"`
+	AnsweredAt     sql.NullTime         `json:"answered_at"`
+	BusinessRootID uuid.UUID            `json:"business_root_id"`
+	ProfileID      uuid.UUID            `json:"profile_id"`
+	CreatedAt      time.Time            `json:"created_at"`
+	UpdatedAt      time.Time            `json:"updated_at"`
+}
+
+type BusinessProduct struct {
+	ID             uuid.UUID      `json:"id"`
+	Name           string         `json:"name"`
+	Category       string         `json:"category"`
+	Description    sql.NullString `json:"description"`
+	Currency       string         `json:"currency"`
+	Price          string         `json:"price"`
+	ImageUrls      []string       `json:"image_urls"`
+	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
+}
+
+type BusinessRole struct {
+	ID              uuid.UUID      `json:"id"`
+	TargetAudience  string         `json:"target_audience"`
+	Tone            string         `json:"tone"`
+	AudiencePersona string         `json:"audience_persona"`
+	Hashtags        []string       `json:"hashtags"`
+	CallToAction    string         `json:"call_to_action"`
+	Goals           sql.NullString `json:"goals"`
+	BusinessRootID  uuid.UUID      `json:"business_root_id"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       sql.NullTime   `json:"deleted_at"`
+}
+
+type BusinessRoot struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type BusinessRssSubscription struct {
+	ID             uuid.UUID    `json:"id"`
+	Title          string       `json:"title"`
+	IsActive       bool         `json:"is_active"`
+	BusinessRootID uuid.UUID    `json:"business_root_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	UpdatedAt      time.Time    `json:"updated_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+}
+
 type Product struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`

@@ -1,7 +1,6 @@
 package account_handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/session"
@@ -49,6 +48,11 @@ func (h *AuthHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req session.LogoutInput
 
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
+		return
+	}
+
 	profile, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
 		response.Error(w, err, nil)
@@ -57,20 +61,6 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	profileId := profile.ID
 
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
-		return
-	}
-
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
-		return
-	}
-
-	// 4. Panggil Service
 	// Tidak perlu mapping manual lagi! (req sudah bertipe DTO)
 	res, err := h.sessSvc.Logout(r.Context(), req, profileId)
 

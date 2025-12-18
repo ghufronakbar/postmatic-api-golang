@@ -2,7 +2,6 @@
 package account_handler
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -62,6 +61,11 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	var req profile.UpdateProfileInput
+
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
+		return
+	}
 	user, err := middleware.GetUserFromContext(r.Context())
 
 	if err != nil {
@@ -71,19 +75,6 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if user == nil {
 		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
-		return
-	}
-
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
-		return
-	}
-
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
 		return
 	}
 
@@ -100,6 +91,11 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	var req profile.UpdatePasswordInput
+
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
+		return
+	}
 	user, err := middleware.GetUserFromContext(r.Context())
 
 	if err != nil {
@@ -109,19 +105,6 @@ func (h *ProfileHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) 
 
 	if user == nil {
 		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
-		return
-	}
-
-	// 2. Decode langsung ke struct tersebut
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
-		return
-	}
-
-	// 3. Validasi struct tersebut
-	// Validator akan membaca tag `validate` yang ada di DTO
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
 		return
 	}
 
@@ -139,6 +122,10 @@ func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct yang BENAR (SetupPasswordInput)
 	var req profile.SetupPasswordInput
 
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, appErr.ValidationErrors)
+		return
+	}
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
 		response.Error(w, err, nil)
@@ -146,16 +133,6 @@ func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if user == nil {
 		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
-		return
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		response.InvalidJsonFormat(w)
-		return
-	}
-
-	if errsMap := utils.ValidateStruct(req); errsMap != nil {
-		response.ValidationFailed(w, errsMap)
 		return
 	}
 

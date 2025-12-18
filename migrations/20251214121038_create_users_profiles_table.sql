@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS profiles (
     phone VARCHAR(20),
     description TEXT,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 
 );
 
@@ -28,14 +28,14 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     password VARCHAR(255),
     provider auth_provider NOT NULL,
-    verified_at TIMESTAMP,
+    verified_at TIMESTAMPTZ,
 
     -- Tambahkan NOT NULL agar di Go tipenya uuid.UUID (bukan NullUUID)
     profile_id UUID NOT NULL, 
     FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 
 );
 

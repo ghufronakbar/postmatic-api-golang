@@ -11,10 +11,14 @@ import (
 )
 
 type Querier interface {
+	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error)
+	GetBusinessMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetBusinessMembersByBusinessRootIDsRow, error)
+	GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoinedBusinessesByProfileIDParams) ([]GetJoinedBusinessesByProfileIDRow, error)
+	GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetMembersByBusinessRootIDsRow, error)
 	GetProductById(ctx context.Context, id uuid.UUID) (Product, error)
 	GetProfileByEmail(ctx context.Context, email string) (Profile, error)
 	GetProfileById(ctx context.Context, id uuid.UUID) (Profile, error)
@@ -22,6 +26,7 @@ type Querier interface {
 	GetUserById(ctx context.Context, id uuid.UUID) (User, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)
+	SetupBusinessRootFirstTime(ctx context.Context, arg SetupBusinessRootFirstTimeParams) (SetupBusinessRootFirstTimeRow, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
