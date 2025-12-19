@@ -196,3 +196,65 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 
 	return res, nil
 }
+
+func (s *BusinessInformationService) GetBusinessById(ctx context.Context, businessId string, profileId string) (GetBusinessByIdResponse, error) {
+	businessUUID, err := uuid.Parse(businessId)
+	if err != nil {
+		return GetBusinessByIdResponse{}, errs.NewBadRequest("INVALID_BUSINESS_ID")
+	}
+	business, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessUUID)
+	fmt.Println(err)
+	if err != nil {
+		return GetBusinessByIdResponse{}, err
+	}
+
+	members, err := s.store.GetMembersByBusinessRootID(ctx, businessUUID)
+	if err != nil {
+		return GetBusinessByIdResponse{}, err
+	}
+
+	var memberBusiness []BusinessMemberSub
+	var userProfile *BusinessMemberSub
+	for _, m := range members {
+		if m.ProfileID.String() == profileId {
+			userProfile = &BusinessMemberSub{
+				Status: string(m.Status),
+				Role:   string(m.Role),
+				Profile: ProfileSub{
+					ID:       m.ProfileID.String(),
+					Name:     m.ProfileName,
+					ImageUrl: utils.NullStringToString(m.ProfileImageUrl),
+					Email:    m.ProfileEmail,
+				},
+			}
+		}
+		memberBusiness = append(memberBusiness, BusinessMemberSub{
+			Status: string(m.Status),
+			Role:   string(m.Role),
+			Profile: ProfileSub{
+				ID:       m.ProfileID.String(),
+				Name:     m.ProfileName,
+				ImageUrl: utils.NullStringToString(m.ProfileImageUrl),
+				Email:    m.ProfileEmail,
+			},
+		})
+	}
+
+	if userProfile == nil {
+		return GetBusinessByIdResponse{}, errs.NewForbidden("USER_NOT_FOUND_IN_BUSINESS")
+	}
+
+	res := GetBusinessByIdResponse{
+		ID:             business.BusinessRootID.String(),
+		Name:           business.Name,
+		PrimaryLogoUrl: utils.NullStringToString(business.PrimaryLogoUrl),
+		Category:       business.Category,
+		Description:    utils.NullStringToString(business.Description),
+		ColorTone:      utils.NullStringToString(business.ColorTone),
+		CreatedAt:      business.CreatedAt,
+		UpdatedAt:      business.UpdatedAt,
+		Members:        memberBusiness,
+		UserPosition:   *userProfile,
+	}
+	return res, nil
+}

@@ -2,7 +2,6 @@
 package business_handler
 
 import (
-	"errors"
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/business/business_information"
@@ -25,21 +24,14 @@ func (h *BusinessInformationHandler) BusinessInformationRoutes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", h.GetJoinedBusinessesByProfileID)
+	r.Get("/{businessId}", h.GetBusinessById)
 	r.Post("/", h.SetupBusinessRootFirstTime)
 
 	return r
 }
 
 func (h *BusinessInformationHandler) GetJoinedBusinessesByProfileID(w http.ResponseWriter, r *http.Request) {
-	prof, err := middleware.GetUserFromContext(r.Context())
-	if err != nil {
-		response.Error(w, err, nil)
-		return
-	}
-	if prof == nil {
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
-		return
-	}
+	prof, _ := middleware.GetUserFromContext(r.Context())
 
 	filter := middleware.GetFilterFromContext(r.Context())
 
@@ -72,15 +64,7 @@ func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseW
 	}
 
 	// 1) Ambil user dari context
-	prof, err := middleware.GetUserFromContext(r.Context())
-	if err != nil {
-		response.Error(w, err, nil)
-		return
-	}
-	if prof == nil {
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
-		return
-	}
+	prof, _ := middleware.GetUserFromContext(r.Context())
 
 	//  Jalankan service
 	res, err := h.busInSvc.SetupBusinessRootFirstTime(r.Context(), prof.ID, req)
@@ -90,4 +74,18 @@ func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseW
 	}
 
 	response.OK(w, "SUCCESS_CREATE_BUSINESS", res)
+}
+
+func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *http.Request) {
+	businessId := chi.URLParam(r, "businessId")
+
+	prof, _ := middleware.GetUserFromContext(r.Context())
+
+	res, err := h.busInSvc.GetBusinessById(r.Context(), businessId, prof.ID)
+	if err != nil {
+		response.Error(w, err, nil)
+		return
+	}
+
+	response.OK(w, "SUCCESS_GET_BUSINESS", res)
 }

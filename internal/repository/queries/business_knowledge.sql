@@ -26,7 +26,7 @@ VALUES (
 RETURNING *;
 
 -- name: GetBusinessKnowledgeByBusinessRootID :one
-SELECT root.id, kn.name, kn.primary_logo_url, kn.category, kn.description, kn.color_tone, root.created_at, root.updated_at
+SELECT root.id AS business_root_id, kn.name, kn.primary_logo_url, kn.category, kn.description, kn.color_tone, root.created_at, root.updated_at
 FROM business_knowledges kn
 JOIN business_roots root ON kn.business_root_id = root.id
 WHERE root.id = sqlc.arg(business_root_id) AND root.deleted_at IS NULL AND kn.deleted_at IS NULL;

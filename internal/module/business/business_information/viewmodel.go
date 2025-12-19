@@ -31,3 +31,16 @@ type ProfileSub struct {
 	ImageUrl *string `json:"imageUrl"`
 	Email    string  `json:"email"`
 }
+
+type GetBusinessByIdResponse struct {
+	ID             string              `json:"id"`
+	Name           string              `json:"name"`
+	PrimaryLogoUrl *string             `json:"primaryLogoUrl"`
+	Category       string              `json:"category"`
+	Description    *string             `json:"description"`
+	ColorTone      *string             `json:"colorTone"`
+	CreatedAt      time.Time           `json:"createdAt"`
+	UpdatedAt      time.Time           `json:"updatedAt"`
+	Members        []BusinessMemberSub `json:"members"`
+	UserPosition   BusinessMemberSub   `json:"userPosition"`
+}

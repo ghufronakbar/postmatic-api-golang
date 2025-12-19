@@ -8,6 +8,7 @@ package entity
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -82,6 +83,40 @@ func (q *Queries) CreateBusinessKnowledge(ctx context.Context, arg CreateBusines
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getBusinessKnowledgeByBusinessRootID = `-- name: GetBusinessKnowledgeByBusinessRootID :one
+SELECT root.id AS business_root_id, kn.name, kn.primary_logo_url, kn.category, kn.description, kn.color_tone, root.created_at, root.updated_at
+FROM business_knowledges kn
+JOIN business_roots root ON kn.business_root_id = root.id
+WHERE root.id = $1 AND root.deleted_at IS NULL AND kn.deleted_at IS NULL
+`
+
+type GetBusinessKnowledgeByBusinessRootIDRow struct {
+	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	Name           string         `json:"name"`
+	PrimaryLogoUrl sql.NullString `json:"primary_logo_url"`
+	Category       string         `json:"category"`
+	Description    sql.NullString `json:"description"`
+	ColorTone      sql.NullString `json:"color_tone"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+}
+
+func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getBusinessKnowledgeByBusinessRootID, businessRootID)
+	var i GetBusinessKnowledgeByBusinessRootIDRow
+	err := row.Scan(
+		&i.BusinessRootID,
+		&i.Name,
+		&i.PrimaryLogoUrl,
+		&i.Category,
+		&i.Description,
+		&i.ColorTone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

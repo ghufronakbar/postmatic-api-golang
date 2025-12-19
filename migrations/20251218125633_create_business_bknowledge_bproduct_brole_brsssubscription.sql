@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS business_roots ( 
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 );
 
 -- 1 to 1 with business_root
