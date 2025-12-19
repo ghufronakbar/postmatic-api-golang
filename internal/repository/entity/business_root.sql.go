@@ -70,6 +70,24 @@ func (q *Queries) CreateBusinessRoot(ctx context.Context) (uuid.UUID, error) {
 	return id, err
 }
 
+const getBusinessRootById = `-- name: GetBusinessRootById :one
+SELECT id, deleted_at
+FROM business_roots
+WHERE id = $1
+`
+
+type GetBusinessRootByIdRow struct {
+	ID        uuid.UUID    `json:"id"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
+func (q *Queries) GetBusinessRootById(ctx context.Context, id uuid.UUID) (GetBusinessRootByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getBusinessRootById, id)
+	var i GetBusinessRootByIdRow
+	err := row.Scan(&i.ID, &i.DeletedAt)
+	return i, err
+}
+
 const getJoinedBusinessesByProfileID = `-- name: GetJoinedBusinessesByProfileID :many
 SELECT
   bm.id                AS member_id,
@@ -93,6 +111,7 @@ JOIN business_knowledges bk
 
 WHERE
   bm.profile_id = $1
+  AND br.deleted_at IS NULL
   AND bm.status = 'accepted'
   AND bk.deleted_at IS NULL
   AND (
@@ -194,4 +213,17 @@ func (q *Queries) GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoi
 		return nil, err
 	}
 	return items, nil
+}
+
+const softDeleteBusinessRoot = `-- name: SoftDeleteBusinessRoot :one
+UPDATE business_roots
+SET deleted_at = NOW()
+WHERE id = $1
+RETURNING id
+`
+
+func (q *Queries) SoftDeleteBusinessRoot(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, softDeleteBusinessRoot, id)
+	err := row.Scan(&id)
+	return id, err
 }

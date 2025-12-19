@@ -21,6 +21,7 @@ JOIN business_knowledges bk
 
 WHERE
   bm.profile_id = sqlc.arg(profile_id)
+  AND br.deleted_at IS NULL
   AND bm.status = 'accepted'
   AND bk.deleted_at IS NULL
   AND (
@@ -85,3 +86,14 @@ WHERE
 INSERT INTO business_roots 
 DEFAULT VALUES
 RETURNING id;
+
+-- name: SoftDeleteBusinessRoot :one
+UPDATE business_roots
+SET deleted_at = NOW()
+WHERE id = sqlc.arg(id)
+RETURNING id;
+
+-- name: GetBusinessRootById :one
+SELECT id, deleted_at
+FROM business_roots
+WHERE id = sqlc.arg(id);

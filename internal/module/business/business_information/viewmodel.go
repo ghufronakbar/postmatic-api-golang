@@ -44,3 +44,8 @@ type GetBusinessByIdResponse struct {
 	Members        []BusinessMemberSub `json:"members"`
 	UserPosition   BusinessMemberSub   `json:"userPosition"`
 }
+
+type DeleteBusinessByIdResponse struct {
+	// Business Root ID
+	ID string `json:"id"`
+}

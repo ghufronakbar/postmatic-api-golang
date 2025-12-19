@@ -30,3 +30,10 @@ SELECT root.id AS business_root_id, kn.name, kn.primary_logo_url, kn.category, k
 FROM business_knowledges kn
 JOIN business_roots root ON kn.business_root_id = root.id
 WHERE root.id = sqlc.arg(business_root_id) AND root.deleted_at IS NULL AND kn.deleted_at IS NULL;
+
+
+-- name: SoftDeleteBusinessKnowledgeByBusinessRootID :one
+UPDATE business_knowledges
+SET deleted_at = NOW()
+WHERE business_root_id = sqlc.arg(business_root_id)
+RETURNING id;

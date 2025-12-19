@@ -1,3 +1,4 @@
+// internal/repository/entity/store.go
 package entity
 
 import (

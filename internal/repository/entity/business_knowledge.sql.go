@@ -120,3 +120,17 @@ func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, busi
 	)
 	return i, err
 }
+
+const softDeleteBusinessKnowledgeByBusinessRootID = `-- name: SoftDeleteBusinessKnowledgeByBusinessRootID :one
+UPDATE business_knowledges
+SET deleted_at = NOW()
+WHERE business_root_id = $1
+RETURNING id
+`
+
+func (q *Queries) SoftDeleteBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, softDeleteBusinessKnowledgeByBusinessRootID, businessRootID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}

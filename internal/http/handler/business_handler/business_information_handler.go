@@ -2,6 +2,7 @@
 package business_handler
 
 import (
+	"fmt"
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/business/business_information"
@@ -26,6 +27,7 @@ func (h *BusinessInformationHandler) BusinessInformationRoutes() chi.Router {
 	r.Get("/", h.GetJoinedBusinessesByProfileID)
 	r.Get("/{businessId}", h.GetBusinessById)
 	r.Post("/", h.SetupBusinessRootFirstTime)
+	r.Delete("/{businessId}", h.DeleteBusinessById)
 
 	return r
 }
@@ -88,4 +90,19 @@ func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *h
 	}
 
 	response.OK(w, "SUCCESS_GET_BUSINESS", res)
+}
+
+func (h *BusinessInformationHandler) DeleteBusinessById(w http.ResponseWriter, r *http.Request) {
+	businessId := chi.URLParam(r, "businessId")
+
+	prof, _ := middleware.GetUserFromContext(r.Context())
+
+	res, err := h.busInSvc.DeleteBusinessById(r.Context(), businessId, prof.ID)
+	if err != nil {
+		fmt.Println(err)
+		response.Error(w, err, nil)
+		return
+	}
+
+	response.OK(w, "DELETE_BUSINESS_SUCCESS", res)
 }

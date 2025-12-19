@@ -18,3 +18,9 @@ VALUES (
     sqlc.arg(business_root_id)
 )
 RETURNING *;
+
+-- name: SoftDeleteBusinessRoleByBusinessRootID :one
+UPDATE business_roles
+SET deleted_at = NOW()
+WHERE business_root_id = sqlc.arg(business_root_id)
+RETURNING id;

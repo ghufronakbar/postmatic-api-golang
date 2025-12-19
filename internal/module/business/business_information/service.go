@@ -177,6 +177,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 			Status:         entity.BusinessMemberStatusPending,
 		})
 
+		// TODO: set cache to verify owned business to owner
 		// TODO: send email notification to owner
 
 		if err != nil {
@@ -257,4 +258,77 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 		UserPosition:   *userProfile,
 	}
 	return res, nil
+}
+
+func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, businessId string, profileId string) (DeleteBusinessByIdResponse, error) {
+	businessUUID, err := uuid.Parse(businessId)
+	if err != nil {
+		return DeleteBusinessByIdResponse{}, errs.NewBadRequest("INVALID_BUSINESS_ID")
+	}
+	profileUUID, err := uuid.Parse(profileId)
+	if err != nil {
+		return DeleteBusinessByIdResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
+	}
+
+	member, err := s.store.GetMemberByProfileIdAndBusinessRootId(ctx, entity.GetMemberByProfileIdAndBusinessRootIdParams{
+		ProfileID:      profileUUID,
+		BusinessRootID: businessUUID,
+	})
+	if err != nil {
+		fmt.Println(err)
+		return DeleteBusinessByIdResponse{}, err
+	}
+
+	if member.Role != entity.BusinessMemberRoleOwner {
+		return DeleteBusinessByIdResponse{}, errs.NewForbidden("USER_NOT_OWNER")
+	}
+
+	root, err := s.store.GetBusinessRootById(ctx, businessUUID)
+
+	if err == sql.ErrNoRows || root.DeletedAt.Valid {
+		return DeleteBusinessByIdResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+
+	if err != nil {
+		return DeleteBusinessByIdResponse{}, err
+	}
+
+	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
+		rootId, err := tx.SoftDeleteBusinessRoot(ctx, businessUUID)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.SoftDeleteBusinessKnowledgeByBusinessRootID(ctx, rootId)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.SoftDeleteBusinessProductByBusinessRootID(ctx, rootId)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.SoftDeleteBusinessMemberByBusinessRootID(ctx, rootId)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.SoftDeleteBusinessRoleByBusinessRootID(ctx, rootId)
+		if err != nil {
+			return err
+		}
+
+		// TODO: delete cache to verify owned business to all members
+
+		return nil
+	})
+
+	if e != nil {
+		return DeleteBusinessByIdResponse{}, e
+	}
+
+	return DeleteBusinessByIdResponse{
+		ID: businessId,
+	}, nil
 }

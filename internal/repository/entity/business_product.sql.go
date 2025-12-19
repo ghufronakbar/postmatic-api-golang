@@ -71,3 +71,17 @@ func (q *Queries) CreateBusinessProduct(ctx context.Context, arg CreateBusinessP
 	)
 	return i, err
 }
+
+const softDeleteBusinessProductByBusinessRootID = `-- name: SoftDeleteBusinessProductByBusinessRootID :one
+UPDATE business_products
+SET deleted_at = NOW()
+WHERE business_root_id = $1
+RETURNING id
+`
+
+func (q *Queries) SoftDeleteBusinessProductByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, softDeleteBusinessProductByBusinessRootID, businessRootID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}

@@ -10,6 +10,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const createBusinessMember = `-- name: CreateBusinessMember :one
@@ -58,4 +59,167 @@ func (q *Queries) CreateBusinessMember(ctx context.Context, arg CreateBusinessMe
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getMemberByProfileIdAndBusinessRootId = `-- name: GetMemberByProfileIdAndBusinessRootId :one
+SELECT id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at FROM business_members
+WHERE profile_id = $1
+AND business_root_id = $2
+`
+
+type GetMemberByProfileIdAndBusinessRootIdParams struct {
+	ProfileID      uuid.UUID `json:"profile_id"`
+	BusinessRootID uuid.UUID `json:"business_root_id"`
+}
+
+func (q *Queries) GetMemberByProfileIdAndBusinessRootId(ctx context.Context, arg GetMemberByProfileIdAndBusinessRootIdParams) (BusinessMember, error) {
+	row := q.db.QueryRowContext(ctx, getMemberByProfileIdAndBusinessRootId, arg.ProfileID, arg.BusinessRootID)
+	var i BusinessMember
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Role,
+		&i.AnsweredAt,
+		&i.BusinessRootID,
+		&i.ProfileID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getMembersByBusinessRootID = `-- name: GetMembersByBusinessRootID :many
+SELECT
+  bm.business_root_id,
+  bm.status,
+  bm.role,
+
+  p.id        AS profile_id,
+  p.name      AS profile_name,
+  p.image_url AS profile_image_url,
+  p.email     AS profile_email
+
+FROM business_members bm
+JOIN profiles p
+  ON p.id = bm.profile_id
+
+WHERE bm.business_root_id = $1
+
+ORDER BY bm.business_root_id, bm.created_at ASC
+`
+
+type GetMembersByBusinessRootIDRow struct {
+	BusinessRootID  uuid.UUID            `json:"business_root_id"`
+	Status          BusinessMemberStatus `json:"status"`
+	Role            BusinessMemberRole   `json:"role"`
+	ProfileID       uuid.UUID            `json:"profile_id"`
+	ProfileName     string               `json:"profile_name"`
+	ProfileImageUrl sql.NullString       `json:"profile_image_url"`
+	ProfileEmail    string               `json:"profile_email"`
+}
+
+func (q *Queries) GetMembersByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) ([]GetMembersByBusinessRootIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getMembersByBusinessRootID, businessRootID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMembersByBusinessRootIDRow
+	for rows.Next() {
+		var i GetMembersByBusinessRootIDRow
+		if err := rows.Scan(
+			&i.BusinessRootID,
+			&i.Status,
+			&i.Role,
+			&i.ProfileID,
+			&i.ProfileName,
+			&i.ProfileImageUrl,
+			&i.ProfileEmail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMembersByBusinessRootIDs = `-- name: GetMembersByBusinessRootIDs :many
+SELECT
+  bm.business_root_id,
+  bm.status,
+  bm.role,
+
+  p.id        AS profile_id,
+  p.name      AS profile_name,
+  p.image_url AS profile_image_url,
+  p.email     AS profile_email
+
+FROM business_members bm
+JOIN profiles p
+  ON p.id = bm.profile_id
+
+WHERE bm.business_root_id = ANY($1::uuid[])
+
+ORDER BY bm.business_root_id, bm.created_at ASC
+`
+
+type GetMembersByBusinessRootIDsRow struct {
+	BusinessRootID  uuid.UUID            `json:"business_root_id"`
+	Status          BusinessMemberStatus `json:"status"`
+	Role            BusinessMemberRole   `json:"role"`
+	ProfileID       uuid.UUID            `json:"profile_id"`
+	ProfileName     string               `json:"profile_name"`
+	ProfileImageUrl sql.NullString       `json:"profile_image_url"`
+	ProfileEmail    string               `json:"profile_email"`
+}
+
+func (q *Queries) GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetMembersByBusinessRootIDsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getMembersByBusinessRootIDs, pq.Array(businessRootIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMembersByBusinessRootIDsRow
+	for rows.Next() {
+		var i GetMembersByBusinessRootIDsRow
+		if err := rows.Scan(
+			&i.BusinessRootID,
+			&i.Status,
+			&i.Role,
+			&i.ProfileID,
+			&i.ProfileName,
+			&i.ProfileImageUrl,
+			&i.ProfileEmail,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const softDeleteBusinessMemberByBusinessRootID = `-- name: SoftDeleteBusinessMemberByBusinessRootID :one
+UPDATE business_members
+SET deleted_at = NOW()
+WHERE business_root_id = $1
+RETURNING id
+`
+
+func (q *Queries) SoftDeleteBusinessMemberByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, softDeleteBusinessMemberByBusinessRootID, businessRootID)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }
