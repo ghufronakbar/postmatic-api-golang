@@ -130,46 +130,68 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 
 	priceStr := fmt.Sprintf("%d.00", input.ProductKnowledge.Price) // 35000 -> "35000.00"
 
-	inputNewBusiness := entity.SetupBusinessRootFirstTimeParams{
-		// PROFILE / MEMBER
-		ProfileID: profileUUID,
+	var businessRootId string
 
-		// BUSINESS KNOWLEDGE
-		Name:               input.BusinessKnowledge.Name,
-		PrimaryLogoUrl:     sql.NullString{String: input.BusinessKnowledge.PrimaryLogoUrl, Valid: input.BusinessKnowledge.PrimaryLogoUrl != ""},
-		Category:           input.BusinessKnowledge.Category,
-		Description:        sql.NullString{String: input.BusinessKnowledge.Description, Valid: input.BusinessKnowledge.Description != ""},
-		UniqueSellingPoint: sql.NullString{String: input.BusinessKnowledge.UniqueSellingPoint, Valid: input.BusinessKnowledge.UniqueSellingPoint != ""},
-		WebsiteUrl:         sql.NullString{String: input.BusinessKnowledge.WebsiteUrl, Valid: input.BusinessKnowledge.WebsiteUrl != ""},
-		VisionMission:      sql.NullString{String: input.BusinessKnowledge.VisionMission, Valid: input.BusinessKnowledge.VisionMission != ""},
-		Location:           sql.NullString{String: input.BusinessKnowledge.Location, Valid: input.BusinessKnowledge.Location != ""},
-		ColorTone:          sql.NullString{String: input.BusinessKnowledge.ColorTone, Valid: input.BusinessKnowledge.ColorTone != ""},
+	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
-		// ROLE
-		TargetAudience:  input.RoleKnowledge.TargetAudience,
-		Tone:            input.RoleKnowledge.Tone,
-		AudiencePersona: input.RoleKnowledge.AudiencePersona,
-		CallToAction:    input.RoleKnowledge.CallToAction,
-		Goals:           sql.NullString{String: input.RoleKnowledge.Goals, Valid: input.RoleKnowledge.Goals != ""},
-		Column20:        input.RoleKnowledge.Hashtags, // hashtags
+		businessRoot, err := tx.CreateBusinessRoot(ctx)
+		if err != nil {
+			return err
+		}
 
-		// PRODUCT
-		Name_2:        input.ProductKnowledge.Name,
-		Category_2:    input.ProductKnowledge.Category,
-		Description_2: sql.NullString{String: input.ProductKnowledge.Description, Valid: input.ProductKnowledge.Description != ""},
-		Currency:      input.ProductKnowledge.Currency,
-		Price:         priceStr,
-		Column16:      input.ProductKnowledge.ImageUrls, // image urls
+		businessRootId = businessRoot.String()
 
-	}
+		_, err = tx.CreateBusinessKnowledge(ctx, entity.CreateBusinessKnowledgeParams{
+			BusinessRootID:     businessRoot,
+			Name:               input.BusinessKnowledge.Name,
+			PrimaryLogoUrl:     sql.NullString{String: input.BusinessKnowledge.PrimaryLogoUrl, Valid: input.BusinessKnowledge.PrimaryLogoUrl != ""},
+			Category:           input.BusinessKnowledge.Category,
+			Description:        sql.NullString{String: input.BusinessKnowledge.Description, Valid: input.BusinessKnowledge.Description != ""},
+			UniqueSellingPoint: sql.NullString{String: input.BusinessKnowledge.UniqueSellingPoint, Valid: input.BusinessKnowledge.UniqueSellingPoint != ""},
+			WebsiteUrl:         sql.NullString{String: input.BusinessKnowledge.WebsiteUrl, Valid: input.BusinessKnowledge.WebsiteUrl != ""},
+			VisionMission:      sql.NullString{String: input.BusinessKnowledge.VisionMission, Valid: input.BusinessKnowledge.VisionMission != ""},
+			Location:           sql.NullString{String: input.BusinessKnowledge.Location, Valid: input.BusinessKnowledge.Location != ""},
+			ColorTone:          sql.NullString{String: input.BusinessKnowledge.ColorTone, Valid: input.BusinessKnowledge.ColorTone != ""},
+		})
+		if err != nil {
+			return err
+		}
 
-	newBusiness, err := s.store.SetupBusinessRootFirstTime(ctx, inputNewBusiness)
-	if err != nil {
-		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(err)
+		_, err = tx.CreateBusinessProduct(ctx, entity.CreateBusinessProductParams{
+			BusinessRootID: businessRoot,
+			Name:           input.ProductKnowledge.Name,
+			Price:          priceStr,
+			Description:    sql.NullString{String: input.ProductKnowledge.Description, Valid: input.ProductKnowledge.Description != ""},
+			ImageUrls:      input.ProductKnowledge.ImageUrls,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
+			BusinessRootID: businessRoot,
+			ProfileID:      profileUUID,
+			Role:           entity.BusinessMemberRoleOwner,
+			AnsweredAt:     sql.NullTime{},
+			Status:         entity.BusinessMemberStatusPending,
+		})
+
+		// TODO: send email notification to owner
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if e != nil {
+		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(e)
 	}
 
 	res := SetupBusinessRootFirstTimeResponse{
-		ID: newBusiness.BusinessRootID.String(),
+		ID: businessRootId,
 	}
 
 	return res, nil

@@ -12,6 +12,11 @@ import (
 
 type Querier interface {
 	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
+	CreateBusinessKnowledge(ctx context.Context, arg CreateBusinessKnowledgeParams) (BusinessKnowledge, error)
+	CreateBusinessMember(ctx context.Context, arg CreateBusinessMemberParams) (BusinessMember, error)
+	CreateBusinessProduct(ctx context.Context, arg CreateBusinessProductParams) (BusinessProduct, error)
+	CreateBusinessRole(ctx context.Context, arg CreateBusinessRoleParams) (BusinessRole, error)
+	CreateBusinessRoot(ctx context.Context) (uuid.UUID, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -25,7 +30,6 @@ type Querier interface {
 	GetUserById(ctx context.Context, id uuid.UUID) (User, error)
 	ListProducts(ctx context.Context) ([]Product, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)
-	SetupBusinessRootFirstTime(ctx context.Context, arg SetupBusinessRootFirstTimeParams) (SetupBusinessRootFirstTimeRow, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)

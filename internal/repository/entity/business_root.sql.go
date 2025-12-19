@@ -57,6 +57,19 @@ func (q *Queries) CountJoinedBusinessesByProfileID(ctx context.Context, arg Coun
 	return total, err
 }
 
+const createBusinessRoot = `-- name: CreateBusinessRoot :one
+INSERT INTO business_roots 
+DEFAULT VALUES
+RETURNING id
+`
+
+func (q *Queries) CreateBusinessRoot(ctx context.Context) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, createBusinessRoot)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getJoinedBusinessesByProfileID = `-- name: GetJoinedBusinessesByProfileID :many
 SELECT
   bm.id                AS member_id,

@@ -80,3 +80,8 @@ WHERE
     sqlc.narg(date_end)::date IS NULL
     OR COALESCE(bm.answered_at)::date <= sqlc.narg(date_end)::date
   );
+
+-- name: CreateBusinessRoot :one
+INSERT INTO business_roots 
+DEFAULT VALUES
+RETURNING id;
