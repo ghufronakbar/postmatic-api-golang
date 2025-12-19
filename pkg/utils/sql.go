@@ -1,7 +1,11 @@
 // sql.go
 package utils
 
-import "database/sql"
+import (
+	"database/sql"
+	"strings"
+	"time"
+)
 
 // StringToNullString mengonversi string biasa/pointer ke sql.NullString
 func StringToNullString(s *string) sql.NullString {
@@ -25,4 +29,23 @@ func NullStringToStringVal(ns sql.NullString) string {
 		return ""
 	}
 	return ns.String
+}
+
+func NullStringToNullTime(s *string) sql.NullTime {
+	if s == nil {
+		return sql.NullTime{Valid: false}
+	}
+
+	val := strings.TrimSpace(*s)
+	if val == "" {
+		return sql.NullTime{Valid: false}
+	}
+
+	// parse date YYYY-MM-DD
+	t, err := time.Parse("2006-01-02", val)
+	if err != nil {
+		return sql.NullTime{Valid: false}
+	}
+
+	return sql.NullTime{Time: t, Valid: true}
 }

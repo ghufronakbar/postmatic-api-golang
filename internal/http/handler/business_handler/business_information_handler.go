@@ -50,6 +50,8 @@ func (h *BusinessInformationHandler) GetJoinedBusinessesByProfileID(w http.Respo
 		PageLimit:  filter.Limit,
 		SortDir:    filter.Sort,
 		Page:       filter.Page,
+		DateStart:  filter.DateStart,
+		DateEnd:    filter.DateEnd,
 	}
 
 	res, pagination, err := h.busInSvc.GetJoinedBusinessesByProfileID(r.Context(), prof.ID, filterQuery)

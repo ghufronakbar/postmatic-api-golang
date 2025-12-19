@@ -14,6 +14,7 @@ type GetJoinedBusinessesByProfileIDResponse struct {
 	Description  string              `json:"description"`
 	CreatedAt    time.Time           `json:"createdAt"`
 	UpdatedAt    time.Time           `json:"updatedAt"`
+	AnsweredAt   time.Time           `json:"answeredAt"`
 	Members      []BusinessMemberSub `json:"members"`
 	UserPosition BusinessMemberSub   `json:"userPosition"`
 }

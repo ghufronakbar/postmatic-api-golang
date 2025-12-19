@@ -26,7 +26,7 @@ func NewService(store entity.Store) *BusinessInformationService {
 	}
 }
 
-func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.Context, profileId string, filter GetJoinedBusinessesByProfileIDFilter) ([]GetJoinedBusinessesByProfileIDResponse, *pagination.Pagination, error) {
+func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.Context, profileId string, filterData GetJoinedBusinessesByProfileIDFilter) ([]GetJoinedBusinessesByProfileIDResponse, *pagination.Pagination, error) {
 	profileUUID, err := uuid.Parse(profileId)
 	if err != nil {
 		return nil, nil, errs.NewInternalServerError(err)
@@ -39,11 +39,13 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 
 	filterQuery := entity.GetJoinedBusinessesByProfileIDParams{
 		ProfileID:  profileUUID,
-		Search:     filter.Search,
-		SortBy:     string(filter.SortBy),
-		PageOffset: int32(filter.PageOffset),
-		PageLimit:  int32(filter.PageLimit),
-		SortDir:    string(filter.SortDir),
+		Search:     filterData.Search,
+		SortBy:     string(filterData.SortBy),
+		PageOffset: int32(filterData.PageOffset),
+		PageLimit:  int32(filterData.PageLimit),
+		SortDir:    string(filterData.SortDir),
+		DateStart:  utils.NullStringToNullTime(filterData.DateStart),
+		DateEnd:    utils.NullStringToNullTime(filterData.DateEnd),
 	}
 
 	res, err := s.store.GetJoinedBusinessesByProfileID(ctx, filterQuery)
@@ -84,6 +86,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 			Description: v.BusinessDescription.String,
 			CreatedAt:   v.BusinessRootCreatedAt,
 			UpdatedAt:   v.BusinessRootUpdatedAt,
+			AnsweredAt:  v.MemberAnsweredAt.Time,
 			Members:     memberBusiness,
 			UserPosition: BusinessMemberSub{
 				Status: string(v.MemberStatus),
@@ -100,7 +103,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 
 	filterCount := entity.CountJoinedBusinessesByProfileIDParams{
 		ProfileID: profileUUID,
-		Search:    filter.Search,
+		Search:    filterData.Search,
 	}
 
 	count, err := s.store.CountJoinedBusinessesByProfileID(ctx, filterCount)
@@ -110,8 +113,8 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 
 	paginationParams := pagination.PaginationParams{
 		Total: int(count),
-		Page:  filter.Page,
-		Limit: filter.PageLimit,
+		Page:  filterData.Page,
+		Limit: filterData.PageLimit,
 	}
 
 	pagination := pagination.NewPagination(&paginationParams)

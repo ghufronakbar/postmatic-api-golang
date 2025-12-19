@@ -2,12 +2,14 @@
 package filter
 
 type ReqFilter struct {
-	Search   string `json:"search"`
-	Page     int    `json:"page"`
-	Limit    int    `json:"limit"`
-	Sort     string `json:"sort"`   // asc|desc
-	SortBy   string `json:"sortBy"` // name|createdAt|updatedAt (input user)
-	Category string `json:"category"`
+	Search    string  `json:"search"`
+	Page      int     `json:"page"`
+	Limit     int     `json:"limit"`
+	Sort      string  `json:"sort"`   // asc|desc
+	SortBy    string  `json:"sortBy"` // name|createdAt|updatedAt (input user)
+	Category  string  `json:"category"`
+	DateStart *string `json:"dateStart"`
+	DateEnd   *string `json:"dateEnd"`
 }
 
 // Offset adalah nilai turunan (hasil kalkulasi), bukan input user

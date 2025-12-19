@@ -28,15 +28,30 @@ WHERE
     COALESCE($2, '') = ''
     OR bk.name ILIKE ('%' || $2 || '%')
   )
+  AND (
+    $3::date IS NULL
+    OR COALESCE(bm.answered_at)::date >= $3::date
+  )
+  AND (
+    $4::date IS NULL
+    OR COALESCE(bm.answered_at)::date <= $4::date
+  )
 `
 
 type CountJoinedBusinessesByProfileIDParams struct {
-	ProfileID uuid.UUID   `json:"profile_id"`
-	Search    interface{} `json:"search"`
+	ProfileID uuid.UUID    `json:"profile_id"`
+	Search    interface{}  `json:"search"`
+	DateStart sql.NullTime `json:"date_start"`
+	DateEnd   sql.NullTime `json:"date_end"`
 }
 
 func (q *Queries) CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countJoinedBusinessesByProfileID, arg.ProfileID, arg.Search)
+	row := q.db.QueryRowContext(ctx, countJoinedBusinessesByProfileID,
+		arg.ProfileID,
+		arg.Search,
+		arg.DateStart,
+		arg.DateEnd,
+	)
 	var total int64
 	err := row.Scan(&total)
 	return total, err
@@ -71,35 +86,45 @@ WHERE
     COALESCE($2, '') = ''
     OR bk.name ILIKE ('%' || $2 || '%')
   )
+  AND (
+    $3::date IS NULL
+    OR COALESCE(bm.answered_at)::date >= $3::date
+  )
+  AND (
+    $4::date IS NULL
+    OR COALESCE(bm.answered_at)::date <= $4::date
+  )
 
 ORDER BY
   -- name
-  CASE WHEN $3 = 'name' AND $4 = 'asc'  THEN bk.name END ASC,
-  CASE WHEN $3 = 'name' AND $4 = 'desc' THEN bk.name END DESC,
+  CASE WHEN $5 = 'name' AND $6 = 'asc'  THEN bk.name END ASC,
+  CASE WHEN $5 = 'name' AND $6 = 'desc' THEN bk.name END DESC,
 
   -- created_at
-  CASE WHEN $3 = 'created_at' AND $4 = 'asc'  THEN br.created_at END ASC,
-  CASE WHEN $3 = 'created_at' AND $4 = 'desc' THEN br.created_at END DESC,
+  CASE WHEN $5 = 'created_at' AND $6 = 'asc'  THEN br.created_at END ASC,
+  CASE WHEN $5 = 'created_at' AND $6 = 'desc' THEN br.created_at END DESC,
 
   -- updated_at
-  CASE WHEN $3 = 'updated_at' AND $4 = 'asc'  THEN br.updated_at END ASC,
-  CASE WHEN $3 = 'updated_at' AND $4 = 'desc' THEN br.updated_at END DESC,
+  CASE WHEN $5 = 'updated_at' AND $6 = 'asc'  THEN br.updated_at END ASC,
+  CASE WHEN $5 = 'updated_at' AND $6 = 'desc' THEN br.updated_at END DESC,
 
   -- fallback stable order
   br.created_at DESC,
   br.id DESC
 
-LIMIT $6
-OFFSET $5
+LIMIT $8
+OFFSET $7
 `
 
 type GetJoinedBusinessesByProfileIDParams struct {
-	ProfileID  uuid.UUID   `json:"profile_id"`
-	Search     interface{} `json:"search"`
-	SortBy     interface{} `json:"sort_by"`
-	SortDir    interface{} `json:"sort_dir"`
-	PageOffset int32       `json:"page_offset"`
-	PageLimit  int32       `json:"page_limit"`
+	ProfileID  uuid.UUID    `json:"profile_id"`
+	Search     interface{}  `json:"search"`
+	DateStart  sql.NullTime `json:"date_start"`
+	DateEnd    sql.NullTime `json:"date_end"`
+	SortBy     interface{}  `json:"sort_by"`
+	SortDir    interface{}  `json:"sort_dir"`
+	PageOffset int32        `json:"page_offset"`
+	PageLimit  int32        `json:"page_limit"`
 }
 
 type GetJoinedBusinessesByProfileIDRow struct {
@@ -119,6 +144,8 @@ func (q *Queries) GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoi
 	rows, err := q.db.QueryContext(ctx, getJoinedBusinessesByProfileID,
 		arg.ProfileID,
 		arg.Search,
+		arg.DateStart,
+		arg.DateEnd,
 		arg.SortBy,
 		arg.SortDir,
 		arg.PageOffset,

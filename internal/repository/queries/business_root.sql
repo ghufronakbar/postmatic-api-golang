@@ -27,6 +27,14 @@ WHERE
     COALESCE(sqlc.narg(search), '') = ''
     OR bk.name ILIKE ('%' || sqlc.narg(search) || '%')
   )
+  AND (
+    sqlc.narg(date_start)::date IS NULL
+    OR COALESCE(bm.answered_at)::date >= sqlc.narg(date_start)::date
+  )
+  AND (
+    sqlc.narg(date_end)::date IS NULL
+    OR COALESCE(bm.answered_at)::date <= sqlc.narg(date_end)::date
+  )
 
 ORDER BY
   -- name
@@ -63,4 +71,12 @@ WHERE
   AND (
     COALESCE(sqlc.narg(search), '') = ''
     OR bk.name ILIKE ('%' || sqlc.narg(search) || '%')
+  )
+  AND (
+    sqlc.narg(date_start)::date IS NULL
+    OR COALESCE(bm.answered_at)::date >= sqlc.narg(date_start)::date
+  )
+  AND (
+    sqlc.narg(date_end)::date IS NULL
+    OR COALESCE(bm.answered_at)::date <= sqlc.narg(date_end)::date
   );

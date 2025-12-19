@@ -35,29 +35,39 @@ func ReqFilterMiddleware(next http.Handler, allowedSortBy []string) http.Handler
 		if err != nil || limit < 1 {
 			limit = 10
 		}
-		if limit > 50 { // clamp internal
+		if limit > 50 {
 			limit = 50
 		}
 
-		// whitelist sort
 		if !slices.Contains(allowedSort, sort) {
 			sort = "asc"
 		}
 
-		// whitelist sortBy
 		allSortBy := append([]string{}, allowedSortByDefault...)
 		allSortBy = append(allSortBy, allowedSortBy...)
 		if !slices.Contains(allSortBy, sortBy) {
 			sortBy = "createdAt"
 		}
 
+		// ✅ DateStart/DateEnd: hanya set kalau valid (YYYY-MM-DD)
+		dateStart := filter.ParseDatePtr(strings.TrimSpace(q.Get("dateStart")))
+		dateEnd := filter.ParseDatePtr(strings.TrimSpace(q.Get("dateEnd")))
+
+		if dateStart != nil && dateEnd != nil && *dateStart > *dateEnd {
+			// swap atau null-kan keduanya
+			// swap:
+			dateStart, dateEnd = nil, nil
+		}
+
 		ctx := context.WithValue(r.Context(), ReqFilterContextKey, filter.ReqFilter{
-			Search:   search,
-			Page:     page,
-			Limit:    limit,
-			Sort:     sort,
-			SortBy:   sortBy,
-			Category: category,
+			Search:    search,
+			Page:      page,
+			Limit:     limit,
+			Sort:      sort,
+			SortBy:    sortBy,
+			Category:  category,
+			DateStart: dateStart,
+			DateEnd:   dateEnd,
 		})
 
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -67,7 +77,16 @@ func ReqFilterMiddleware(next http.Handler, allowedSortBy []string) http.Handler
 func GetFilterFromContext(ctx context.Context) filter.ReqFilter {
 	fil, ok := ctx.Value(ReqFilterContextKey).(filter.ReqFilter)
 	if !ok {
-		return filter.ReqFilter{Search: "", SortBy: "createdAt", Page: 1, Limit: 10, Sort: "asc", Category: ""}
+		return filter.ReqFilter{
+			Search:    "",
+			SortBy:    "createdAt",
+			Page:      1,
+			Limit:     10,
+			Sort:      "asc",
+			Category:  "",
+			DateStart: nil,
+			DateEnd:   nil,
+		}
 	}
 	return fil
 }
