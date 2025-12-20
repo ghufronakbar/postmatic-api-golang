@@ -14,20 +14,28 @@ import (
 )
 
 type BusinessInformationHandler struct {
-	busInSvc *business_information.BusinessInformationService
+	busInSvc   *business_information.BusinessInformationService
+	middleware *middleware.OwnedBusiness
 }
 
-func NewBusinessInformationHandler(busInSvc *business_information.BusinessInformationService) *BusinessInformationHandler {
-	return &BusinessInformationHandler{busInSvc: busInSvc}
+func NewBusinessInformationHandler(busInSvc *business_information.BusinessInformationService, ownedMw *middleware.OwnedBusiness) *BusinessInformationHandler {
+	return &BusinessInformationHandler{busInSvc: busInSvc, middleware: ownedMw}
 }
 
 func (h *BusinessInformationHandler) BusinessInformationRoutes() chi.Router {
 	r := chi.NewRouter()
 
+	// Route yang tidak butuh businessId
 	r.Get("/", h.GetJoinedBusinessesByProfileID)
-	r.Get("/{businessId}", h.GetBusinessById)
 	r.Post("/", h.SetupBusinessRootFirstTime)
-	r.Delete("/{businessId}", h.DeleteBusinessById)
+
+	// Route yang butuh businessId -> middleware dipasang DI SINI
+	r.Route("/{businessId}", func(r chi.Router) {
+		r.Use(h.middleware.OwnedBusinessMiddleware)
+
+		r.Get("/", h.GetBusinessById)
+		r.Delete("/", h.DeleteBusinessById)
+	})
 
 	return r
 }

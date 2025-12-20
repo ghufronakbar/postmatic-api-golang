@@ -169,6 +169,7 @@ type BusinessMember struct {
 	ProfileID      uuid.UUID            `json:"profile_id"`
 	CreatedAt      time.Time            `json:"created_at"`
 	UpdatedAt      time.Time            `json:"updated_at"`
+	DeletedAt      sql.NullTime         `json:"deleted_at"`
 }
 
 type BusinessProduct struct {

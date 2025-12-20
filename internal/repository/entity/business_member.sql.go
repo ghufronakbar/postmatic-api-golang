@@ -28,7 +28,7 @@ VALUES (
 	$4,
 	$5
 )
-RETURNING id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at
+RETURNING id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at, deleted_at
 `
 
 type CreateBusinessMemberParams struct {
@@ -57,14 +57,16 @@ func (q *Queries) CreateBusinessMember(ctx context.Context, arg CreateBusinessMe
 		&i.ProfileID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getMemberByProfileIdAndBusinessRootId = `-- name: GetMemberByProfileIdAndBusinessRootId :one
-SELECT id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at FROM business_members
+SELECT id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at, deleted_at FROM business_members
 WHERE profile_id = $1
 AND business_root_id = $2
+AND deleted_at IS NULL
 `
 
 type GetMemberByProfileIdAndBusinessRootIdParams struct {
@@ -84,6 +86,7 @@ func (q *Queries) GetMemberByProfileIdAndBusinessRootId(ctx context.Context, arg
 		&i.ProfileID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

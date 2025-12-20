@@ -15,6 +15,7 @@ import (
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
+	ownedBusinessRepo "postmatic-api/internal/repository/redis/owned_business_repository"
 	sessionRepo "postmatic-api/internal/repository/redis/session_repository"
 
 	"github.com/go-chi/chi/v5"
@@ -30,18 +31,21 @@ func NewRouter(db *sql.DB) chi.Router {
 	}
 	sessionRepo := sessionRepo.NewSessionRepository(rdb)
 	emailLimiterRepo := emailLimiterRepo.NewLimiterEmailRepository(rdb)
+	ownedRepo := ownedBusinessRepo.NewOwnedBusinessRepository(rdb)
+
+	ownedMw := middleware.NewOwnedBusiness(store, ownedRepo)
 
 	// 2. =========== INITIAL SERVICE ===========
 	mailerSvc := mailer.NewService(cfg)
 	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	sessSvc := session.NewService(sessionRepo)
 	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
-	busInSvc := business_information.NewService(store)
+	busInSvc := business_information.NewService(store, ownedRepo)
 
 	// 3. =========== INITIAL HANDLER ===========
 	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
 	profileHandler := account_handler.NewProfileHandler(profSvc)
-	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc)
+	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()

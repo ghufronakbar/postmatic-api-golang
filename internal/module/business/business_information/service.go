@@ -4,9 +4,12 @@ package business_information
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"time"
 
 	"postmatic-api/internal/repository/entity"
+	"postmatic-api/internal/repository/redis/owned_business_repository"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/pagination"
 
@@ -16,13 +19,15 @@ import (
 )
 
 type BusinessInformationService struct {
-	store entity.Store
+	store  entity.Store
+	obRepo *owned_business_repository.OwnedBusinessRepository
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store) *BusinessInformationService {
+func NewService(store entity.Store, obRepo *owned_business_repository.OwnedBusinessRepository) *BusinessInformationService {
 	return &BusinessInformationService{
-		store: store,
+		store:  store,
+		obRepo: obRepo,
 	}
 }
 
@@ -131,6 +136,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	priceStr := fmt.Sprintf("%d.00", input.ProductKnowledge.Price) // 35000 -> "35000.00"
 
 	var businessRootId string
+	var memberID string
 
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
@@ -169,26 +175,42 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 			return err
 		}
 
-		_, err = tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
+		member, err := tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
 			BusinessRootID: businessRoot,
 			ProfileID:      profileUUID,
 			Role:           entity.BusinessMemberRoleOwner,
-			AnsweredAt:     sql.NullTime{},
+			AnsweredAt:     sql.NullTime{Time: time.Now(), Valid: true},
 			Status:         entity.BusinessMemberStatusPending,
 		})
-
-		// TODO: set cache to verify owned business to owner
-		// TODO: send email notification to owner
 
 		if err != nil {
 			return err
 		}
+
+		memberID = member.ID.String()
+
+		// TODO: send email notification to owner
 
 		return nil
 	})
 
 	if e != nil {
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(e)
+	}
+
+	if memberID == "" {
+		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(errors.New("MEMBER_ID_IS_EMPTY"))
+	}
+
+	// REDIS: upsert one business into profile owned business cache
+	err = s.obRepo.UpsertOneBusiness(ctx, profileId, owned_business_repository.RedisBusinessSub{
+		BusinessRootID: businessRootId,
+		Role:           entity.BusinessMemberRoleOwner,
+		MemberID:       memberID,
+	}, time.Hour)
+
+	if err != nil {
+		fmt.Println("redis upsert owned business failed:", err)
 	}
 
 	res := SetupBusinessRootFirstTimeResponse{
@@ -203,9 +225,13 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 	if err != nil {
 		return GetBusinessByIdResponse{}, errs.NewBadRequest("INVALID_BUSINESS_ID")
 	}
+
 	business, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessUUID)
-	fmt.Println(err)
-	if err != nil {
+
+	if err == sql.ErrNoRows {
+		return GetBusinessByIdResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+	if err != nil && err != sql.ErrNoRows {
 		return GetBusinessByIdResponse{}, err
 	}
 
@@ -293,6 +319,11 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 		return DeleteBusinessByIdResponse{}, err
 	}
 
+	members, err := s.store.GetMembersByBusinessRootID(ctx, businessUUID)
+	if err != nil {
+		return DeleteBusinessByIdResponse{}, err
+	}
+
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 		rootId, err := tx.SoftDeleteBusinessRoot(ctx, businessUUID)
 		if err != nil {
@@ -319,14 +350,24 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 			return err
 		}
 
-		// TODO: delete cache to verify owned business to all members
-
 		return nil
 	})
 
 	if e != nil {
-		return DeleteBusinessByIdResponse{}, e
+		return DeleteBusinessByIdResponse{}, errs.NewInternalServerError(e)
 	}
+
+	// REDIS: delete cache to verify owned business to all members
+	go func(members []entity.GetMembersByBusinessRootIDRow, businessID string) {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		for _, m := range members {
+			if err := s.obRepo.DeleteOneBusiness(ctxBg, m.ProfileID.String(), businessID, time.Hour); err != nil {
+				fmt.Println("redis delete cache failed:", err)
+			}
+		}
+	}(members, businessUUID.String())
 
 	return DeleteBusinessByIdResponse{
 		ID: businessId,

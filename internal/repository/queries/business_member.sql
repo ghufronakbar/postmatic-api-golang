@@ -62,4 +62,5 @@ RETURNING id;
 -- name: GetMemberByProfileIdAndBusinessRootId :one
 SELECT * FROM business_members
 WHERE profile_id = sqlc.arg(profile_id)
-AND business_root_id = sqlc.arg(business_root_id);
+AND business_root_id = sqlc.arg(business_root_id)
+AND deleted_at IS NULL;
