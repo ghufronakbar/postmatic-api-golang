@@ -4,6 +4,7 @@ package middleware
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 
 type contextOwnedBusinessKey string
 
-const OwnedBusinessContextKey contextOwnedBusinessKey = "ownedBusiness"
+const OwnedBusinessContextKey contextOwnedBusinessKey = "ownedBusinessContextKey"
 
 type OwnedBusiness struct {
 	store entity.Store
@@ -86,12 +87,14 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 		)
 
 		if err == sql.ErrNoRows {
+			fmt.Println("err == sql.ErrNoRows")
 			// kamu bilang: kalau tidak ditemukan => forbidden karena bukan member
 			response.Error(w, r, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
 
 		if dbMember.Status != entity.BusinessMemberStatusAccepted {
+			fmt.Println("dbMember.Status != entity.BusinessMemberStatusAccepted")
 			response.Error(w, r, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
@@ -127,11 +130,13 @@ type OwnedBusinessContext struct {
 func OwnedBusinessFromContext(ctx context.Context) (*OwnedBusinessContext, error) {
 	v := ctx.Value(OwnedBusinessContextKey)
 	if v == nil {
-		return nil, errs.NewUnauthorized("FORBIDDEN")
+		fmt.Println("v == nil")
+		return nil, errs.NewForbidden("FORBIDDEN")
 	}
 	ob, ok := v.(*OwnedBusinessContext)
 	if !ok || ob == nil {
-		return nil, errs.NewUnauthorized("FORBIDDEN")
+		fmt.Println("!ok || ob == nil")
+		return nil, errs.NewForbidden("FORBIDDEN")
 	}
 	return ob, nil
 }

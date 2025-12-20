@@ -72,6 +72,32 @@ func (q *Queries) CreateBusinessRole(ctx context.Context, arg CreateBusinessRole
 	return i, err
 }
 
+const getBusinessRoleByBusinessRootID = `-- name: GetBusinessRoleByBusinessRootID :one
+SELECT br.id, br.target_audience, br.tone, br.audience_persona, br.hashtags, br.call_to_action, br.goals, br.business_root_id, br.created_at, br.updated_at, br.deleted_at
+FROM business_roles br
+WHERE br.business_root_id = $1
+  AND br.deleted_at IS NULL
+`
+
+func (q *Queries) GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (BusinessRole, error) {
+	row := q.db.QueryRowContext(ctx, getBusinessRoleByBusinessRootID, businessRootID)
+	var i BusinessRole
+	err := row.Scan(
+		&i.ID,
+		&i.TargetAudience,
+		&i.Tone,
+		&i.AudiencePersona,
+		pq.Array(&i.Hashtags),
+		&i.CallToAction,
+		&i.Goals,
+		&i.BusinessRootID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const softDeleteBusinessRoleByBusinessRootID = `-- name: SoftDeleteBusinessRoleByBusinessRootID :one
 UPDATE business_roles
 SET deleted_at = NOW()
@@ -84,4 +110,70 @@ func (q *Queries) SoftDeleteBusinessRoleByBusinessRootID(ctx context.Context, bu
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const upsertBusinessRoleByBusinessRootID = `-- name: UpsertBusinessRoleByBusinessRootID :one
+INSERT INTO business_roles (
+  target_audience,
+  tone,
+  audience_persona,
+  hashtags,
+  call_to_action,
+  goals,
+  business_root_id
+) VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7
+)
+ON CONFLICT (business_root_id) DO UPDATE SET
+  target_audience  = EXCLUDED.target_audience,
+  tone             = EXCLUDED.tone,
+  audience_persona = EXCLUDED.audience_persona,
+  hashtags         = EXCLUDED.hashtags,
+  call_to_action   = EXCLUDED.call_to_action,
+  goals            = EXCLUDED.goals,
+  deleted_at       = NULL
+RETURNING id, target_audience, tone, audience_persona, hashtags, call_to_action, goals, business_root_id, created_at, updated_at, deleted_at
+`
+
+type UpsertBusinessRoleByBusinessRootIDParams struct {
+	TargetAudience  string         `json:"target_audience"`
+	Tone            string         `json:"tone"`
+	AudiencePersona string         `json:"audience_persona"`
+	Hashtags        []string       `json:"hashtags"`
+	CallToAction    string         `json:"call_to_action"`
+	Goals           sql.NullString `json:"goals"`
+	BusinessRootID  uuid.UUID      `json:"business_root_id"`
+}
+
+func (q *Queries) UpsertBusinessRoleByBusinessRootID(ctx context.Context, arg UpsertBusinessRoleByBusinessRootIDParams) (BusinessRole, error) {
+	row := q.db.QueryRowContext(ctx, upsertBusinessRoleByBusinessRootID,
+		arg.TargetAudience,
+		arg.Tone,
+		arg.AudiencePersona,
+		pq.Array(arg.Hashtags),
+		arg.CallToAction,
+		arg.Goals,
+		arg.BusinessRootID,
+	)
+	var i BusinessRole
+	err := row.Scan(
+		&i.ID,
+		&i.TargetAudience,
+		&i.Tone,
+		&i.AudiencePersona,
+		pq.Array(&i.Hashtags),
+		&i.CallToAction,
+		&i.Goals,
+		&i.BusinessRootID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }

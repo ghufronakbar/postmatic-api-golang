@@ -22,6 +22,8 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error)
 	GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error)
+	GetBusinessProductsByBusinessRootId(ctx context.Context, businessRootID uuid.UUID) ([]BusinessProduct, error)
+	GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (BusinessRole, error)
 	GetBusinessRootById(ctx context.Context, id uuid.UUID) (GetBusinessRootByIdRow, error)
 	GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoinedBusinessesByProfileIDParams) ([]GetJoinedBusinessesByProfileIDRow, error)
 	GetMemberByProfileIdAndBusinessRootId(ctx context.Context, arg GetMemberByProfileIdAndBusinessRootIdParams) (BusinessMember, error)
@@ -42,6 +44,8 @@ type Querier interface {
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error)
+	UpsertBusinessRoleByBusinessRootID(ctx context.Context, arg UpsertBusinessRoleByBusinessRootIDParams) (BusinessRole, error)
 	VerifyUser(ctx context.Context, id uuid.UUID) (User, error)
 }
 

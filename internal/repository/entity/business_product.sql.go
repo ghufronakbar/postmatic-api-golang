@@ -72,6 +72,49 @@ func (q *Queries) CreateBusinessProduct(ctx context.Context, arg CreateBusinessP
 	return i, err
 }
 
+const getBusinessProductsByBusinessRootId = `-- name: GetBusinessProductsByBusinessRootId :many
+SELECT bp.id, bp.name, bp.category, bp.description, bp.currency, bp.price, bp.image_urls, bp.business_root_id, bp.created_at, bp.updated_at, bp.deleted_at
+FROM business_products bp
+WHERE bp.business_root_id = $1
+  AND bp.deleted_at IS NULL
+ORDER BY bp.created_at DESC
+`
+
+func (q *Queries) GetBusinessProductsByBusinessRootId(ctx context.Context, businessRootID uuid.UUID) ([]BusinessProduct, error) {
+	rows, err := q.db.QueryContext(ctx, getBusinessProductsByBusinessRootId, businessRootID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BusinessProduct
+	for rows.Next() {
+		var i BusinessProduct
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Category,
+			&i.Description,
+			&i.Currency,
+			&i.Price,
+			pq.Array(&i.ImageUrls),
+			&i.BusinessRootID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const softDeleteBusinessProductByBusinessRootID = `-- name: SoftDeleteBusinessProductByBusinessRootID :one
 UPDATE business_products
 SET deleted_at = NOW()

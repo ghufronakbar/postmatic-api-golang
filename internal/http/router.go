@@ -12,6 +12,7 @@ import (
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/business/business_information"
+	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
@@ -41,11 +42,13 @@ func NewRouter(db *sql.DB) chi.Router {
 	sessSvc := session.NewService(sessionRepo)
 	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
 	busInSvc := business_information.NewService(store, ownedRepo)
+	busKnowledgeSvc := business_knowledge.NewService(store)
 
 	// 3. =========== INITIAL HANDLER ===========
 	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
 	profileHandler := account_handler.NewProfileHandler(profSvc)
 	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
+	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -56,6 +59,7 @@ func NewRouter(db *sql.DB) chi.Router {
 			return middleware.ReqFilterMiddleware(next, business_information.SORT_BY)
 		})
 		r.Mount("/information", busInHandler.BusinessInformationRoutes())
+		r.Mount("/knowledge", busKnowledgeHandler.BusinessKnowledgeRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {

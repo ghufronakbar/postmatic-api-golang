@@ -180,7 +180,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 			ProfileID:      profileUUID,
 			Role:           entity.BusinessMemberRoleOwner,
 			AnsweredAt:     sql.NullTime{Time: time.Now(), Valid: true},
-			Status:         entity.BusinessMemberStatusPending,
+			Status:         entity.BusinessMemberStatusAccepted,
 		})
 
 		if err != nil {

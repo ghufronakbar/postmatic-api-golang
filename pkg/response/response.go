@@ -1,5 +1,4 @@
 // pkg/response/response.go
-
 package response
 
 import (
@@ -7,15 +6,15 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"postmatic-api/pkg/errs" // Import package error yang kita buat diatas
-	"postmatic-api/pkg/filter"
-	"postmatic-api/pkg/pagination"
 	"reflect"
 
-	"github.com/go-chi/chi/v5/middleware"
+	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/filter"
+	"postmatic-api/pkg/pagination"
+
+	chimw "github.com/go-chi/chi/v5/middleware"
 )
 
-// Struktur sesuai request Anda
 type MetaData struct {
 	Code      int    `json:"code"`
 	Message   string `json:"message"`
@@ -27,101 +26,72 @@ type MetaData struct {
 type BaseResponse struct {
 	MetaData         MetaData               `json:"metaData"`
 	ResponseMessage  string                 `json:"responseMessage"`
-	Data             interface{}            `json:"data"` // 'any' di Go adalah interface{}
+	Data             interface{}            `json:"data"`
 	ValidationErrors map[string]string      `json:"validationErrors"`
 	FilterQuery      *filter.ReqFilter      `json:"filterQuery"`
 	Pagination       *pagination.Pagination `json:"pagination"`
 }
 
-// Helper untuk mengirim response JSON
-func JSON(w http.ResponseWriter, r *http.Request, status int, message string, data interface{}) {
+type writeOpts struct {
+	validationErrors map[string]string
+	filterQuery      *filter.ReqFilter
+	pagination       *pagination.Pagination
+}
+
+func write(w http.ResponseWriter, r *http.Request, status int, message string, data interface{}, opts writeOpts) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 
 	metaMsg := http.StatusText(status)
 
-	var validationErrors map[string]string
-	var returnData interface{}
-
-	if message == "VALIDATION_FAILED" {
-		validationErrors = data.(map[string]string)
-		returnData = nil
-	} else {
-		// ✅ normalize nil slice
-		returnData = normalizeNilSlice(data)
-	}
-
-	reqID := middleware.GetReqID(r.Context())
-	reqPath := r.URL.Path
-	method := r.Method
+	reqID := chimw.GetReqID(r.Context())
+	// opsional: expose juga di header
+	// w.Header().Set("X-Request-ID", reqID)
 
 	resp := BaseResponse{
 		MetaData: MetaData{
 			Code:      status,
 			Message:   metaMsg,
 			RequestID: reqID,
-			Path:      reqPath,
-			Method:    method,
+			Path:      r.URL.Path, // atau r.RequestURI kalau mau include query string
+			Method:    r.Method,
 		},
 		ResponseMessage:  message,
-		Data:             returnData,
-		ValidationErrors: validationErrors,
-		FilterQuery:      nil,
+		Data:             normalizeNilSlice(data),
+		ValidationErrors: opts.validationErrors,
+		FilterQuery:      opts.filterQuery,
+		Pagination:       opts.pagination,
 	}
 
-	_ = json.NewEncoder(w).Encode(resp)
+	// kalau gagal encode, minimal log (karena header sudah terlanjur ditulis)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		fmt.Println("encode response error:", err)
+	}
 }
 
 func OK(w http.ResponseWriter, r *http.Request, message string, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	// Mapping status code ke message standard HTTP (opsional, biar rapi)
-	metaMsg := http.StatusText(200)
-
-	resp := BaseResponse{
-		MetaData: MetaData{
-			Code:    200,
-			Message: metaMsg,
-		},
-		ResponseMessage: message,
-		Data:            data,
-	}
-
-	json.NewEncoder(w).Encode(resp)
+	write(w, r, http.StatusOK, message, data, writeOpts{})
 }
 
 func LIST(w http.ResponseWriter, r *http.Request, message string, data interface{}, filterQuery *filter.ReqFilter, pagination *pagination.Pagination) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	metaMsg := http.StatusText(200)
-
-	resp := BaseResponse{
-		MetaData: MetaData{
-			Code:    200,
-			Message: metaMsg,
-		},
-		ResponseMessage: message,
-		// ✅ normalize nil slice
-		Data:        normalizeNilSlice(data),
-		FilterQuery: filterQuery,
-		Pagination:  pagination,
-	}
-
-	_ = json.NewEncoder(w).Encode(resp)
+	write(w, r, http.StatusOK, message, data, writeOpts{
+		filterQuery: filterQuery,
+		pagination:  pagination,
+	})
 }
 
-// Helper khusus untuk Error
+func ValidationFailed(w http.ResponseWriter, r *http.Request, errsMap map[string]string) {
+	write(w, r, http.StatusBadRequest, "VALIDATION_FAILED", nil, writeOpts{
+		validationErrors: errsMap,
+	})
+}
+
 func Error(w http.ResponseWriter, r *http.Request, err error, data interface{}) {
-	// Default error (jika bukan AppError) -> 500
 	code := http.StatusInternalServerError
 	msg := "INTERNAL_SERVER_ERROR"
 
-	// Cek apakah error tersebut adalah *errs.AppError
 	var appErr *errs.AppError
 	if errors.As(err, &appErr) {
-		// Jika ya, pakai Code & Message dari error tersebut
 		code = appErr.Code
 		msg = appErr.Message
 
@@ -129,38 +99,28 @@ func Error(w http.ResponseWriter, r *http.Request, err error, data interface{}) 
 			fmt.Println(err)
 		}
 
-		// Cek Validation Error
 		if appErr.ValidationErrors != nil {
-			JSON(w, r, http.StatusBadRequest, "VALIDATION_FAILED", appErr.ValidationErrors)
+			ValidationFailed(w, r, appErr.ValidationErrors)
 			return
 		}
 	}
 
-	JSON(w, r, code, msg, data)
-}
-
-func ValidationFailed(w http.ResponseWriter, r *http.Request, errsMap map[string]string) {
-	JSON(w, r, http.StatusBadRequest, "VALIDATION_FAILED", errsMap)
+	write(w, r, code, msg, data, writeOpts{})
 }
 
 func InvalidJsonFormat(w http.ResponseWriter, r *http.Request) {
-	JSON(w, r, http.StatusBadRequest, "INVALID_JSON_FORMAT", nil)
+	write(w, r, http.StatusBadRequest, "INVALID_JSON_FORMAT", nil, writeOpts{})
 }
 
-// normalizeNilSlice mengubah nil slice (mis. []T(nil)) menjadi []T{} agar JSON jadi [] bukan null.
 func normalizeNilSlice(data interface{}) interface{} {
 	if data == nil {
 		return nil
 	}
-
 	rv := reflect.ValueOf(data)
 	rt := rv.Type()
-
-	// interface berisi nil slice → Kind slice, IsNil true
 	if rt.Kind() == reflect.Slice && rv.IsNil() {
 		empty := reflect.MakeSlice(rt, 0, 0)
 		return empty.Interface()
 	}
-
 	return data
 }

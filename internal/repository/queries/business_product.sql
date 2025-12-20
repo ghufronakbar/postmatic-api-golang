@@ -24,3 +24,10 @@ UPDATE business_products
 SET deleted_at = NOW()
 WHERE business_root_id = sqlc.arg(business_root_id)
 RETURNING id;
+
+-- name: GetBusinessProductsByBusinessRootId :many
+SELECT bp.*
+FROM business_products bp
+WHERE bp.business_root_id = $1
+  AND bp.deleted_at IS NULL
+ORDER BY bp.created_at DESC;

@@ -24,8 +24,8 @@ func main() {
 
 	// 3. Setup Router
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
 	r.Use(middleware.RequestID)
+	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer) // Wajib ada agar server tidak crash saat panic
 
 	// 4. Register All Modules

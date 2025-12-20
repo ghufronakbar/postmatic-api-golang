@@ -88,21 +88,25 @@ func (q *Queries) CreateBusinessKnowledge(ctx context.Context, arg CreateBusines
 }
 
 const getBusinessKnowledgeByBusinessRootID = `-- name: GetBusinessKnowledgeByBusinessRootID :one
-SELECT root.id AS business_root_id, kn.name, kn.primary_logo_url, kn.category, kn.description, kn.color_tone, root.created_at, root.updated_at
+SELECT root.id AS business_root_id, kn.name, kn.primary_logo_url, kn.category, kn.description, kn.color_tone, root.created_at, root.updated_at, kn.unique_selling_point, kn.website_url, kn.vision_mission, kn.location
 FROM business_knowledges kn
 JOIN business_roots root ON kn.business_root_id = root.id
 WHERE root.id = $1 AND root.deleted_at IS NULL AND kn.deleted_at IS NULL
 `
 
 type GetBusinessKnowledgeByBusinessRootIDRow struct {
-	BusinessRootID uuid.UUID      `json:"business_root_id"`
-	Name           string         `json:"name"`
-	PrimaryLogoUrl sql.NullString `json:"primary_logo_url"`
-	Category       string         `json:"category"`
-	Description    sql.NullString `json:"description"`
-	ColorTone      sql.NullString `json:"color_tone"`
-	CreatedAt      time.Time      `json:"created_at"`
-	UpdatedAt      time.Time      `json:"updated_at"`
+	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	Name               string         `json:"name"`
+	PrimaryLogoUrl     sql.NullString `json:"primary_logo_url"`
+	Category           string         `json:"category"`
+	Description        sql.NullString `json:"description"`
+	ColorTone          sql.NullString `json:"color_tone"`
+	CreatedAt          time.Time      `json:"created_at"`
+	UpdatedAt          time.Time      `json:"updated_at"`
+	UniqueSellingPoint sql.NullString `json:"unique_selling_point"`
+	WebsiteUrl         sql.NullString `json:"website_url"`
+	VisionMission      sql.NullString `json:"vision_mission"`
+	Location           sql.NullString `json:"location"`
 }
 
 func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error) {
@@ -117,6 +121,10 @@ func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, busi
 		&i.ColorTone,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.UniqueSellingPoint,
+		&i.WebsiteUrl,
+		&i.VisionMission,
+		&i.Location,
 	)
 	return i, err
 }
@@ -133,4 +141,88 @@ func (q *Queries) SoftDeleteBusinessKnowledgeByBusinessRootID(ctx context.Contex
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const upsertBusinessKnowledgeByBusinessRootID = `-- name: UpsertBusinessKnowledgeByBusinessRootID :one
+INSERT INTO business_knowledges (
+  name,
+  primary_logo_url,
+  category,
+  description,
+  unique_selling_point,
+  website_url,
+  vision_mission,
+  location,
+  color_tone,
+  business_root_id
+) VALUES (
+  $1,
+  $2,
+  $3,
+  $4,
+  $5,
+  $6,
+  $7,
+  $8,
+  $9,
+  $10
+)
+ON CONFLICT (business_root_id) DO UPDATE SET
+  name                = EXCLUDED.name,
+  primary_logo_url     = EXCLUDED.primary_logo_url,
+  category            = EXCLUDED.category,
+  description         = EXCLUDED.description,
+  unique_selling_point = EXCLUDED.unique_selling_point,
+  website_url         = EXCLUDED.website_url,
+  vision_mission      = EXCLUDED.vision_mission,
+  location            = EXCLUDED.location,
+  color_tone          = EXCLUDED.color_tone,
+  deleted_at          = NULL
+RETURNING id, name, primary_logo_url, category, description, unique_selling_point, website_url, vision_mission, location, color_tone, business_root_id, created_at, updated_at, deleted_at
+`
+
+type UpsertBusinessKnowledgeByBusinessRootIDParams struct {
+	Name               string         `json:"name"`
+	PrimaryLogoUrl     sql.NullString `json:"primary_logo_url"`
+	Category           string         `json:"category"`
+	Description        sql.NullString `json:"description"`
+	UniqueSellingPoint sql.NullString `json:"unique_selling_point"`
+	WebsiteUrl         sql.NullString `json:"website_url"`
+	VisionMission      sql.NullString `json:"vision_mission"`
+	Location           sql.NullString `json:"location"`
+	ColorTone          sql.NullString `json:"color_tone"`
+	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+}
+
+func (q *Queries) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error) {
+	row := q.db.QueryRowContext(ctx, upsertBusinessKnowledgeByBusinessRootID,
+		arg.Name,
+		arg.PrimaryLogoUrl,
+		arg.Category,
+		arg.Description,
+		arg.UniqueSellingPoint,
+		arg.WebsiteUrl,
+		arg.VisionMission,
+		arg.Location,
+		arg.ColorTone,
+		arg.BusinessRootID,
+	)
+	var i BusinessKnowledge
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.PrimaryLogoUrl,
+		&i.Category,
+		&i.Description,
+		&i.UniqueSellingPoint,
+		&i.WebsiteUrl,
+		&i.VisionMission,
+		&i.Location,
+		&i.ColorTone,
+		&i.BusinessRootID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
