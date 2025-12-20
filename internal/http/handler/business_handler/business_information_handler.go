@@ -25,16 +25,13 @@ func NewBusinessInformationHandler(busInSvc *business_information.BusinessInform
 func (h *BusinessInformationHandler) BusinessInformationRoutes() chi.Router {
 	r := chi.NewRouter()
 
-	// Route yang tidak butuh businessId
-	r.Get("/", h.GetJoinedBusinessesByProfileID)
-	r.Post("/", h.SetupBusinessRootFirstTime)
-
-	// Route yang butuh businessId -> middleware dipasang DI SINI
-	r.Route("/{businessId}", func(r chi.Router) {
+	// owned business middleware
+	r.Route("/", func(r chi.Router) {
 		r.Use(h.middleware.OwnedBusinessMiddleware)
-
-		r.Get("/", h.GetBusinessById)
-		r.Delete("/", h.DeleteBusinessById)
+		r.Get("/", h.GetJoinedBusinessesByProfileID)
+		r.Get("/{businessId}", h.GetBusinessById)
+		r.Post("/", h.SetupBusinessRootFirstTime)
+		r.Delete("/{businessId}", h.DeleteBusinessById)
 	})
 
 	return r
@@ -58,18 +55,18 @@ func (h *BusinessInformationHandler) GetJoinedBusinessesByProfileID(w http.Respo
 
 	res, pagination, err := h.busInSvc.GetJoinedBusinessesByProfileID(r.Context(), prof.ID, filterQuery)
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.LIST(w, "SUCCESS_GET_JOINED_BUSINESS", res, &filter, pagination)
+	response.LIST(w, r, "SUCCESS_GET_JOINED_BUSINESS", res, &filter, pagination)
 }
 
 func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseWriter, r *http.Request) {
 	var req business_information.BusinessSetupInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
@@ -79,11 +76,11 @@ func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseW
 	//  Jalankan service
 	res, err := h.busInSvc.SetupBusinessRootFirstTime(r.Context(), prof.ID, req)
 	if err != nil {
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
-	response.OK(w, "SUCCESS_CREATE_BUSINESS", res)
+	response.OK(w, r, "SUCCESS_CREATE_BUSINESS", res)
 }
 
 func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *http.Request) {
@@ -93,11 +90,11 @@ func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *h
 
 	res, err := h.busInSvc.GetBusinessById(r.Context(), businessId, prof.ID)
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "SUCCESS_GET_BUSINESS", res)
+	response.OK(w, r, "SUCCESS_GET_BUSINESS", res)
 }
 
 func (h *BusinessInformationHandler) DeleteBusinessById(w http.ResponseWriter, r *http.Request) {
@@ -108,9 +105,9 @@ func (h *BusinessInformationHandler) DeleteBusinessById(w http.ResponseWriter, r
 	res, err := h.busInSvc.DeleteBusinessById(r.Context(), businessId, prof.ID)
 	if err != nil {
 		fmt.Println(err)
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "DELETE_BUSINESS_SUCCESS", res)
+	response.OK(w, r, "DELETE_BUSINESS_SUCCESS", res)
 }

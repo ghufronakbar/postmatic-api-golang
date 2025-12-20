@@ -26,7 +26,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		tokenStr := extractToken(r)
 
 		if tokenStr == "" {
-			response.Error(w, errs.NewUnauthorized("MISSING_TOKEN"), nil)
+			response.Error(w, r, errs.NewUnauthorized("MISSING_TOKEN"), nil)
 			return
 		}
 
@@ -34,7 +34,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		claims, err := token.ValidateAccessToken(tokenStr)
 		if err != nil {
 			// Error bisa karena expired, signature salah, dll
-			response.Error(w, errs.NewUnauthorized("INVALID_OR_EXPIRED_TOKEN"), nil)
+			response.Error(w, r, errs.NewUnauthorized("INVALID_OR_EXPIRED_TOKEN"), nil)
 			return
 		}
 

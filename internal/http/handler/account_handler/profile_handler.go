@@ -37,13 +37,13 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	user, err := middleware.GetUserFromContext(r.Context())
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
 	if user == nil {
 		fmt.Println("USER_NOT_FOUND")
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
+		response.Error(w, r, errors.New("USER_NOT_FOUND"), nil)
 		return
 	}
 
@@ -51,11 +51,11 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Println(err)
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
-	response.OK(w, "GET_PROFILE_SUCCESS", res)
+	response.OK(w, r, "GET_PROFILE_SUCCESS", res)
 }
 
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
@@ -63,29 +63,29 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var req profile.UpdateProfileInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 	user, err := middleware.GetUserFromContext(r.Context())
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
 	if user == nil {
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
+		response.Error(w, r, errors.New("USER_NOT_FOUND"), nil)
 		return
 	}
 
 	res, err := h.profSvc.UpdateProfile(r.Context(), user.ID, req)
 
 	if err != nil {
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
-	response.OK(w, "UPDATE_PROFILE_SUCCESS", res)
+	response.OK(w, r, "UPDATE_PROFILE_SUCCESS", res)
 }
 
 func (h *ProfileHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
@@ -93,29 +93,29 @@ func (h *ProfileHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) 
 	var req profile.UpdatePasswordInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 	user, err := middleware.GetUserFromContext(r.Context())
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
 	if user == nil {
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
+		response.Error(w, r, errors.New("USER_NOT_FOUND"), nil)
 		return
 	}
 
 	err = h.profSvc.UpdatePassword(r.Context(), user.ID, req)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "UPDATE_PASSWORD_SUCCESS", nil)
+	response.OK(w, r, "UPDATE_PASSWORD_SUCCESS", nil)
 }
 
 func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
@@ -123,16 +123,16 @@ func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
 	var req profile.SetupPasswordInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 	if user == nil {
-		response.Error(w, errors.New("USER_NOT_FOUND"), nil)
+		response.Error(w, r, errors.New("USER_NOT_FOUND"), nil)
 		return
 	}
 
@@ -141,10 +141,10 @@ func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		// Jika error karena rate limit, kita bisa sertakan data retryAfter
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
 	// 3. Response setup password biasanya return sukses info
-	response.OK(w, "SETUP_PASSWORD_SUCCESS_CHECK_EMAIL", res)
+	response.OK(w, r, "SETUP_PASSWORD_SUCCESS_CHECK_EMAIL", res)
 }

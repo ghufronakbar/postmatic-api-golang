@@ -25,7 +25,7 @@ func (h *AuthHandler) SessionRoutes() chi.Router {
 func (h *AuthHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 	profileId := user.ID
@@ -38,24 +38,24 @@ func (h *AuthHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 	err = h.sessSvc.LogoutAll(r.Context(), input)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "LOGOUT_ALL_SUCCESS", nil)
+	response.OK(w, r, "LOGOUT_ALL_SUCCESS", nil)
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req session.LogoutInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
 	profile, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
@@ -65,41 +65,41 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	res, err := h.sessSvc.Logout(r.Context(), req, profileId)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "LOGOUT_SUCCESS", res)
+	response.OK(w, r, "LOGOUT_SUCCESS", res)
 }
 
 func (h *AuthHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
 	refreshToken := r.Header.Get("X-Postmatic-RefreshToken")
 
 	if refreshToken == "" {
-		response.Error(w, errs.NewUnauthorized("INVALID_REFRESH_TOKEN"), nil)
+		response.Error(w, r, errs.NewUnauthorized("INVALID_REFRESH_TOKEN"), nil)
 		return
 	}
 
 	res, err := h.sessSvc.GetSession(r.Context(), user, refreshToken)
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "GET_SESSION_SUCCESS", res)
+	response.OK(w, r, "GET_SESSION_SUCCESS", res)
 }
 
 func (h *AuthHandler) GetAllSession(w http.ResponseWriter, r *http.Request) {
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
@@ -107,9 +107,9 @@ func (h *AuthHandler) GetAllSession(w http.ResponseWriter, r *http.Request) {
 
 	res, err := h.sessSvc.GetAllSession(r.Context(), profileId)
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "GET_SESSION_LIST_SUCCESS", res)
+	response.OK(w, r, "GET_SESSION_LIST_SUCCESS", res)
 }

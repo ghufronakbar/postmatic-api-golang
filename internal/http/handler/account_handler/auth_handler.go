@@ -38,7 +38,7 @@ func (h *AuthHandler) LoginCredential(w http.ResponseWriter, r *http.Request) {
 	var req auth.LoginCredentialInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
@@ -50,11 +50,11 @@ func (h *AuthHandler) LoginCredential(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.LoginCredential(r.Context(), req, sessionInput)
 
 	if err != nil {
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
-	response.OK(w, "LOGIN_SUCCESS", res)
+	response.OK(w, r, "LOGIN_SUCCESS", res)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -62,18 +62,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req auth.RegisterInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
 	res, err := h.authSvc.Register(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "REGISTER_SUCCESS", res)
+	response.OK(w, r, "REGISTER_SUCCESS", res)
 }
 
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -81,18 +81,18 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var req auth.RefreshTokenInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
 	res, err := h.authSvc.RefreshToken(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "REFRESH_TOKEN_SUCCESS", res)
+	response.OK(w, r, "REFRESH_TOKEN_SUCCESS", res)
 }
 
 func (h *AuthHandler) CheckVerifyToken(w http.ResponseWriter, r *http.Request) {
@@ -102,11 +102,11 @@ func (h *AuthHandler) CheckVerifyToken(w http.ResponseWriter, r *http.Request) {
 	res, err := h.authSvc.CheckVerifyToken(r.Context(), createAccountToken)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "CHECK_VERIFY_TOKEN_SUCCESS", res)
+	response.OK(w, r, "CHECK_VERIFY_TOKEN_SUCCESS", res)
 }
 
 func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) {
@@ -127,11 +127,11 @@ func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) 
 	res, err := h.authSvc.SubmitVerifyToken(r.Context(), input, session)
 
 	if err != nil {
-		response.Error(w, err, nil)
+		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, "SUBMIT_VERIFY_TOKEN_SUCCESS", res)
+	response.OK(w, r, "SUBMIT_VERIFY_TOKEN_SUCCESS", res)
 }
 
 func (h *AuthHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
@@ -139,16 +139,16 @@ func (h *AuthHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Req
 	var req auth.ResendEmailVerificationInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, appErr.ValidationErrors)
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
 	res, err := h.authSvc.ResendEmailVerification(r.Context(), req)
 
 	if err != nil {
-		response.Error(w, err, res)
+		response.Error(w, r, err, res)
 		return
 	}
 
-	response.OK(w, "RESEND_EMAIL_VERIFICATION_SUCCESS", res)
+	response.OK(w, r, "RESEND_EMAIL_VERIFICATION_SUCCESS", res)
 }

@@ -4,7 +4,6 @@ package middleware
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -34,7 +33,6 @@ func NewOwnedBusiness(store entity.Store, repo *ownedBusinessRepo.OwnedBusinessR
 func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		businessId := chi.URLParam(r, "businessId")
-		fmt.Println("business from middleware", businessId)
 		if businessId == "" {
 			next.ServeHTTP(w, r)
 			return
@@ -43,19 +41,19 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 		// pastikan auth middleware sudah jalan
 		prof, err := GetUserFromContext(r.Context())
 		if err != nil || prof == nil {
-			response.Error(w, errs.NewUnauthorized("UNAUTHORIZED"), nil)
+			response.Error(w, r, errs.NewUnauthorized("UNAUTHORIZED"), nil)
 			return
 		}
 
 		// parse UUID
 		profUUID, err := uuid.Parse(prof.ID)
 		if err != nil {
-			response.Error(w, errs.NewBadRequest("INVALID_PROFILE_ID"), nil)
+			response.Error(w, r, errs.NewBadRequest("INVALID_PROFILE_ID"), nil)
 			return
 		}
 		businessUUID, err := uuid.Parse(businessId)
 		if err != nil {
-			response.Error(w, errs.NewBadRequest("INVALID_BUSINESS_ID"), nil)
+			response.Error(w, r, errs.NewBadRequest("INVALID_BUSINESS_ID"), nil)
 			return
 		}
 
@@ -89,17 +87,17 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 
 		if err == sql.ErrNoRows {
 			// kamu bilang: kalau tidak ditemukan => forbidden karena bukan member
-			response.Error(w, errs.NewForbidden("FORBIDDEN"), nil)
+			response.Error(w, r, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
 
 		if dbMember.Status != entity.BusinessMemberStatusAccepted {
-			response.Error(w, errs.NewForbidden("FORBIDDEN"), nil)
+			response.Error(w, r, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
 
 		if err != nil {
-			response.Error(w, errs.NewInternalServerError(err), nil)
+			response.Error(w, r, errs.NewInternalServerError(err), nil)
 			return
 		}
 
