@@ -175,6 +175,20 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 			return err
 		}
 
+		_, err = tx.CreateBusinessRole(ctx, entity.CreateBusinessRoleParams{
+			BusinessRootID:  businessRoot,
+			TargetAudience:  input.RoleKnowledge.TargetAudience,
+			Tone:            input.RoleKnowledge.Tone,
+			AudiencePersona: input.RoleKnowledge.AudiencePersona,
+			Hashtags:        input.RoleKnowledge.Hashtags,
+			CallToAction:    input.RoleKnowledge.CallToAction,
+			Goals:           sql.NullString{String: input.RoleKnowledge.Goals, Valid: input.RoleKnowledge.Goals != ""},
+		})
+
+		if err != nil {
+			return err
+		}
+
 		member, err := tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
 			BusinessRootID: businessRoot,
 			ProfileID:      profileUUID,
