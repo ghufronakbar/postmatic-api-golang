@@ -89,12 +89,12 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 
 		if err == sql.ErrNoRows {
 			// kamu bilang: kalau tidak ditemukan => forbidden karena bukan member
-			response.Error(w, errs.NewUnauthorized("FORBIDDEN"), nil)
+			response.Error(w, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
 
 		if dbMember.Status != entity.BusinessMemberStatusAccepted {
-			response.Error(w, errs.NewUnauthorized("FORBIDDEN"), nil)
+			response.Error(w, errs.NewForbidden("FORBIDDEN"), nil)
 			return
 		}
 
