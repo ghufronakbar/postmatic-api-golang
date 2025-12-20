@@ -16,5 +16,6 @@ EXECUTE FUNCTION set_updated_at();
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TRIGGER IF EXISTS trigger_products_updated_at ON products;
 DROP TABLE IF EXISTS products;
 -- +goose StatementEnd

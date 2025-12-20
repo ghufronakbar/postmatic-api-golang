@@ -45,3 +45,16 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 -- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+
+DROP TRIGGER IF EXISTS trigger_users_updated_at ON users;
+DROP TRIGGER IF EXISTS trigger_profiles_updated_at ON profiles;
+
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS profiles;
+
+DROP TYPE IF EXISTS auth_provider;
+
+-- +goose StatementEnd
