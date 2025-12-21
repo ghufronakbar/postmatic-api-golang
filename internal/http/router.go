@@ -6,15 +6,18 @@ import (
 	"net/http"
 	"postmatic-api/config"
 	"postmatic-api/internal/http/handler/account_handler"
+	"postmatic-api/internal/http/handler/app"
 	"postmatic-api/internal/http/handler/business_handler"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/auth"
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
+	"postmatic-api/internal/module/app/image_uploader"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/business/business_product"
 	"postmatic-api/internal/module/business/business_role"
+	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
@@ -39,22 +42,35 @@ func NewRouter(db *sql.DB) chi.Router {
 	ownedMw := middleware.NewOwnedBusiness(store, ownedRepo)
 
 	// 2. =========== INITIAL SERVICE ===========
+	// HEADLESS
 	mailerSvc := mailer.NewService(cfg)
+	cldSvc, err := cloudinary_uploader.NewService(cfg)
+	if err != nil {
+		panic("Cannot connect to Cloudinary" + err.Error())
+	}
+	// ACCOUNT
 	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	sessSvc := session.NewService(sessionRepo)
 	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
+	// BUSINESS
 	busInSvc := business_information.NewService(store, ownedRepo)
 	busKnowledgeSvc := business_knowledge.NewService(store)
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
+	// APP
+	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, store)
 
 	// 3. =========== INITIAL HANDLER ===========
+	// ACCOUNT
 	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
 	profileHandler := account_handler.NewProfileHandler(profSvc)
+	// BUSINESS
 	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
 	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)
 	busRoleHandler := business_handler.NewBusinessRoleHandler(busRoleSvc, ownedMw)
 	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
+	// APP
+	imageUploaderHandler := app.NewImageUploaderHandler(imageUploaderSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -82,6 +98,11 @@ func NewRouter(db *sql.DB) chi.Router {
 			r.Use(middleware.AuthMiddleware)
 			r.Mount("/", profileHandler.ProfileRoutes())
 		})
+	})
+
+	r.Route("/app", func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
+		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
 	})
 
 	return r

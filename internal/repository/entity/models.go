@@ -143,6 +143,47 @@ func (ns NullBusinessMemberStatus) Value() (driver.Value, error) {
 	return string(ns.BusinessMemberStatus), nil
 }
 
+type ImageProvider string
+
+const (
+	ImageProviderCloudinary ImageProvider = "cloudinary"
+)
+
+func (e *ImageProvider) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ImageProvider(s)
+	case string:
+		*e = ImageProvider(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ImageProvider: %T", src)
+	}
+	return nil
+}
+
+type NullImageProvider struct {
+	ImageProvider ImageProvider `json:"image_provider"`
+	Valid         bool          `json:"valid"` // Valid is true if ImageProvider is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullImageProvider) Scan(value interface{}) error {
+	if value == nil {
+		ns.ImageProvider, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ImageProvider.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullImageProvider) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ImageProvider), nil
+}
+
 type BusinessKnowledge struct {
 	ID                 uuid.UUID      `json:"id"`
 	Name               string         `json:"name"`
@@ -227,6 +268,17 @@ type Profile struct {
 	Description sql.NullString `json:"description"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
+
+type UploadedImage struct {
+	ID        int64         `json:"id"`
+	Hashkey   string        `json:"hashkey"`
+	PublicID  string        `json:"public_id"`
+	Size      int64         `json:"size"`
+	ImageUrl  string        `json:"image_url"`
+	Provider  ImageProvider `json:"provider"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
 type User struct {

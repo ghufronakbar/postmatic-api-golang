@@ -1,9 +1,11 @@
+// internal/module/headless/cloudinary_uploader/service.go
 package cloudinary_uploader
 
 import (
 	"context"
 	"io"
 	"postmatic-api/config"
+	"postmatic-api/pkg/errs"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
@@ -14,21 +16,24 @@ type CloudinaryUploaderService struct {
 	cld *cloudinary.Cloudinary
 }
 
-func NewService(cfg *config.Config) *CloudinaryUploaderService {
+func NewService(cfg *config.Config) (*CloudinaryUploaderService, error) {
 	cld, err := cloudinary.NewFromParams(cfg.CLOUDINARY_CLOUD_NAME, cfg.CLOUDINARY_API_KEY, cfg.CLOUDINARY_API_SECRET)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	return &CloudinaryUploaderService{
 		cfg: cfg,
 		cld: cld,
-	}
+	}, nil
 }
 
-func (s *CloudinaryUploaderService) UploadSingleImage(ctx context.Context, file io.Reader, params uploader.UploadParams) (*CloudinaryUploadSingleImageResponse, error) {
-	result, err := s.cld.Upload.Upload(ctx, file, params)
+func (s *CloudinaryUploaderService) UploadSingleImage(ctx context.Context, file io.Reader) (*CloudinaryUploadSingleImageResponse, error) {
+	result, err := s.cld.Upload.Upload(ctx, file, uploader.UploadParams{
+		Folder: s.cfg.APP_NAME,
+		Tags:   []string{"source:api", "type:image"},
+	})
 	if err != nil {
-		return nil, err
+		return nil, errs.NewInternalServerError(err)
 	}
 	return &CloudinaryUploadSingleImageResponse{
 		PublicId: result.PublicID,

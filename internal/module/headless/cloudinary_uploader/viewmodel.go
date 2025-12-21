@@ -1,3 +1,4 @@
+// internal/module/headless/cloudinary_uploader/viewmodel.go
 package cloudinary_uploader
 
 type CloudinaryUploadSingleImageResponse struct {
