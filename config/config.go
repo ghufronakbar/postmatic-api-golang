@@ -12,8 +12,9 @@ import (
 
 type Config struct {
 	// COMMON
-	MODE              string
-	PORT              string
+	MODE string
+	PORT string
+
 	APP_NAME          string
 	APP_LOGO          string
 	APP_ADDRESS       string
@@ -58,6 +59,11 @@ type Config struct {
 	SMTP_NAME        string
 	SMTP_SERVER_NAME string
 	SMTP_SENDER      string
+
+	// CLOUDINARY
+	CLOUDINARY_CLOUD_NAME string
+	CLOUDINARY_API_KEY    string
+	CLOUDINARY_API_SECRET string
 }
 
 func Load() *Config {
@@ -132,6 +138,11 @@ func Load() *Config {
 		SMTP_NAME:        getEnv("SMTP_NAME"),
 		SMTP_SERVER_NAME: getEnv("SMTP_SERVER_NAME"),
 		SMTP_SENDER:      getEnv("SMTP_SENDER"),
+
+		// CLOUDINARY
+		CLOUDINARY_CLOUD_NAME: getEnv("CLOUDINARY_CLOUD_NAME"),
+		CLOUDINARY_API_KEY:    getEnv("CLOUDINARY_API_KEY"),
+		CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET"),
 	}
 }
 
