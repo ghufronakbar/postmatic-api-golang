@@ -87,6 +87,7 @@ func ValidationFailed(w http.ResponseWriter, r *http.Request, errsMap map[string
 }
 
 func Error(w http.ResponseWriter, r *http.Request, err error, data interface{}) {
+	fmt.Println(err)
 	code := http.StatusInternalServerError
 	msg := "INTERNAL_SERVER_ERROR"
 
@@ -96,7 +97,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error, data interface{}) 
 		msg = appErr.Message
 
 		if appErr.Code == http.StatusInternalServerError {
-			fmt.Println(err)
+			// TODO: log server error
 		}
 
 		if appErr.ValidationErrors != nil {

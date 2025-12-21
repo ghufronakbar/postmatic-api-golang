@@ -1,0 +1,189 @@
+// internal/module/business/business_product/service.go
+package business_product
+
+import (
+	"context"
+	"database/sql"
+
+	"postmatic-api/internal/repository/entity"
+	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/pagination"
+	"postmatic-api/pkg/utils"
+
+	"github.com/google/uuid"
+)
+
+type BusinessProductService struct {
+	store entity.Store
+}
+
+// Update Constructor: Minta Token Maker dari main.go
+func NewService(store entity.Store) *BusinessProductService {
+	return &BusinessProductService{
+		store: store,
+	}
+}
+
+func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context.Context, businessRootId string, filter GetBusinessProductsByBusinessRootIDFilter) ([]BusinessProductResponse, pagination.Pagination, error) {
+	businessRootUUID, err := uuid.Parse(businessRootId)
+	if err != nil {
+		return []BusinessProductResponse{}, pagination.Pagination{}, errs.NewInternalServerError(err)
+	}
+
+	inputFilter := entity.GetBusinessProductsByBusinessRootIdParams{
+		BusinessRootID: businessRootUUID,
+		Search:         filter.Search,
+		SortBy:         string(filter.SortBy),
+		PageOffset:     int32(filter.PageOffset),
+		PageLimit:      int32(filter.PageLimit),
+		SortDir:        string(filter.SortDir),
+		Category:       sql.NullString{String: filter.Category, Valid: filter.Category != ""},
+		DateStart:      utils.NullStringToNullTime(filter.DateStart),
+		DateEnd:        utils.NullStringToNullTime(filter.DateEnd),
+	}
+
+	bk, err := s.store.GetBusinessProductsByBusinessRootId(ctx, inputFilter)
+	if err != nil && err != sql.ErrNoRows {
+		return []BusinessProductResponse{}, pagination.Pagination{}, errs.NewInternalServerError(err)
+	}
+
+	if bk == nil {
+		return []BusinessProductResponse{}, pagination.Pagination{}, nil
+	}
+
+	var result []BusinessProductResponse
+	for _, v := range bk {
+		result = append(result, BusinessProductResponse{
+			BusinessRootID: businessRootUUID.String(),
+			Name:           v.Name,
+			Category:       v.Category,
+			Description:    v.Description.String,
+			Price:          v.Price,
+			Currency:       v.Currency,
+			ImageUrls:      v.ImageUrls,
+			CreatedAt:      v.CreatedAt,
+			UpdatedAt:      v.UpdatedAt,
+			ID:             v.ID.String(),
+		})
+	}
+
+	countParam := entity.CountBusinessProductsByBusinessRootIdParams{
+		BusinessRootID: businessRootUUID,
+		Search:         filter.Search,
+		Category:       sql.NullString{String: filter.Category, Valid: filter.Category != ""},
+		DateStart:      utils.NullStringToNullTime(filter.DateStart),
+		DateEnd:        utils.NullStringToNullTime(filter.DateEnd),
+	}
+
+	count, err := s.store.CountBusinessProductsByBusinessRootId(ctx, countParam)
+	if err != nil {
+		return []BusinessProductResponse{}, pagination.Pagination{}, errs.NewInternalServerError(err)
+	}
+
+	paginationParams := pagination.PaginationParams{
+		Total: int(count),
+		Page:  filter.Page,
+		Limit: filter.PageLimit,
+	}
+
+	pagination := pagination.NewPagination(&paginationParams)
+
+	return result, pagination, nil
+}
+
+func (s *BusinessProductService) CreateBusinessProduct(ctx context.Context, businessRootId string, input CreateUpdateBusinessProductInput) (BusinessProductResponse, error) {
+	businessRootUUID, err := uuid.Parse(businessRootId)
+	if err != nil {
+		return BusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	inputFilter := entity.CreateBusinessProductParams{
+		BusinessRootID: businessRootUUID,
+		Name:           input.Name,
+		Category:       input.Category,
+		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Price:          input.Price,
+		Currency:       input.Currency,
+		ImageUrls:      input.ImageUrls,
+	}
+
+	bk, err := s.store.CreateBusinessProduct(ctx, inputFilter)
+	if err != nil {
+		return BusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	return BusinessProductResponse{
+		BusinessRootID: businessRootUUID.String(),
+		Name:           bk.Name,
+		Category:       bk.Category,
+		Description:    bk.Description.String,
+		Price:          bk.Price,
+		Currency:       bk.Currency,
+		ImageUrls:      bk.ImageUrls,
+		CreatedAt:      bk.CreatedAt,
+		UpdatedAt:      bk.UpdatedAt,
+		ID:             bk.ID.String(),
+	}, nil
+}
+
+func (s *BusinessProductService) UpdateBusinessProduct(ctx context.Context, businessProductId string, input CreateUpdateBusinessProductInput) (BusinessProductResponse, error) {
+	businessProductIdUUID, err := uuid.Parse(businessProductId)
+	if err != nil {
+		return BusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	inputFilter := entity.UpdateBusinessProductParams{
+		Name:        input.Name,
+		Category:    input.Category,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+		Price:       input.Price,
+		Currency:    input.Currency,
+		ImageUrls:   input.ImageUrls,
+		ID:          businessProductIdUUID,
+	}
+
+	bk, err := s.store.UpdateBusinessProduct(ctx, inputFilter)
+	if err != nil {
+		return BusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	return BusinessProductResponse{
+		BusinessRootID: bk.BusinessRootID.String(),
+		Name:           bk.Name,
+		Category:       bk.Category,
+		Description:    bk.Description.String,
+		Price:          bk.Price,
+		Currency:       bk.Currency,
+		ImageUrls:      bk.ImageUrls,
+		CreatedAt:      bk.CreatedAt,
+		UpdatedAt:      bk.UpdatedAt,
+		ID:             bk.ID.String(),
+	}, nil
+}
+
+func (s *BusinessProductService) SoftDeleteBusinessProductByBusinessRootID(ctx context.Context, businessProductId string) (SoftDeleteBusinessProductResponse, error) {
+	businessProductIdUUID, err := uuid.Parse(businessProductId)
+	if err != nil {
+		return SoftDeleteBusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	check, err := s.store.GetBusinessProductByBusinessProductId(ctx, businessProductIdUUID)
+	if err == sql.ErrNoRows {
+		return SoftDeleteBusinessProductResponse{}, errs.NewNotFound("")
+	}
+	if err != nil && err != sql.ErrNoRows {
+		return SoftDeleteBusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+	if check.DeletedAt.Valid {
+		return SoftDeleteBusinessProductResponse{}, errs.NewNotFound("")
+	}
+
+	bk, err := s.store.SoftDeleteBusinessProductByBusinessProductId(ctx, businessProductIdUUID)
+	if err != nil {
+		return SoftDeleteBusinessProductResponse{}, errs.NewInternalServerError(err)
+	}
+
+	return SoftDeleteBusinessProductResponse{
+		ID: bk.String(),
+	}, nil
+}

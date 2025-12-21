@@ -13,6 +13,7 @@ import (
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
+	"postmatic-api/internal/module/business/business_product"
 	"postmatic-api/internal/module/business/business_role"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
@@ -45,6 +46,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busInSvc := business_information.NewService(store, ownedRepo)
 	busKnowledgeSvc := business_knowledge.NewService(store)
 	busRoleSvc := business_role.NewService(store)
+	busProductSvc := business_product.NewService(store)
 
 	// 3. =========== INITIAL HANDLER ===========
 	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
@@ -52,6 +54,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
 	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)
 	busRoleHandler := business_handler.NewBusinessRoleHandler(busRoleSvc, ownedMw)
+	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -64,6 +67,7 @@ func NewRouter(db *sql.DB) chi.Router {
 		r.Mount("/information", busInHandler.BusinessInformationRoutes())
 		r.Mount("/knowledge", busKnowledgeHandler.BusinessKnowledgeRoutes())
 		r.Mount("/role", busRoleHandler.BusinessRoleRoutes())
+		r.Mount("/product", busProductHandler.BusinessProductRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {

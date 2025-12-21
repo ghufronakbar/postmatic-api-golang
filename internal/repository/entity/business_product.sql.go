@@ -13,6 +13,58 @@ import (
 	"github.com/lib/pq"
 )
 
+const countBusinessProductsByBusinessRootId = `-- name: CountBusinessProductsByBusinessRootId :one
+SELECT COUNT(*)::bigint AS total
+FROM business_products bp
+WHERE
+  bp.business_root_id = $1
+  AND bp.deleted_at IS NULL
+
+  -- search (name + description)
+  AND (
+    COALESCE($2, '') = ''
+    OR bp.name ILIKE ('%' || $2 || '%')
+    OR COALESCE(bp.description, '') ILIKE ('%' || $2 || '%')
+  )
+
+  -- category
+  AND (
+    $3::text IS NULL
+    OR bp.category = $3
+  )
+
+  -- date range (berdasarkan created_at)
+  AND (
+    $4::date IS NULL
+    OR bp.created_at::date >= $4::date
+  )
+  AND (
+    $5::date IS NULL
+    OR bp.created_at::date <= $5::date
+  )
+`
+
+type CountBusinessProductsByBusinessRootIdParams struct {
+	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	Search         interface{}    `json:"search"`
+	Category       sql.NullString `json:"category"`
+	DateStart      sql.NullTime   `json:"date_start"`
+	DateEnd        sql.NullTime   `json:"date_end"`
+}
+
+func (q *Queries) CountBusinessProductsByBusinessRootId(ctx context.Context, arg CountBusinessProductsByBusinessRootIdParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countBusinessProductsByBusinessRootId,
+		arg.BusinessRootID,
+		arg.Search,
+		arg.Category,
+		arg.DateStart,
+		arg.DateEnd,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const createBusinessProduct = `-- name: CreateBusinessProduct :one
 INSERT INTO business_products (
     name,
@@ -40,7 +92,7 @@ type CreateBusinessProductParams struct {
 	Category       string         `json:"category"`
 	Description    sql.NullString `json:"description"`
 	Currency       string         `json:"currency"`
-	Price          string         `json:"price"`
+	Price          int64          `json:"price"`
 	ImageUrls      []string       `json:"image_urls"`
 	BusinessRootID uuid.UUID      `json:"business_root_id"`
 }
@@ -72,16 +124,114 @@ func (q *Queries) CreateBusinessProduct(ctx context.Context, arg CreateBusinessP
 	return i, err
 }
 
-const getBusinessProductsByBusinessRootId = `-- name: GetBusinessProductsByBusinessRootId :many
-SELECT bp.id, bp.name, bp.category, bp.description, bp.currency, bp.price, bp.image_urls, bp.business_root_id, bp.created_at, bp.updated_at, bp.deleted_at
-FROM business_products bp
-WHERE bp.business_root_id = $1
-  AND bp.deleted_at IS NULL
-ORDER BY bp.created_at DESC
+const getBusinessProductByBusinessProductId = `-- name: GetBusinessProductByBusinessProductId :one
+SELECT id, name, category, description, currency, price, image_urls, business_root_id, created_at, updated_at, deleted_at FROM business_products WHERE id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) GetBusinessProductsByBusinessRootId(ctx context.Context, businessRootID uuid.UUID) ([]BusinessProduct, error) {
-	rows, err := q.db.QueryContext(ctx, getBusinessProductsByBusinessRootId, businessRootID)
+func (q *Queries) GetBusinessProductByBusinessProductId(ctx context.Context, id uuid.UUID) (BusinessProduct, error) {
+	row := q.db.QueryRowContext(ctx, getBusinessProductByBusinessProductId, id)
+	var i BusinessProduct
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Category,
+		&i.Description,
+		&i.Currency,
+		&i.Price,
+		pq.Array(&i.ImageUrls),
+		&i.BusinessRootID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getBusinessProductsByBusinessRootId = `-- name: GetBusinessProductsByBusinessRootId :many
+WITH p AS (
+  SELECT
+    COALESCE(NULLIF($8,  ''), 'created_at') AS sort_by,
+    COALESCE(NULLIF($9, ''), 'desc')       AS sort_dir
+)
+SELECT bp.id, bp.name, bp.category, bp.description, bp.currency, bp.price, bp.image_urls, bp.business_root_id, bp.created_at, bp.updated_at, bp.deleted_at
+FROM business_products bp
+CROSS JOIN p
+WHERE
+  bp.business_root_id = $1
+  AND bp.deleted_at IS NULL
+
+  -- search (name + description)
+  AND (
+    COALESCE($2, '') = ''
+    OR bp.name ILIKE ('%' || $2 || '%')
+    OR COALESCE(bp.description, '') ILIKE ('%' || $2 || '%')
+  )
+
+  -- category
+  AND (
+    $3::text IS NULL
+    OR bp.category = $3
+  )
+
+  -- date range (berdasarkan created_at)
+  AND (
+    $4::date IS NULL
+    OR bp.created_at::date >= $4::date
+  )
+  AND (
+    $5::date IS NULL
+    OR bp.created_at::date <= $5::date
+  )
+
+ORDER BY
+  -- name
+  CASE WHEN p.sort_by = 'name' AND p.sort_dir = 'asc'  THEN bp.name END ASC,
+  CASE WHEN p.sort_by = 'name' AND p.sort_dir = 'desc' THEN bp.name END DESC,
+
+  -- created_at (default)
+  CASE WHEN p.sort_by = 'created_at' AND p.sort_dir = 'asc'  THEN bp.created_at END ASC,
+  CASE WHEN p.sort_by = 'created_at' AND p.sort_dir = 'desc' THEN bp.created_at END DESC,
+
+  -- updated_at
+  CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'asc'  THEN bp.updated_at END ASC,
+  CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'desc' THEN bp.updated_at END DESC,
+
+  -- price
+  CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'asc'  THEN bp.price END ASC,
+  CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'desc' THEN bp.price END DESC,
+
+  -- fallback stable order
+  bp.created_at DESC,
+  bp.id DESC
+
+LIMIT $7
+OFFSET $6
+`
+
+type GetBusinessProductsByBusinessRootIdParams struct {
+	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	Search         interface{}    `json:"search"`
+	Category       sql.NullString `json:"category"`
+	DateStart      sql.NullTime   `json:"date_start"`
+	DateEnd        sql.NullTime   `json:"date_end"`
+	PageOffset     int32          `json:"page_offset"`
+	PageLimit      int32          `json:"page_limit"`
+	SortBy         interface{}    `json:"sort_by"`
+	SortDir        interface{}    `json:"sort_dir"`
+}
+
+func (q *Queries) GetBusinessProductsByBusinessRootId(ctx context.Context, arg GetBusinessProductsByBusinessRootIdParams) ([]BusinessProduct, error) {
+	rows, err := q.db.QueryContext(ctx, getBusinessProductsByBusinessRootId,
+		arg.BusinessRootID,
+		arg.Search,
+		arg.Category,
+		arg.DateStart,
+		arg.DateEnd,
+		arg.PageOffset,
+		arg.PageLimit,
+		arg.SortBy,
+		arg.SortDir,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -115,6 +265,19 @@ func (q *Queries) GetBusinessProductsByBusinessRootId(ctx context.Context, busin
 	return items, nil
 }
 
+const softDeleteBusinessProductByBusinessProductId = `-- name: SoftDeleteBusinessProductByBusinessProductId :one
+UPDATE business_products
+SET deleted_at = NOW()
+WHERE id = $1
+RETURNING id
+`
+
+func (q *Queries) SoftDeleteBusinessProductByBusinessProductId(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, softDeleteBusinessProductByBusinessProductId, id)
+	err := row.Scan(&id)
+	return id, err
+}
+
 const softDeleteBusinessProductByBusinessRootID = `-- name: SoftDeleteBusinessProductByBusinessRootID :one
 UPDATE business_products
 SET deleted_at = NOW()
@@ -127,4 +290,54 @@ func (q *Queries) SoftDeleteBusinessProductByBusinessRootID(ctx context.Context,
 	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const updateBusinessProduct = `-- name: UpdateBusinessProduct :one
+UPDATE business_products
+SET
+    name = $1,
+    category = $2,
+    description = $3,
+    currency = $4,
+    price = $5,
+    image_urls = $6
+WHERE id = $7
+RETURNING id, name, category, description, currency, price, image_urls, business_root_id, created_at, updated_at, deleted_at
+`
+
+type UpdateBusinessProductParams struct {
+	Name        string         `json:"name"`
+	Category    string         `json:"category"`
+	Description sql.NullString `json:"description"`
+	Currency    string         `json:"currency"`
+	Price       int64          `json:"price"`
+	ImageUrls   []string       `json:"image_urls"`
+	ID          uuid.UUID      `json:"id"`
+}
+
+func (q *Queries) UpdateBusinessProduct(ctx context.Context, arg UpdateBusinessProductParams) (BusinessProduct, error) {
+	row := q.db.QueryRowContext(ctx, updateBusinessProduct,
+		arg.Name,
+		arg.Category,
+		arg.Description,
+		arg.Currency,
+		arg.Price,
+		pq.Array(arg.ImageUrls),
+		arg.ID,
+	)
+	var i BusinessProduct
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Category,
+		&i.Description,
+		&i.Currency,
+		&i.Price,
+		pq.Array(&i.ImageUrls),
+		&i.BusinessRootID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }

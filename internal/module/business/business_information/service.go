@@ -133,8 +133,6 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(err)
 	}
 
-	priceStr := fmt.Sprintf("%d.00", input.ProductKnowledge.Price) // 35000 -> "35000.00"
-
 	var businessRootId string
 	var memberID string
 
@@ -166,9 +164,11 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		_, err = tx.CreateBusinessProduct(ctx, entity.CreateBusinessProductParams{
 			BusinessRootID: businessRoot,
 			Name:           input.ProductKnowledge.Name,
-			Price:          priceStr,
+			Price:          input.ProductKnowledge.Price,
 			Description:    sql.NullString{String: input.ProductKnowledge.Description, Valid: input.ProductKnowledge.Description != ""},
 			ImageUrls:      input.ProductKnowledge.ImageUrls,
+			Category:       input.ProductKnowledge.Category,
+			Currency:       input.ProductKnowledge.Currency,
 		})
 
 		if err != nil {

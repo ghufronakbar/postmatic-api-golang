@@ -178,7 +178,7 @@ type BusinessProduct struct {
 	Category       string         `json:"category"`
 	Description    sql.NullString `json:"description"`
 	Currency       string         `json:"currency"`
-	Price          string         `json:"price"`
+	Price          int64          `json:"price"`
 	ImageUrls      []string       `json:"image_urls"`
 	BusinessRootID uuid.UUID      `json:"business_root_id"`
 	CreatedAt      time.Time      `json:"created_at"`
@@ -215,14 +215,6 @@ type BusinessRssSubscription struct {
 	CreatedAt      time.Time    `json:"created_at"`
 	UpdatedAt      time.Time    `json:"updated_at"`
 	DeletedAt      sql.NullTime `json:"deleted_at"`
-}
-
-type Product struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Price     int32     `json:"price"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Profile struct {
