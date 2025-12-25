@@ -3,6 +3,7 @@ package cloudinary_uploader
 
 import (
 	"context"
+	"errors"
 	"io"
 	"postmatic-api/config"
 	"postmatic-api/pkg/errs"
@@ -35,8 +36,12 @@ func (s *CloudinaryUploaderService) UploadSingleImage(ctx context.Context, file 
 	if err != nil {
 		return nil, errs.NewInternalServerError(err)
 	}
+	if result == nil {
+		return nil, errs.NewInternalServerError(errors.New("CLOUDINARY_RETURNED_EMPTY_URL"))
+	}
 	return &CloudinaryUploadSingleImageResponse{
 		PublicId: result.PublicID,
 		ImageUrl: result.SecureURL,
+		Format:   result.Format,
 	}, nil
 }

@@ -8,4 +8,5 @@ type ImageUploaderViewModel struct {
 	Size        int64  `json:"size"`
 	ImageUrl    string `json:"imageUrl"`
 	Provider    string `json:"provider"`
+	Format      string `json:"format"`
 }

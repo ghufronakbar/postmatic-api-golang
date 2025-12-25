@@ -48,6 +48,7 @@ func (s *ImageUploaderService) UploadSingleImage(ctx context.Context, file io.Re
 			Size:        check.Size,
 			ImageUrl:    check.ImageUrl,
 			ID:          check.ID,
+			Format:      check.Format,
 			Provider:    string(check.Provider),
 		}, nil
 	}
@@ -66,6 +67,7 @@ func (s *ImageUploaderService) UploadSingleImage(ctx context.Context, file io.Re
 		ImageUrl: result.ImageUrl,
 		Size:     size,
 		Provider: entity.ImageProviderCloudinary,
+		Format:   result.Format,
 	})
 	if err != nil {
 		return ImageUploaderViewModel{}, errs.NewInternalServerError(err)

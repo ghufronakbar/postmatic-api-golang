@@ -10,7 +10,7 @@ import (
 )
 
 const getUploadedImageByHashkey = `-- name: GetUploadedImageByHashkey :one
-SELECT id, hashkey, public_id, size, image_url, provider, created_at, updated_at FROM uploaded_images WHERE hashkey = $1
+SELECT id, hashkey, public_id, size, image_url, provider, format, created_at, updated_at FROM uploaded_images WHERE hashkey = $1
 `
 
 func (q *Queries) GetUploadedImageByHashkey(ctx context.Context, hashkey string) (UploadedImage, error) {
@@ -23,6 +23,7 @@ func (q *Queries) GetUploadedImageByHashkey(ctx context.Context, hashkey string)
 		&i.Size,
 		&i.ImageUrl,
 		&i.Provider,
+		&i.Format,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -30,15 +31,16 @@ func (q *Queries) GetUploadedImageByHashkey(ctx context.Context, hashkey string)
 }
 
 const insertUploadedImage = `-- name: InsertUploadedImage :one
-INSERT INTO uploaded_images (hashkey, public_id, image_url, size, provider)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO uploaded_images (hashkey, public_id, image_url, size, provider, format)
+VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT (hashkey)
 DO UPDATE SET
   public_id = EXCLUDED.public_id,
   image_url = EXCLUDED.image_url,
   size      = EXCLUDED.size,
-  provider  = EXCLUDED.provider
-RETURNING id, hashkey, public_id, image_url, size, provider
+  provider  = EXCLUDED.provider,
+  format    = EXCLUDED.format
+RETURNING id, hashkey, public_id, image_url, size, provider, format
 `
 
 type InsertUploadedImageParams struct {
@@ -47,6 +49,7 @@ type InsertUploadedImageParams struct {
 	ImageUrl string        `json:"image_url"`
 	Size     int64         `json:"size"`
 	Provider ImageProvider `json:"provider"`
+	Format   string        `json:"format"`
 }
 
 type InsertUploadedImageRow struct {
@@ -56,6 +59,7 @@ type InsertUploadedImageRow struct {
 	ImageUrl string        `json:"image_url"`
 	Size     int64         `json:"size"`
 	Provider ImageProvider `json:"provider"`
+	Format   string        `json:"format"`
 }
 
 func (q *Queries) InsertUploadedImage(ctx context.Context, arg InsertUploadedImageParams) (InsertUploadedImageRow, error) {
@@ -65,6 +69,7 @@ func (q *Queries) InsertUploadedImage(ctx context.Context, arg InsertUploadedIma
 		arg.ImageUrl,
 		arg.Size,
 		arg.Provider,
+		arg.Format,
 	)
 	var i InsertUploadedImageRow
 	err := row.Scan(
@@ -74,6 +79,7 @@ func (q *Queries) InsertUploadedImage(ctx context.Context, arg InsertUploadedIma
 		&i.ImageUrl,
 		&i.Size,
 		&i.Provider,
+		&i.Format,
 	)
 	return i, err
 }

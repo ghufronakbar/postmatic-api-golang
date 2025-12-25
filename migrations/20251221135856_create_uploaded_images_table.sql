@@ -9,6 +9,7 @@ CREATE TABLE uploaded_images (
     size BIGINT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
     provider image_provider NOT NULL,
+    format VARCHAR(8) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

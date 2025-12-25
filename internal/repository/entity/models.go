@@ -277,6 +277,7 @@ type UploadedImage struct {
 	Size      int64         `json:"size"`
 	ImageUrl  string        `json:"image_url"`
 	Provider  ImageProvider `json:"provider"`
+	Format    string        `json:"format"`
 	CreatedAt sql.NullTime  `json:"created_at"`
 	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
