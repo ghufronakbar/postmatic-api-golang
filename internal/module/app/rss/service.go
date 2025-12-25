@@ -77,7 +77,7 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 		SortDir:    filter.SortDir,
 		PageOffset: int32(filter.PageOffset),
 		PageLimit:  int32(filter.PageLimit),
-		Category:   uuid.NullUUID{UUID: categoryUUID, Valid: filter.Category != uuid.Nil.String()},
+		Category:   uuid.NullUUID{UUID: categoryUUID, Valid: categoryUUID != uuid.Nil},
 	}
 	feeds, err := s.store.GetAllRSSFeed(ctx, filterData)
 	if err != nil {
@@ -85,7 +85,7 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 	}
 	filterCount := entity.CountAllRSSFeedParams{
 		Search:   filter.Search,
-		Category: uuid.NullUUID{UUID: categoryUUID, Valid: filter.Category != uuid.Nil.String()},
+		Category: uuid.NullUUID{UUID: categoryUUID, Valid: categoryUUID != uuid.Nil},
 	}
 	count, err := s.store.CountAllRSSFeed(ctx, filterCount)
 	if err != nil {
