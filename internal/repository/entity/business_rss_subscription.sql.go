@@ -62,10 +62,10 @@ INSERT INTO business_rss_subscriptions (
 `
 
 type CreateBusinessRssSubscriptionParams struct {
-	BusinessRootID uuid.UUID     `json:"business_root_id"`
-	Title          string        `json:"title"`
-	IsActive       bool          `json:"is_active"`
-	AppRssFeedID   uuid.NullUUID `json:"app_rss_feed_id"`
+	BusinessRootID uuid.UUID `json:"business_root_id"`
+	Title          string    `json:"title"`
+	IsActive       bool      `json:"is_active"`
+	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
 }
 
 func (q *Queries) CreateBusinessRssSubscription(ctx context.Context, arg CreateBusinessRssSubscriptionParams) (BusinessRssSubscription, error) {
@@ -100,10 +100,10 @@ RETURNING id, title, is_active, business_root_id, created_at, updated_at, delete
 `
 
 type EditBusinessRssSubscriptionParams struct {
-	Title        string        `json:"title"`
-	IsActive     bool          `json:"is_active"`
-	AppRssFeedID uuid.NullUUID `json:"app_rss_feed_id"`
-	ID           uuid.UUID     `json:"id"`
+	Title        string    `json:"title"`
+	IsActive     bool      `json:"is_active"`
+	AppRssFeedID uuid.UUID `json:"app_rss_feed_id"`
+	ID           uuid.UUID `json:"id"`
 }
 
 func (q *Queries) EditBusinessRssSubscription(ctx context.Context, arg EditBusinessRssSubscriptionParams) (BusinessRssSubscription, error) {
@@ -139,9 +139,9 @@ SELECT EXISTS (
 `
 
 type ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams struct {
-	BusinessRootID uuid.UUID     `json:"business_root_id"`
-	AppRssFeedID   uuid.NullUUID `json:"app_rss_feed_id"`
-	ID             uuid.UUID     `json:"id"`
+	BusinessRootID uuid.UUID `json:"business_root_id"`
+	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
+	ID             uuid.UUID `json:"id"`
 }
 
 func (q *Queries) ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(ctx context.Context, arg ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams) (bool, error) {
@@ -159,8 +159,8 @@ AND deleted_at IS NULL
 `
 
 type GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams struct {
-	BusinessRootID uuid.UUID     `json:"business_root_id"`
-	AppRssFeedID   uuid.NullUUID `json:"app_rss_feed_id"`
+	BusinessRootID uuid.UUID `json:"business_root_id"`
+	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
 }
 
 func (q *Queries) GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedId(ctx context.Context, arg GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams) (BusinessRssSubscription, error) {
@@ -310,7 +310,7 @@ type GetBusinessRssSubscriptionsByBusinessRootIDRow struct {
 	SubscriptionTitle          string         `json:"subscription_title"`
 	SubscriptionIsActive       bool           `json:"subscription_is_active"`
 	SubscriptionBusinessRootID uuid.UUID      `json:"subscription_business_root_id"`
-	SubscriptionAppRssFeedID   uuid.NullUUID  `json:"subscription_app_rss_feed_id"`
+	SubscriptionAppRssFeedID   uuid.UUID      `json:"subscription_app_rss_feed_id"`
 	SubscriptionCreatedAt      time.Time      `json:"subscription_created_at"`
 	SubscriptionUpdatedAt      time.Time      `json:"subscription_updated_at"`
 	SubscriptionDeletedAt      sql.NullTime   `json:"subscription_deleted_at"`

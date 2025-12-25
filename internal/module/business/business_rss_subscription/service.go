@@ -67,7 +67,7 @@ func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRoo
 			ID:             v.SubscriptionID.String(),
 			Title:          v.SubscriptionTitle,
 			IsActive:       v.SubscriptionIsActive,
-			AppRssId:       v.SubscriptionAppRssFeedID.UUID.String(),
+			AppRssId:       v.SubscriptionAppRssFeedID.String(),
 			AppRssFeed:     rssFeed,
 		})
 	}
@@ -111,7 +111,7 @@ func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx conte
 	exist, err := s.store.GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedId(ctx,
 		entity.GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams{
 			BusinessRootID: businessRootUUID,
-			AppRssFeedID:   uuid.NullUUID{UUID: appRssFeedId, Valid: appRssFeedId != uuid.Nil},
+			AppRssFeedID:   appRssFeedId,
 		})
 
 	if err != nil && err != sql.ErrNoRows {
@@ -126,7 +126,7 @@ func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx conte
 		BusinessRootID: businessRootUUID,
 		Title:          input.Title,
 		IsActive:       input.IsActive,
-		AppRssFeedID:   uuid.NullUUID{UUID: appRssFeedId, Valid: appRssFeedId != uuid.Nil},
+		AppRssFeedID:   appRssFeedId,
 	}
 
 	created, err := s.store.CreateBusinessRssSubscription(ctx, inputParam)
@@ -181,10 +181,7 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 	}
 
 	// cek apakah feed berubah (perhatikan Valid)
-	currentFeed := uuid.Nil
-	if checkSubscription.AppRssFeedID.Valid {
-		currentFeed = checkSubscription.AppRssFeedID.UUID
-	}
+	currentFeed := checkSubscription.AppRssFeedID
 
 	// ✅ Kalau feed berubah, cek apakah feed baru sudah di-subscribe row lain
 	if currentFeed != appRssFeedUUID {
@@ -192,7 +189,7 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 			ctx,
 			entity.ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams{
 				BusinessRootID: businessRootUUID,
-				AppRssFeedID:   uuid.NullUUID{UUID: appRssFeedUUID, Valid: true},
+				AppRssFeedID:   appRssFeedUUID,
 				ID:             subscriptionUUID,
 			},
 		)
@@ -208,7 +205,7 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 	_, err = s.store.EditBusinessRssSubscription(ctx, entity.EditBusinessRssSubscriptionParams{
 		Title:        input.Title,
 		IsActive:     input.IsActive,
-		AppRssFeedID: uuid.NullUUID{UUID: appRssFeedUUID, Valid: true},
+		AppRssFeedID: appRssFeedUUID,
 		ID:           subscriptionUUID,
 	})
 	if err != nil {

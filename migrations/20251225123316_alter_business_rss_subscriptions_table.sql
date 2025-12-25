@@ -3,7 +3,7 @@
 -- Relasi: business_rss_subscriptions (*) -> app_rss_feeds (1)
 
 ALTER TABLE business_rss_subscriptions
-ADD COLUMN IF NOT EXISTS app_rss_feed_id UUID;
+ADD COLUMN IF NOT EXISTS app_rss_feed_id UUID NOT NULL;
 
 ALTER TABLE business_rss_subscriptions
 ADD CONSTRAINT fk_business_rss_subscriptions_app_rss_feed_id
