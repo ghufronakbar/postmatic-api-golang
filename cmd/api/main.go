@@ -7,6 +7,8 @@ import (
 	"postmatic-api/config"
 	handler "postmatic-api/internal/http"
 
+	_ "time/tzdata"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )

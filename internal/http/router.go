@@ -14,6 +14,7 @@ import (
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/app/image_uploader"
 	"postmatic-api/internal/module/app/rss"
+	"postmatic-api/internal/module/app/timezone"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/business/business_product"
@@ -63,6 +64,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, store)
 	rssSvc := rss.NewRSSService(store)
 	rssSubscriptionSvc := business_rss_subscription.NewService(store, rssSvc)
+	timezoneSvc := timezone.NewTimezoneService()
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -77,6 +79,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	// APP
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
+	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -114,6 +117,7 @@ func NewRouter(db *sql.DB) chi.Router {
 		})
 		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
 		r.Mount("/rss", rssHandler.RSSRoutes())
+		r.Mount("/timezone", timezoneHandler.TimezoneRoutes())
 	})
 
 	return r
