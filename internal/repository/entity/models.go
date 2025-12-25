@@ -184,6 +184,25 @@ func (ns NullImageProvider) Value() (driver.Value, error) {
 	return string(ns.ImageProvider), nil
 }
 
+type AppRssCategory struct {
+	ID        uuid.UUID    `json:"id"`
+	Name      string       `json:"name"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+}
+
+type AppRssFeed struct {
+	ID               uuid.UUID    `json:"id"`
+	Title            string       `json:"title"`
+	Url              string       `json:"url"`
+	Publisher        string       `json:"publisher"`
+	AppRssCategoryID uuid.UUID    `json:"app_rss_category_id"`
+	DeletedAt        sql.NullTime `json:"deleted_at"`
+	CreatedAt        time.Time    `json:"created_at"`
+	UpdatedAt        time.Time    `json:"updated_at"`
+}
+
 type BusinessKnowledge struct {
 	ID                 uuid.UUID      `json:"id"`
 	Name               string         `json:"name"`

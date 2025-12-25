@@ -209,7 +209,7 @@ func findCategoryIDByName(ctx context.Context, tx *sql.Tx, name string) (uuid.UU
 	var id uuid.UUID
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
-		FROM app_rss_category
+		FROM app_rss_categories
 		WHERE deleted_at IS NULL AND lower(name) = lower($1)
 		LIMIT 1
 	`, name).Scan(&id)
@@ -224,7 +224,7 @@ func findCategoryIDByName(ctx context.Context, tx *sql.Tx, name string) (uuid.UU
 
 func insertCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
-		INSERT INTO app_rss_category (id, name, deleted_at)
+		INSERT INTO app_rss_categories (id, name, deleted_at)
 		VALUES ($1, $2, $3)
 	`, id, name, deletedAt)
 	if err != nil {
@@ -235,7 +235,7 @@ func insertCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, 
 
 func updateCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
-		UPDATE app_rss_category
+		UPDATE app_rss_categories
 		SET name = $2,
 		    deleted_at = $3
 		WHERE id = $1
@@ -249,7 +249,7 @@ func updateCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, 
 func findRssIDByID(ctx context.Context, tx *sql.Tx, id uuid.UUID) (uuid.UUID, bool, error) {
 	var got uuid.UUID
 	err := tx.QueryRowContext(ctx, `
-		SELECT id FROM app_rss WHERE id = $1 LIMIT 1
+		SELECT id FROM app_rss_feeds WHERE id = $1 LIMIT 1
 	`, id).Scan(&got)
 	if err == nil {
 		return got, true, nil
@@ -264,7 +264,7 @@ func findRssIDByURL(ctx context.Context, tx *sql.Tx, url string) (uuid.UUID, boo
 	var id uuid.UUID
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
-		FROM app_rss
+		FROM app_rss_feeds
 		WHERE deleted_at IS NULL AND url = $1
 		LIMIT 1
 	`, url).Scan(&id)
@@ -279,7 +279,7 @@ func findRssIDByURL(ctx context.Context, tx *sql.Tx, url string) (uuid.UUID, boo
 
 func insertRss(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, publisher string, categoryID uuid.UUID, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
-		INSERT INTO app_rss (id, title, url, publisher, master_rss_category_id, deleted_at)
+		INSERT INTO app_rss_feeds (id, title, url, publisher, app_rss_category_id, deleted_at)
 		VALUES ($1, $2, $3, $4, $5, $6)
 	`, id, title, url, publisher, categoryID, deletedAt)
 	if err != nil {
@@ -290,11 +290,11 @@ func insertRss(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, publis
 
 func updateRssByID(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, publisher string, categoryID uuid.UUID, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
-		UPDATE app_rss
+		UPDATE app_rss_feeds
 		SET title = $2,
 		    url = $3,
 		    publisher = $4,
-		    master_rss_category_id = $5,
+		    app_rss_category_id = $5,
 		    deleted_at = $6
 		WHERE id = $1
 	`, id, title, url, publisher, categoryID, deletedAt)

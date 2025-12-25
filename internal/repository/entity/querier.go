@@ -11,6 +11,8 @@ import (
 )
 
 type Querier interface {
+	CountAllRSSCategory(ctx context.Context, search interface{}) (int64, error)
+	CountAllRSSFeed(ctx context.Context, arg CountAllRSSFeedParams) (int64, error)
 	CountBusinessProductsByBusinessRootId(ctx context.Context, arg CountBusinessProductsByBusinessRootIdParams) (int64, error)
 	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
 	CreateBusinessKnowledge(ctx context.Context, arg CreateBusinessKnowledgeParams) (BusinessKnowledge, error)
@@ -20,6 +22,8 @@ type Querier interface {
 	CreateBusinessRoot(ctx context.Context) (uuid.UUID, error)
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetAllRSSCategory(ctx context.Context, arg GetAllRSSCategoryParams) ([]AppRssCategory, error)
+	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)
 	GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error)
 	GetBusinessProductByBusinessProductId(ctx context.Context, id uuid.UUID) (BusinessProduct, error)
 	GetBusinessProductsByBusinessRootId(ctx context.Context, arg GetBusinessProductsByBusinessRootIdParams) ([]BusinessProduct, error)

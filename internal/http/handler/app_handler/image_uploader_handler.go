@@ -1,5 +1,5 @@
-// internal/http/handler/app/image_uploader_handler.go
-package app
+// internal/http/handler/app_handler/image_uploader_handler.go
+package app_handler
 
 import (
 	"context"

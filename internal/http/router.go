@@ -6,13 +6,14 @@ import (
 	"net/http"
 	"postmatic-api/config"
 	"postmatic-api/internal/http/handler/account_handler"
-	"postmatic-api/internal/http/handler/app"
+	"postmatic-api/internal/http/handler/app_handler"
 	"postmatic-api/internal/http/handler/business_handler"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/auth"
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/app/image_uploader"
+	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/business/business_product"
@@ -59,6 +60,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busProductSvc := business_product.NewService(store)
 	// APP
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, store)
+	rssSvc := rss.NewRSSService(store)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -70,7 +72,8 @@ func NewRouter(db *sql.DB) chi.Router {
 	busRoleHandler := business_handler.NewBusinessRoleHandler(busRoleSvc, ownedMw)
 	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
 	// APP
-	imageUploaderHandler := app.NewImageUploaderHandler(imageUploaderSvc)
+	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
+	rssHandler := app_handler.NewRSSHandler(rssSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -102,7 +105,11 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middleware.ReqFilterMiddleware(next, append(rss.SORT_BY_RSS_CATEGORY, rss.SORT_BY_RSS_FEED...))
+		})
 		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
+		r.Mount("/rss", rssHandler.RSSRoutes())
 	})
 
 	return r
