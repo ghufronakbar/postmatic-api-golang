@@ -1,6 +1,6 @@
 package image_uploader
 
-type ImageUploaderViewModel struct {
+type ImageUploaderResponse struct {
 	ID          int64  `json:"id"`
 	Hashkey     string `json:"hashkey"`
 	IsDuplicate bool   `json:"isDuplicate"`
