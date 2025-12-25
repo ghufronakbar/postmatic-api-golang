@@ -3,7 +3,9 @@ package rss
 
 import (
 	"context"
+	"database/sql"
 	"postmatic-api/internal/repository/entity"
+	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/pagination"
 
 	"github.com/google/uuid"
@@ -110,4 +112,23 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 		})
 	}
 	return responses, &pagination, nil
+}
+
+func (s *RSSService) GetRSSFeedById(ctx context.Context, id string) (RSSResponse, error) {
+	feed, err := s.store.GetRssFeedById(ctx, uuid.MustParse(id))
+	if err == sql.ErrNoRows {
+		return RSSResponse{}, errs.NewNotFound("RSS_FEED_NOT_FOUND")
+	}
+	if err != nil && err != sql.ErrNoRows {
+		return RSSResponse{}, err
+	}
+	return RSSResponse{
+		ID:                  feed.ID.String(),
+		Title:               feed.Title,
+		URL:                 feed.Url,
+		Publisher:           feed.Publisher,
+		MasterRSSCategoryID: feed.AppRssCategoryID.String(),
+		CreatedAt:           feed.CreatedAt,
+		UpdatedAt:           feed.UpdatedAt,
+	}, nil
 }

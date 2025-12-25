@@ -18,6 +18,7 @@ import (
 	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/business/business_product"
 	"postmatic-api/internal/module/business/business_role"
+	"postmatic-api/internal/module/business/business_rss_subscription"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
@@ -61,6 +62,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	// APP
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, store)
 	rssSvc := rss.NewRSSService(store)
+	rssSubscriptionSvc := business_rss_subscription.NewService(store, rssSvc)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -71,6 +73,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)
 	busRoleHandler := business_handler.NewBusinessRoleHandler(busRoleSvc, ownedMw)
 	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
+	busRssSubscriptionHandler := business_handler.NewBusinessRssSubscriptionHandler(rssSubscriptionSvc, ownedMw)
 	// APP
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
@@ -87,6 +90,7 @@ func NewRouter(db *sql.DB) chi.Router {
 		r.Mount("/knowledge", busKnowledgeHandler.BusinessKnowledgeRoutes())
 		r.Mount("/role", busRoleHandler.BusinessRoleRoutes())
 		r.Mount("/product", busProductHandler.BusinessProductRoutes())
+		r.Mount("/rss-subscription", busRssSubscriptionHandler.BusinessRssSubscriptionRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {

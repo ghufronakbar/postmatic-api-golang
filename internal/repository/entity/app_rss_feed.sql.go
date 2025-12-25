@@ -123,3 +123,24 @@ func (q *Queries) GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([
 	}
 	return items, nil
 }
+
+const getRssFeedById = `-- name: GetRssFeedById :one
+SELECT id, title, url, publisher, app_rss_category_id, deleted_at, created_at, updated_at FROM app_rss_feeds
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+func (q *Queries) GetRssFeedById(ctx context.Context, id uuid.UUID) (AppRssFeed, error) {
+	row := q.db.QueryRowContext(ctx, getRssFeedById, id)
+	var i AppRssFeed
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.Url,
+		&i.Publisher,
+		&i.AppRssCategoryID,
+		&i.DeletedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

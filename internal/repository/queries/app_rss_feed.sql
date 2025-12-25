@@ -49,3 +49,7 @@ WHERE
     sqlc.narg(category)::uuid IS NULL
     OR f.app_rss_category_id = sqlc.narg(category)::uuid
   );
+
+-- name: GetRssFeedById :one
+SELECT * FROM app_rss_feeds
+WHERE id = $1 AND deleted_at IS NULL;

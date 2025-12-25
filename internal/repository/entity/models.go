@@ -268,13 +268,14 @@ type BusinessRoot struct {
 }
 
 type BusinessRssSubscription struct {
-	ID             uuid.UUID    `json:"id"`
-	Title          string       `json:"title"`
-	IsActive       bool         `json:"is_active"`
-	BusinessRootID uuid.UUID    `json:"business_root_id"`
-	CreatedAt      time.Time    `json:"created_at"`
-	UpdatedAt      time.Time    `json:"updated_at"`
-	DeletedAt      sql.NullTime `json:"deleted_at"`
+	ID             uuid.UUID     `json:"id"`
+	Title          string        `json:"title"`
+	IsActive       bool          `json:"is_active"`
+	BusinessRootID uuid.UUID     `json:"business_root_id"`
+	CreatedAt      time.Time     `json:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at"`
+	DeletedAt      sql.NullTime  `json:"deleted_at"`
+	AppRssFeedID   uuid.NullUUID `json:"app_rss_feed_id"`
 }
 
 type Profile struct {
