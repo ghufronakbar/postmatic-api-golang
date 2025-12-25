@@ -1,0 +1,1206 @@
+[
+    {
+        "id": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+        "name": "News",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:23.115Z",
+        "updatedAt": "2025-07-10T14:39:23.115Z",
+        "masterRsses": [
+            {
+                "id": "bacb6c28-40a4-4fa3-99c3-d5054d15a4a2",
+                "title": "Top News",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:23.115Z",
+                "updatedAt": "2025-07-10T14:39:23.115Z"
+            },
+            {
+                "id": "24fe1657-28c2-4248-9489-43525bcc0ae2",
+                "title": "World News",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:24.446Z",
+                "updatedAt": "2025-07-10T14:39:24.446Z"
+            },
+            {
+                "id": "11fb7aba-1dda-42b0-988e-7f971338562a",
+                "title": "US News",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15837362",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:25.513Z",
+                "updatedAt": "2025-07-10T14:39:25.513Z"
+            },
+            {
+                "id": "b3a3ea4f-1b0b-4523-ad4c-7db85eea4bc1",
+                "title": "Asia News",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19832390",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:26.861Z",
+                "updatedAt": "2025-07-10T14:39:26.861Z"
+            },
+            {
+                "id": "ac792939-6e84-46d1-894a-90c49ba83821",
+                "title": "Europe News",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19794221",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:27.857Z",
+                "updatedAt": "2025-07-10T14:39:27.857Z"
+            },
+            {
+                "id": "4d10e5aa-5f3c-457c-8052-9c74ac9d477c",
+                "title": "ANTARA News Terkini",
+                "url": "https://www.antaranews.com/rss/terkini.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "59159556-a9ce-48d7-9e34-1e291f916bc6",
+                "title": "ANTARA Top News",
+                "url": "https://www.antaranews.com/rss/top-news.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "34ce7ab9-638e-4e88-b648-f65ef7269b69",
+                "title": "DuniaASEANInternasionalInternational Corner",
+                "url": "https://www.antaranews.com/rss/dunia.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "4e738c93-f16f-4892-90aa-2ca607d2ee42",
+                "title": "ASEAN",
+                "url": "https://www.antaranews.com/rss/dunia-asean.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "f4f86aa9-d56a-4b88-b1a9-b36150302297",
+                "title": "Internasional",
+                "url": "https://www.antaranews.com/rss/dunia-internasional.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "67a18bab-da98-432f-a2fa-744c7cf82514",
+                "title": "International Corner",
+                "url": "https://www.antaranews.com/rss/dunia-internasional-corner.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "d5074c5e-e8c4-4a5d-9a35-1fd50a559266",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "99a34837-7ae1-497a-8a26-5938262ca713",
+        "name": "Business",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:28.842Z",
+        "updatedAt": "2025-07-10T14:39:28.842Z",
+        "masterRsses": [
+            {
+                "id": "3d752e26-2fe0-4d09-b32b-fed33c727205",
+                "title": "Business",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:28.842Z",
+                "updatedAt": "2025-07-10T14:39:28.842Z"
+            },
+            {
+                "id": "09c765d2-92be-4fe6-8863-f69c78692045",
+                "title": "Small Business",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=44877279",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:38.300Z",
+                "updatedAt": "2025-07-10T14:39:38.300Z"
+            },
+            {
+                "id": "9bbcf0b5-9678-4191-acbf-1102bc8cae35",
+                "title": "CNBC Make It",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=103395579",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:38.757Z",
+                "updatedAt": "2025-07-10T14:39:38.757Z"
+            },
+            {
+                "id": "2a48e724-43f3-495c-af07-8b3cf277b91a",
+                "title": "Funny Business",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=17646093",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:41.373Z",
+                "updatedAt": "2025-07-10T14:39:41.373Z"
+            },
+            {
+                "id": "d14bd000-61db-4f4d-a45a-ce2750fe55f3",
+                "title": "EkonomiFinansialBisnisBursa",
+                "url": "https://www.antaranews.com/rss/ekonomi.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "a1c270f4-348b-4da7-b878-57515b5dcdae",
+                "title": "Bisnis",
+                "url": "https://www.antaranews.com/rss/ekonomi-bisnis.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "99a34837-7ae1-497a-8a26-5938262ca713",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+        "name": "Finance",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:30.107Z",
+        "updatedAt": "2025-07-10T14:39:30.107Z",
+        "masterRsses": [
+            {
+                "id": "4313bc59-83fb-47bd-8b93-b3a9ec3164f0",
+                "title": "Earnings",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:30.107Z",
+                "updatedAt": "2025-07-10T14:39:30.107Z"
+            },
+            {
+                "id": "f0116218-c695-4378-81b1-707160065dab",
+                "title": "Economy",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:31.418Z",
+                "updatedAt": "2025-07-10T14:39:31.418Z"
+            },
+            {
+                "id": "51132b61-09c9-467b-a6bd-e0ab99f3dc00",
+                "title": "Finance",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:31.878Z",
+                "updatedAt": "2025-07-10T14:39:31.878Z"
+            },
+            {
+                "id": "3bc8b991-7c60-49a0-b890-e32ad7c3a1db",
+                "title": "Wealth",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001054",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:34.526Z",
+                "updatedAt": "2025-07-10T14:39:34.526Z"
+            },
+            {
+                "id": "0dd68d8f-3635-4453-993a-8c28023bb473",
+                "title": "Investing",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839069",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:39.304Z",
+                "updatedAt": "2025-07-10T14:39:39.304Z"
+            },
+            {
+                "id": "b6c6e7f7-0a32-4245-ae0e-824d6d5ea6f2",
+                "title": "Financial Advisors",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100646281",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:39.796Z",
+                "updatedAt": "2025-07-10T14:39:39.796Z"
+            },
+            {
+                "id": "4ea11343-a677-467b-b20c-e67a54843c16",
+                "title": "Personal Finance",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=21324812",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:40.250Z",
+                "updatedAt": "2025-07-10T14:39:40.250Z"
+            },
+            {
+                "id": "011b8901-e442-478e-9078-d73eabd066d5",
+                "title": "Charting Asia",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=23103686",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:40.714Z",
+                "updatedAt": "2025-07-10T14:39:40.714Z"
+            },
+            {
+                "id": "afa59091-96db-4058-96be-b23df27c9212",
+                "title": "Market Insider",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20409666",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:42.338Z",
+                "updatedAt": "2025-07-10T14:39:42.338Z"
+            },
+            {
+                "id": "b718eb99-c61b-4b2f-90d5-30d52c9089d5",
+                "title": "NetNet",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=38818154",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:42.856Z",
+                "updatedAt": "2025-07-10T14:39:42.856Z"
+            },
+            {
+                "id": "a9f3b568-6947-4015-bc84-58c95923815a",
+                "title": "Trader Talk",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20398120",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:43.306Z",
+                "updatedAt": "2025-07-10T14:39:43.306Z"
+            },
+            {
+                "id": "52083804-f4b2-47e7-9fa2-29c2b187beab",
+                "title": "Buffett Watch",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19206666",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:43.782Z",
+                "updatedAt": "2025-07-10T14:39:43.782Z"
+            },
+            {
+                "id": "cb005ae0-8311-44cd-814a-37c8cd451de1",
+                "title": "Options Action",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=28282083",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:50.283Z",
+                "updatedAt": "2025-07-10T14:39:50.283Z"
+            },
+            {
+                "id": "cdb0d9a5-a003-49b8-aa85-1a48773cf4be",
+                "title": "Fast Money",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838499",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:51.264Z",
+                "updatedAt": "2025-07-10T14:39:51.264Z"
+            },
+            {
+                "id": "84c4d296-584b-4d4a-8d74-86888e19aee0",
+                "title": "Mad Money",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838459",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:51.809Z",
+                "updatedAt": "2025-07-10T14:39:51.809Z"
+            },
+            {
+                "id": "dc42d264-6ce5-4d63-9852-cc037ea0f8fb",
+                "title": "Kudlow Report",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838446",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:52.466Z",
+                "updatedAt": "2025-07-10T14:39:52.466Z"
+            },
+            {
+                "id": "6ef199ae-a412-4fdf-ab60-89be8fb78697",
+                "title": "Futures Now",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=48227449",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:53.121Z",
+                "updatedAt": "2025-07-10T14:39:53.121Z"
+            },
+            {
+                "id": "3b11696d-5ee4-4492-8dd7-e3345e2a17ea",
+                "title": "Suze Orman",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838523",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:53.752Z",
+                "updatedAt": "2025-07-10T14:39:53.752Z"
+            },
+            {
+                "id": "354353a8-01f5-4796-b6ed-eebb79077d96",
+                "title": "Worldwide Exchange",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838355",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:54.673Z",
+                "updatedAt": "2025-07-10T14:39:54.673Z"
+            },
+            {
+                "id": "5e31e0bc-7085-4695-9de0-eebf890a6c62",
+                "title": "Finansial",
+                "url": "https://www.antaranews.com/rss/ekonomi-finansial.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "902067e8-33b4-4a19-8525-7056f87c43aa",
+                "title": "Bursa",
+                "url": "https://www.antaranews.com/rss/ekonomi-bursa.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "ffab2a80-f5b0-4a59-b08d-d73c1f3dc5f0",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "bfa4e078-c09e-4db2-990c-52e15d3410be",
+        "name": "Opinion",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:30.845Z",
+        "updatedAt": "2025-07-10T14:39:30.845Z",
+        "masterRsses": [
+            {
+                "id": "4f4df3cb-591f-4603-a93f-034201a99c65",
+                "title": "Commentary",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100370673",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "bfa4e078-c09e-4db2-990c-52e15d3410be",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:30.845Z",
+                "updatedAt": "2025-07-10T14:39:30.845Z"
+            }
+        ]
+    },
+    {
+        "id": "feba6737-84ac-4042-99bc-74c98b93c03f",
+        "name": "Technology",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:32.328Z",
+        "updatedAt": "2025-07-10T14:39:32.328Z",
+        "masterRsses": [
+            {
+                "id": "2b5bcba2-33aa-459d-b7dd-f9bba8fccbba",
+                "title": "Technology",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19854910",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "feba6737-84ac-4042-99bc-74c98b93c03f",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:32.328Z",
+                "updatedAt": "2025-07-10T14:39:32.328Z"
+            },
+            {
+                "id": "0f356a6e-42c7-4a6f-9a56-acbe8a5a029c",
+                "title": "Tekno",
+                "url": "https://www.antaranews.com/rss/tekno.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "feba6737-84ac-4042-99bc-74c98b93c03f",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "a92d4317-1814-4b48-85a1-2a3cd6460d65",
+        "name": "Politics",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:32.862Z",
+        "updatedAt": "2025-07-10T14:39:32.862Z",
+        "masterRsses": [
+            {
+                "id": "0149ee88-a6bf-4d96-8d88-da896939302b",
+                "title": "Politics",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000113",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "a92d4317-1814-4b48-85a1-2a3cd6460d65",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:32.862Z",
+                "updatedAt": "2025-07-10T14:39:32.862Z"
+            },
+            {
+                "id": "916ec126-ebb6-447d-8dad-3bdc0558f95a",
+                "title": "Politik",
+                "url": "https://www.antaranews.com/rss/politik.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "a92d4317-1814-4b48-85a1-2a3cd6460d65",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "e904886a-6de5-4b27-9708-44b5b1e635d2",
+        "name": "Health",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:33.394Z",
+        "updatedAt": "2025-07-10T14:39:33.394Z",
+        "masterRsses": [
+            {
+                "id": "5fea2ddc-d8cb-4545-afd5-fffc20c19400",
+                "title": "Health Care",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000108",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "e904886a-6de5-4b27-9708-44b5b1e635d2",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:33.394Z",
+                "updatedAt": "2025-07-10T14:39:33.394Z"
+            }
+        ]
+    },
+    {
+        "id": "5e555c79-9f09-4b7d-9020-d00133ab6e5a",
+        "name": "Real Estate",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:33.954Z",
+        "updatedAt": "2025-07-10T14:39:33.954Z",
+        "masterRsses": [
+            {
+                "id": "cdec34d6-e6c7-408b-9863-8b01a9abd97c",
+                "title": "Real Estate",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000115",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "5e555c79-9f09-4b7d-9020-d00133ab6e5a",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:33.954Z",
+                "updatedAt": "2025-07-10T14:39:33.954Z"
+            }
+        ]
+    },
+    {
+        "id": "18b1f1ab-c511-4e37-bb27-317e2bbdcb17",
+        "name": "Autos",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:34.988Z",
+        "updatedAt": "2025-07-10T14:39:34.988Z",
+        "masterRsses": [
+            {
+                "id": "8f2d82f9-2b2f-4838-b881-480b346613c6",
+                "title": "Autos",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000101",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "18b1f1ab-c511-4e37-bb27-317e2bbdcb17",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:34.988Z",
+                "updatedAt": "2025-07-10T14:39:34.988Z"
+            },
+            {
+                "id": "b9cb97e2-b4d7-422d-8f87-6e0ffb8b6973",
+                "title": "OtomotifUmumGo-GreenPrototypeReview",
+                "url": "https://www.antaranews.com/rss/otomotif.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "18b1f1ab-c511-4e37-bb27-317e2bbdcb17",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "9598115b-12d2-4564-afb3-c19047464ae1",
+                "title": "Prototype",
+                "url": "https://www.antaranews.com/rss/otomotif-prototype.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "18b1f1ab-c511-4e37-bb27-317e2bbdcb17",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            },
+            {
+                "id": "d7efe4ad-7174-4b98-8087-0332fe6b7d58",
+                "title": "Review",
+                "url": "https://www.antaranews.com/rss/otomotif-review.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "18b1f1ab-c511-4e37-bb27-317e2bbdcb17",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "9a2a4862-15c6-4284-852b-e5d5532a2c15",
+        "name": "Energy",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:35.534Z",
+        "updatedAt": "2025-07-10T14:39:35.534Z",
+        "masterRsses": [
+            {
+                "id": "e5e6284d-483b-4b6b-97db-0fdf5a4114a8",
+                "title": "Energy",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=19836768",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "9a2a4862-15c6-4284-852b-e5d5532a2c15",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:35.534Z",
+                "updatedAt": "2025-07-10T14:39:35.534Z"
+            },
+            {
+                "id": "f67ccdc7-a672-4a46-a93b-286186065353",
+                "title": "Go-Green",
+                "url": "https://www.antaranews.com/rss/otomotif-go-green.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "9a2a4862-15c6-4284-852b-e5d5532a2c15",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:30:19.207Z",
+                "updatedAt": "2025-07-25T23:30:19.207Z"
+            }
+        ]
+    },
+    {
+        "id": "49d1a626-9c25-4605-8077-474785916112",
+        "name": "Media",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:36.448Z",
+        "updatedAt": "2025-07-10T14:39:36.448Z",
+        "masterRsses": [
+            {
+                "id": "054f29b0-d92e-4bc4-a4bb-87fbec36abf2",
+                "title": "Media",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000110",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:36.448Z",
+                "updatedAt": "2025-07-10T14:39:36.448Z"
+            },
+            {
+                "id": "84ce222c-e952-4b2e-aef4-f018d0756917",
+                "title": "Top Video",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839263",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:44.245Z",
+                "updatedAt": "2025-07-10T14:39:44.245Z"
+            },
+            {
+                "id": "bcec584a-f863-4f53-a6ab-69eea5c2be1e",
+                "title": "Digital Workshop",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100616801",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:44.707Z",
+                "updatedAt": "2025-07-10T14:39:44.707Z"
+            },
+            {
+                "id": "92281b8c-e2de-4b53-97e4-36cf39f119ed",
+                "title": "Latest Video",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100004038",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:45.157Z",
+                "updatedAt": "2025-07-10T14:39:45.157Z"
+            },
+            {
+                "id": "ac1bc6c5-19bc-4e77-a2cd-65c83e7332be",
+                "title": "CEO Interviews",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100004032",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:45.671Z",
+                "updatedAt": "2025-07-10T14:39:45.671Z"
+            },
+            {
+                "id": "247e65ee-2629-40ad-b646-4933792119ea",
+                "title": "Analyst Interviews",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100004033",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:46.174Z",
+                "updatedAt": "2025-07-10T14:39:46.174Z"
+            },
+            {
+                "id": "e0a18dac-89cc-4a7d-b306-1dc662197bc0",
+                "title": "Must Watch",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=101014894",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:47.037Z",
+                "updatedAt": "2025-07-10T14:39:47.037Z"
+            },
+            {
+                "id": "c8d75cf4-950e-485a-9449-47b1fa15294d",
+                "title": "Squawk Box",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838368",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:47.983Z",
+                "updatedAt": "2025-07-10T14:39:47.983Z"
+            },
+            {
+                "id": "da80ba0a-21cd-4f20-8adc-28e68fb8dcd4",
+                "title": "Squawk on the Street",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838381",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:48.472Z",
+                "updatedAt": "2025-07-10T14:39:48.472Z"
+            },
+            {
+                "id": "e59e8aff-edb7-4672-b4aa-000b5b37bb37",
+                "title": "Power Lunch",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838342",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:48.928Z",
+                "updatedAt": "2025-07-10T14:39:48.928Z"
+            },
+            {
+                "id": "2bba3fff-ccd5-4bbf-8151-e7324cfb5ce4",
+                "title": "Street Signs",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838408",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:49.410Z",
+                "updatedAt": "2025-07-10T14:39:49.410Z"
+            },
+            {
+                "id": "46202829-4e3a-4634-a2fc-3fdafa7405d5",
+                "title": "Closing Bell",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838421",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:50.781Z",
+                "updatedAt": "2025-07-10T14:39:50.781Z"
+            },
+            {
+                "id": "f44c3543-2dc9-41e9-92fc-910a68598840",
+                "title": "Capital Connection",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=17501773",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:54.203Z",
+                "updatedAt": "2025-07-10T14:39:54.203Z"
+            },
+            {
+                "id": "49acce7d-8fee-4cea-a9df-46bcb954f2e1",
+                "title": "Squawk Box Asia",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15838831",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:55.140Z",
+                "updatedAt": "2025-07-10T14:39:55.140Z"
+            },
+            {
+                "id": "20936b63-bce3-4ac3-8b20-ad013783ac39",
+                "title": "The Call",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=37447855",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "49d1a626-9c25-4605-8077-474785916112",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:55.600Z",
+                "updatedAt": "2025-07-10T14:39:55.600Z"
+            }
+        ]
+    },
+    {
+        "id": "e753dad7-5ef2-4e77-8d3b-2d7f8a5ee2d1",
+        "name": "Retail",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:37.137Z",
+        "updatedAt": "2025-07-10T14:39:37.137Z",
+        "masterRsses": [
+            {
+                "id": "f81f6b30-5448-4100-a174-62401ec869d8",
+                "title": "Retail",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000116",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "e753dad7-5ef2-4e77-8d3b-2d7f8a5ee2d1",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:37.137Z",
+                "updatedAt": "2025-07-10T14:39:37.137Z"
+            }
+        ]
+    },
+    {
+        "id": "a7ff6649-f9bf-43fd-aba1-5e0f8e174ff3",
+        "name": "Travel",
+        "deletedAt": null,
+        "createdAt": "2025-07-10T14:39:37.732Z",
+        "updatedAt": "2025-07-10T14:39:37.732Z",
+        "masterRsses": [
+            {
+                "id": "a94ac339-b5ec-4982-9b0d-71b072051c10",
+                "title": "Travel",
+                "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000739",
+                "publisher": "cnbc",
+                "masterRssCategoryId": "a7ff6649-f9bf-43fd-aba1-5e0f8e174ff3",
+                "deletedAt": null,
+                "createdAt": "2025-07-10T14:39:37.732Z",
+                "updatedAt": "2025-07-10T14:39:37.732Z"
+            }
+        ]
+    },
+    {
+        "id": "fee182f9-24d0-435c-87b7-35045f81ab35",
+        "name": "Photography",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.701Z",
+        "updatedAt": "2025-07-25T23:32:29.701Z",
+        "masterRsses": [
+            {
+                "id": "40af49d2-0171-4e2f-a98f-666b92933a21",
+                "title": "Antara News Galeri Photo",
+                "url": "https://www.antaranews.com/rss/photo.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "fee182f9-24d0-435c-87b7-35045f81ab35",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.049Z",
+                "updatedAt": "2025-07-25T23:32:30.049Z"
+            }
+        ]
+    },
+    {
+        "id": "dee5491f-e213-4361-8b64-2f34e6b9d504",
+        "name": "Video",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.750Z",
+        "updatedAt": "2025-07-25T23:32:29.750Z",
+        "masterRsses": [
+            {
+                "id": "5ad11865-3a84-4ba6-accd-a81ff7fef860",
+                "title": "Antara News Video",
+                "url": "https://www.antaranews.com/rss/video.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "dee5491f-e213-4361-8b64-2f34e6b9d504",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.216Z",
+                "updatedAt": "2025-07-25T23:32:30.216Z"
+            }
+        ]
+    },
+    {
+        "id": "ebea1f50-b70e-4f76-bbf6-3d6521825d45",
+        "name": "Law",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.786Z",
+        "updatedAt": "2025-07-25T23:32:29.786Z",
+        "masterRsses": [
+            {
+                "id": "2e8e5039-a604-421e-8d18-1e9a5149788e",
+                "title": "Hukum",
+                "url": "https://www.antaranews.com/rss/hukum.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "ebea1f50-b70e-4f76-bbf6-3d6521825d45",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.323Z",
+                "updatedAt": "2025-07-25T23:32:30.323Z"
+            }
+        ]
+    },
+    {
+        "id": "f2d1d765-5819-4258-873e-bd98c802c941",
+        "name": "Local News",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.806Z",
+        "updatedAt": "2025-07-25T23:32:29.806Z",
+        "masterRsses": [
+            {
+                "id": "30c0153f-bfc4-447f-b0e6-e74fd90e7c6d",
+                "title": "MetroKriminalitasLintas KotaLenggang Jakarta",
+                "url": "https://www.antaranews.com/rss/metro.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "f2d1d765-5819-4258-873e-bd98c802c941",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.422Z",
+                "updatedAt": "2025-07-25T23:32:30.422Z"
+            },
+            {
+                "id": "2f7ab158-0e41-467b-a23d-d83b3ffa6334",
+                "title": "Lintas Kota",
+                "url": "https://www.antaranews.com/rss/metro-lintas-kota.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "f2d1d765-5819-4258-873e-bd98c802c941",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.631Z",
+                "updatedAt": "2025-07-25T23:32:30.631Z"
+            },
+            {
+                "id": "76e10d1b-4f13-400c-9a31-a792ab88bd19",
+                "title": "Lenggang Jakarta",
+                "url": "https://www.antaranews.com/rss/metro-lenggang-jakarta.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "f2d1d765-5819-4258-873e-bd98c802c941",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.737Z",
+                "updatedAt": "2025-07-25T23:32:30.737Z"
+            }
+        ]
+    },
+    {
+        "id": "49995c18-06ac-4c8b-985a-741f9e7620f1",
+        "name": "Crime",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.826Z",
+        "updatedAt": "2025-07-25T23:32:29.826Z",
+        "masterRsses": [
+            {
+                "id": "97c6e285-7587-469a-a239-86b238b0f860",
+                "title": "Kriminalitas",
+                "url": "https://www.antaranews.com/rss/metro-kriminalitas.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "49995c18-06ac-4c8b-985a-741f9e7620f1",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.531Z",
+                "updatedAt": "2025-07-25T23:32:30.531Z"
+            }
+        ]
+    },
+    {
+        "id": "004fc50c-d14d-4633-89c5-85b9788012c4",
+        "name": "Sports",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.845Z",
+        "updatedAt": "2025-07-25T23:32:29.845Z",
+        "masterRsses": [
+            {
+                "id": "a01fb0ba-5a2d-4cc1-b5db-b61f1e8cb916",
+                "title": "SepakbolaIndonesia \tInternasionalLiga InggrisLiga SpanyolLiga ItaliaLiga ChampionsLiga-Liga Lain",
+                "url": "https://www.antaranews.com/rss/sepakbola.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.844Z",
+                "updatedAt": "2025-07-25T23:32:30.844Z"
+            },
+            {
+                "id": "a96221f9-562e-420c-9c06-80460d4d2a38",
+                "title": "Indonesia",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-indonesia.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:30.960Z",
+                "updatedAt": "2025-07-25T23:32:30.960Z"
+            },
+            {
+                "id": "d9a3220c-2361-433c-a021-3c529b843833",
+                "title": "Internasional",
+                "url": "https://www.antaranews.com/rss/sepakbola-internasional.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.080Z",
+                "updatedAt": "2025-07-25T23:32:31.080Z"
+            },
+            {
+                "id": "b22db00c-989d-460b-97f1-4315f17bae8b",
+                "title": "Liga Inggris",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-inggris-premier.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.177Z",
+                "updatedAt": "2025-07-25T23:32:31.177Z"
+            },
+            {
+                "id": "f9289f34-c852-451d-bf78-dca6847a6e40",
+                "title": "Liga Spanyol",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-spanyol.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.298Z",
+                "updatedAt": "2025-07-25T23:32:31.298Z"
+            },
+            {
+                "id": "c45276f3-df96-40f6-b8aa-43f8719b21f6",
+                "title": "Liga Italia",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-italia-seri-a.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.405Z",
+                "updatedAt": "2025-07-25T23:32:31.405Z"
+            },
+            {
+                "id": "a7574e9b-bebb-408d-b6e7-beb609759d94",
+                "title": "Liga Champions",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-champions.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.507Z",
+                "updatedAt": "2025-07-25T23:32:31.507Z"
+            },
+            {
+                "id": "b5daaf79-8315-4332-8ab9-01f002557936",
+                "title": "Liga-Liga Lain",
+                "url": "https://www.antaranews.com/rss/sepakbola-liga-liga-dunia.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.616Z",
+                "updatedAt": "2025-07-25T23:32:31.616Z"
+            },
+            {
+                "id": "86efc24c-c6de-49dc-a287-d36667a80f15",
+                "title": "OlahragaBulutangkisBola BasketTenisBalapAll Sport",
+                "url": "https://www.antaranews.com/rss/olahraga.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.724Z",
+                "updatedAt": "2025-07-25T23:32:31.724Z"
+            },
+            {
+                "id": "02c00c7e-1dde-49aa-91dd-fce25ee087cb",
+                "title": "Bulutangkis",
+                "url": "https://www.antaranews.com/rss/olahraga-bulutangkis.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.823Z",
+                "updatedAt": "2025-07-25T23:32:31.823Z"
+            },
+            {
+                "id": "adb18a08-56a7-4b26-8de2-67d5944302d5",
+                "title": "Bola Basket",
+                "url": "https://www.antaranews.com/rss/olahraga-bola-basket.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:31.927Z",
+                "updatedAt": "2025-07-25T23:32:31.927Z"
+            },
+            {
+                "id": "ca2fb6ad-6318-4fee-9f3f-13f9ec90bfc7",
+                "title": "Tenis",
+                "url": "https://www.antaranews.com/rss/olahraga-tenis.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.035Z",
+                "updatedAt": "2025-07-25T23:32:32.035Z"
+            },
+            {
+                "id": "86eda3c9-6b83-47a2-865c-4488466a2e03",
+                "title": "Balap",
+                "url": "https://www.antaranews.com/rss/olahraga-balap.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.138Z",
+                "updatedAt": "2025-07-25T23:32:32.138Z"
+            },
+            {
+                "id": "3aad714d-07b6-4c29-88cd-51198e87c2cd",
+                "title": "All Sport",
+                "url": "https://www.antaranews.com/rss/olahraga-all-sport.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "004fc50c-d14d-4633-89c5-85b9788012c4",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.268Z",
+                "updatedAt": "2025-07-25T23:32:32.268Z"
+            }
+        ]
+    },
+    {
+        "id": "71ca84cc-ec92-497c-ac5d-bc76316961c6",
+        "name": "Culture",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.862Z",
+        "updatedAt": "2025-07-25T23:32:29.862Z",
+        "masterRsses": [
+            {
+                "id": "535d7fc3-3844-41e8-8906-b5fef95dc457",
+                "title": "Humaniora",
+                "url": "https://www.antaranews.com/rss/humaniora.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "71ca84cc-ec92-497c-ac5d-bc76316961c6",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.375Z",
+                "updatedAt": "2025-07-25T23:32:32.375Z"
+            }
+        ]
+    },
+    {
+        "id": "32060372-6a12-453d-91b3-b9c17b220f02",
+        "name": "Lifestyle",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.902Z",
+        "updatedAt": "2025-07-25T23:32:29.902Z",
+        "masterRsses": [
+            {
+                "id": "b0aaf7cb-145a-4396-b6c5-7e1d4633d0b1",
+                "title": "Lifestyle",
+                "url": "https://www.antaranews.com/rss/lifestyle.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "32060372-6a12-453d-91b3-b9c17b220f02",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.473Z",
+                "updatedAt": "2025-07-25T23:32:32.473Z"
+            }
+        ]
+    },
+    {
+        "id": "5d63856c-d714-4637-a098-75e9dbc9d0b1",
+        "name": "Entertainment",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.917Z",
+        "updatedAt": "2025-07-25T23:32:29.917Z",
+        "masterRsses": [
+            {
+                "id": "3fad6d83-02b3-4229-bdda-cc2f1c1a7b47",
+                "title": "Hiburan",
+                "url": "https://www.antaranews.com/rss/hiburan.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "5d63856c-d714-4637-a098-75e9dbc9d0b1",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.571Z",
+                "updatedAt": "2025-07-25T23:32:32.571Z"
+            }
+        ]
+    },
+    {
+        "id": "80ef5792-4a99-4a92-bfed-42ca3250973b",
+        "name": "Infographics",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.936Z",
+        "updatedAt": "2025-07-25T23:32:29.936Z",
+        "masterRsses": [
+            {
+                "id": "adb843a3-4e98-42d1-bb07-19e72807442d",
+                "title": "Infografik",
+                "url": "https://www.antaranews.com/rss/infografik.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "80ef5792-4a99-4a92-bfed-42ca3250973b",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.677Z",
+                "updatedAt": "2025-07-25T23:32:32.677Z"
+            }
+        ]
+    },
+    {
+        "id": "62a6f2b0-90e9-46bb-b3b4-7b7c1d6a9394",
+        "name": "General",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.962Z",
+        "updatedAt": "2025-07-25T23:32:29.962Z",
+        "masterRsses": [
+            {
+                "id": "63ccf909-5928-493f-a4cb-08961ed76673",
+                "title": "Umum",
+                "url": "https://www.antaranews.com/rss/otomotif-umum.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "62a6f2b0-90e9-46bb-b3b4-7b7c1d6a9394",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.779Z",
+                "updatedAt": "2025-07-25T23:32:32.779Z"
+            }
+        ]
+    },
+    {
+        "id": "dbe7ddab-6684-4d0b-a7af-2ef5495efd74",
+        "name": "Environment",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.979Z",
+        "updatedAt": "2025-07-25T23:32:29.979Z",
+        "masterRsses": [
+            {
+                "id": "199bba08-232f-435d-99b8-448ff26dc3bd",
+                "title": "Warta Bumi",
+                "url": "https://www.antaranews.com/rss/warta-bumi.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "dbe7ddab-6684-4d0b-a7af-2ef5495efd74",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.880Z",
+                "updatedAt": "2025-07-25T23:32:32.880Z"
+            }
+        ]
+    },
+    {
+        "id": "c6e3b0b3-c771-40b1-b079-c28fbbb3ce7d",
+        "name": "Press Release",
+        "deletedAt": null,
+        "createdAt": "2025-07-25T23:32:29.996Z",
+        "updatedAt": "2025-07-25T23:32:29.996Z",
+        "masterRsses": [
+            {
+                "id": "2c11aaa1-d66c-45d0-a8b2-2fbba9ac1da9",
+                "title": "Rilis Pers",
+                "url": "https://www.antaranews.com/rss/rilis-pers.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "c6e3b0b3-c771-40b1-b079-c28fbbb3ce7d",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:32.987Z",
+                "updatedAt": "2025-07-25T23:32:32.987Z"
+            },
+            {
+                "id": "6e426f4c-2b30-4f69-9813-7183e13d2be9",
+                "title": "Rilis Pers",
+                "url": "https://www.antaranews.com/rss/rilis-pers.xml",
+                "publisher": "antara",
+                "masterRssCategoryId": "c6e3b0b3-c771-40b1-b079-c28fbbb3ce7d",
+                "deletedAt": null,
+                "createdAt": "2025-07-25T23:32:33.086Z",
+                "updatedAt": "2025-07-25T23:32:33.086Z"
+            }
+        ]
+    }
+]
