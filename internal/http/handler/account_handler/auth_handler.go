@@ -3,6 +3,7 @@ package account_handler
 
 import (
 	"net/http"
+	"postmatic-api/config"
 	"postmatic-api/internal/module/account/auth"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
@@ -12,10 +13,11 @@ import (
 
 type AuthHandler struct {
 	authSvc *auth.AuthService
+	cfg     *config.Config
 }
 
-func NewAuthHandler(authSvc *auth.AuthService) *AuthHandler {
-	return &AuthHandler{authSvc: authSvc}
+func NewAuthHandler(authSvc *auth.AuthService, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{authSvc: authSvc, cfg: cfg}
 }
 
 func (h *AuthHandler) AuthRoutes() chi.Router {
@@ -51,6 +53,8 @@ func (h *AuthHandler) LoginCredential(w http.ResponseWriter, r *http.Request) {
 		response.Error(w, r, err, res)
 		return
 	}
+
+	SetAuthCookies(w, r, h.cfg, res.AccessToken, res.RefreshToken)
 
 	response.OK(w, r, "LOGIN_SUCCESS", res)
 }
@@ -128,6 +132,8 @@ func (h *AuthHandler) SubmitVerifyToken(w http.ResponseWriter, r *http.Request) 
 		response.Error(w, r, err, nil)
 		return
 	}
+
+	SetAuthCookies(w, r, h.cfg, res.AccessToken, res.RefreshToken)
 
 	response.OK(w, r, "SUBMIT_VERIFY_TOKEN_SUCCESS", res)
 }

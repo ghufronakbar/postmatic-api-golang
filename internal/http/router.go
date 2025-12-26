@@ -72,10 +72,10 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
-	authHandler := account_handler.NewAuthHandler(authSvc)
+	authHandler := account_handler.NewAuthHandler(authSvc, cfg)
 	sessHandler := account_handler.NewSessionHandler(sessSvc)
 	profileHandler := account_handler.NewProfileHandler(profSvc)
-	googleOauthHandler := account_handler.NewGoogleOAuthHandler(googleSvc)
+	googleOauthHandler := account_handler.NewGoogleOAuthHandler(googleSvc, cfg)
 	// BUSINESS
 	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
 	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)

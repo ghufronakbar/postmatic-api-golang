@@ -4,6 +4,7 @@ package account_handler
 import (
 	"net/http"
 
+	"postmatic-api/config"
 	"postmatic-api/internal/module/account/google_oauth"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
@@ -13,10 +14,11 @@ import (
 
 type GoogleOAuthHandler struct {
 	authSvc *google_oauth.GoogleOAuthService
+	cfg     *config.Config
 }
 
-func NewGoogleOAuthHandler(authSvc *google_oauth.GoogleOAuthService) *GoogleOAuthHandler {
-	return &GoogleOAuthHandler{authSvc: authSvc}
+func NewGoogleOAuthHandler(authSvc *google_oauth.GoogleOAuthService, cfg *config.Config) *GoogleOAuthHandler {
+	return &GoogleOAuthHandler{authSvc: authSvc, cfg: cfg}
 }
 
 func (h *GoogleOAuthHandler) GoogleOAuthRoutes() chi.Router {
@@ -69,8 +71,8 @@ func (h *GoogleOAuthHandler) LoginGoogleCallback(w http.ResponseWriter, r *http.
 		return
 	}
 
-	// TODO: set cookie
 	// ✅ mode redirect (callback dipanggil browser)
+	SetAuthCookies(w, r, h.cfg, res.AccessToken, res.RefreshToken)
 	http.Redirect(w, r, res.From, http.StatusFound)
 
 	// (opsional) kalau kamu kadang pingin lihat JSON via Postman:
