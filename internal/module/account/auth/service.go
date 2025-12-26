@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"net/url"
 	"time"
 
 	"postmatic-api/config"
@@ -101,7 +100,13 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		e = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+		// TODO: add to queue instead synchronous (and place outside db transaction)
+		e = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+			Name:  profile.Name,
+			To:    profile.Email,
+			Token: createAccountToken,
+			From:  input.From,
+		})
 		if e != nil {
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
@@ -211,7 +216,13 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		}
 
 		// Kirim Email
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+		// TODO: add to queue instead synchronous
+		err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+			Name:  profile.Name,
+			To:    profile.Email,
+			Token: createAccountToken,
+			From:  input.From,
+		})
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -513,28 +524,15 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 	}
 
 	// GO ROUTINE FOR SENDING EMAIL IN BACKGROUND
+	// TODO: add to queue instead of using go routine
 	go func() {
-		bgCtx := context.Background()
-
-		link := s.cfg.AUTH_URL + "&from=" + url.QueryEscape(input.From)
-
-		// Data yang mau dikirim ke HTML {{.Name}}, {{.Email}}, {{.Link}}
-		templateData := mailer.WelcomeInput{
+		ctxTo, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		s.mailer.SendWelcomeEmail(ctxTo, mailer.WelcomeInputDTO{
 			Name:  *valid.Name,
 			Email: *valid.Email,
-			Link:  link,
-		}
-
-		emailInput := mailer.SendEmailInput{
-			To:           *valid.Email,
-			Subject:      "Selamat Datang di Postmatic!",
-			TemplateName: mailer.WelcomeTemplate,
-			Data:         templateData,
-		}
-
-		if err := s.mailer.SendEmail(bgCtx, emailInput); err != nil {
-			println("Failed to send email:", err.Error())
-		}
+			From:  input.From,
+		})
 	}()
 
 	return VerifyCreateAccountResponse{
@@ -611,12 +609,18 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		imageUrl = &profile.ImageUrl.String
 	}
 
-	token, err := token.GenerateCreateAccountToken(user.ID.String(), profile.Email, profile.Name, imageUrl)
+	token, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, imageUrl)
 	if err != nil {
 		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
 	}
 
-	err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, token, input.From)
+	// TODO: add to queue instead synchronous
+	err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+		Name:  profile.Name,
+		To:    profile.Email,
+		Token: token,
+		From:  input.From,
+	})
 	if err != nil {
 		return ResendEmailVerificationResponse{}, err
 	}
@@ -641,34 +645,4 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		RetryAfter: retryAfter,
 	}, nil
 
-}
-
-func (s *AuthService) sendVerificationEmail(ctx context.Context, name, to, token, from string) error {
-	u, err := url.Parse(s.cfg.AUTH_URL + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token)
-	if err != nil {
-		return errs.NewInternalServerError(err)
-	}
-
-	q := u.Query()
-	q.Set("from", from)
-	u.RawQuery = q.Encode()
-
-	confirmUrl := u.String()
-	fmt.Println(confirmUrl)
-	templateData := mailer.VerificationInput{
-		Name:       name,
-		ConfirmUrl: confirmUrl,
-	}
-
-	err = s.mailer.SendEmail(ctx, mailer.SendEmailInput{
-		To:           to,
-		Subject:      "Konfirmasi Pendaftaran Akun",
-		TemplateName: mailer.VerificationTemplate,
-		Type:         "html",
-		Data:         templateData,
-	})
-	if err != nil {
-		return errs.NewInternalServerError(err)
-	}
-	return nil
 }

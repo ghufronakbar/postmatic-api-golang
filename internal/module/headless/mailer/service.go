@@ -23,13 +23,7 @@ var templateFS embed.FS
 
 type MailerService struct {
 	dialer *gomail.Dialer
-
-	// constants
-	sender       string
-	appName      string
-	logo         string
-	address      string
-	contactEmail string
+	cfg    *config.Config
 }
 
 func NewService(cfg *config.Config) *MailerService {
@@ -41,12 +35,8 @@ func NewService(cfg *config.Config) *MailerService {
 	)
 
 	return &MailerService{
-		dialer:       d,
-		sender:       cfg.SMTP_SENDER,
-		appName:      cfg.APP_NAME,
-		logo:         cfg.APP_LOGO,
-		address:      cfg.APP_ADDRESS,
-		contactEmail: cfg.APP_CONTACT_EMAIL,
+		dialer: d,
+		cfg:    cfg,
 	}
 }
 
@@ -68,9 +58,9 @@ var funcMap = template.FuncMap{
 	},
 }
 
-func (s *MailerService) SendEmail(ctx context.Context, input SendEmailInput) error {
+func (s *MailerService) sendEmail(ctx context.Context, input SendEmailInput) error {
 	m := gomail.NewMessage()
-	m.SetHeader("From", s.sender)
+	m.SetHeader("From", s.cfg.SMTP_SENDER)
 	m.SetHeader("To", input.To)
 	m.SetHeader("Subject", input.Subject)
 
@@ -99,10 +89,10 @@ func (s *MailerService) SendEmail(ctx context.Context, input SendEmailInput) err
 		dataMap := make(map[string]interface{})
 
 		// Inject Global Constants
-		dataMap["AppName"] = s.appName
-		dataMap["Logo"] = s.logo
-		dataMap["Address"] = s.address
-		dataMap["ContactEmail"] = s.contactEmail
+		dataMap["AppName"] = s.cfg.APP_NAME
+		dataMap["Logo"] = s.cfg.APP_LOGO
+		dataMap["Address"] = s.cfg.APP_ADDRESS
+		dataMap["ContactEmail"] = s.cfg.APP_CONTACT_EMAIL
 		dataMap["Subject"] = input.Subject // Butuh subject di title head
 
 		// Inject Input Data (Merge)
@@ -127,10 +117,10 @@ func (s *MailerService) SendEmail(ctx context.Context, input SendEmailInput) err
 
 		// Mari kita pakai Map untuk fleksibilitas maksimal di contoh ini:
 		finalData := map[string]interface{}{
-			"AppName":      s.appName,
-			"Logo":         s.logo,
-			"Address":      s.address,
-			"ContactEmail": s.contactEmail,
+			"AppName":      s.cfg.APP_NAME,
+			"Logo":         s.cfg.APP_LOGO,
+			"Address":      s.cfg.APP_ADDRESS,
+			"ContactEmail": s.cfg.APP_CONTACT_EMAIL,
 			"Subject":      input.Subject,
 		}
 

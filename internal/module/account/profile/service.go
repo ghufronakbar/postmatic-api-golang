@@ -4,7 +4,6 @@ package profile
 import (
 	"context"
 	"database/sql"
-	"net/url"
 	"time"
 
 	"postmatic-api/config"
@@ -283,7 +282,13 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 		}
 
 		// 3. KIRIM EMAIL (Kirim JWT Token, bukan User ID)
-		err = s.sendVerificationEmail(ctx, profile.Name, profile.Email, createAccountToken, input.From)
+		// TODO: add to queue instead synchronous (and place outside db transaction)
+		err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+			Name:  profile.Name,
+			To:    profile.Email,
+			Token: createAccountToken,
+			From:  input.From,
+		})
 		if err != nil {
 			return err
 		}
@@ -303,34 +308,4 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 	return SetupPasswordResponse{
 		RetryAfter: retryAfter,
 	}, nil
-}
-
-func (s *ProfileService) sendVerificationEmail(ctx context.Context, name, to, token, from string) error {
-	u, err := url.Parse(s.cfg.AUTH_URL + s.cfg.VERIFY_EMAIL_ROUTE + "/" + token)
-	if err != nil {
-		return errs.NewInternalServerError(err)
-	}
-
-	q := u.Query()
-	q.Set("from", from)
-	u.RawQuery = q.Encode()
-
-	confirmUrl := u.String()
-
-	templateData := mailer.VerificationInput{
-		Name:       name,
-		ConfirmUrl: confirmUrl,
-	}
-
-	err = s.mailer.SendEmail(ctx, mailer.SendEmailInput{
-		To:           to,
-		Subject:      "Konfirmasi Pendaftaran Akun",
-		TemplateName: mailer.VerificationTemplate,
-		Type:         "html",
-		Data:         templateData,
-	})
-	if err != nil {
-		return errs.NewInternalServerError(err)
-	}
-	return nil
 }
