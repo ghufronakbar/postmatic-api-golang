@@ -13,6 +13,7 @@ import (
 	"postmatic-api/internal/module/account/google_oauth"
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
+	"postmatic-api/internal/module/app/category_creator_image"
 	"postmatic-api/internal/module/app/image_uploader"
 	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/app/timezone"
@@ -69,6 +70,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	rssSubscriptionSvc := business_rss_subscription.NewService(store, rssSvc)
 	timezoneSvc := timezone.NewTimezoneService()
 	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
+	catCreatorImageSvc := category_creator_image.NewCategoryCreatorImageService(store)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -87,6 +89,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
 	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
+	catCreatorImageHandler := app_handler.NewCategoryCreatorImageHandler(catCreatorImageSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -123,12 +126,22 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
-		r.Use(func(next http.Handler) http.Handler {
-			return middleware.ReqFilterMiddleware(next, append(rss.SORT_BY_RSS_CATEGORY, rss.SORT_BY_RSS_FEED...))
-		})
 		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
-		r.Mount("/rss", rssHandler.RSSRoutes())
+		r.Route("/rss", func(r chi.Router) {
+			r.Use(func(next http.Handler) http.Handler {
+				fil := append(rss.SORT_BY_RSS_CATEGORY, rss.SORT_BY_RSS_FEED...)
+				return middleware.ReqFilterMiddleware(next, fil)
+			})
+			r.Mount("/", rssHandler.RSSRoutes())
+		})
 		r.Mount("/timezone", timezoneHandler.TimezoneRoutes())
+		r.Route("/category-creator-image", func(r chi.Router) {
+			r.Use(func(next http.Handler) http.Handler {
+				fil := append(category_creator_image.SORT_BY_CATEGORY_CREATOR_IMAGE_PRODUCT, category_creator_image.SORT_BY_CATEGORY_CREATOR_IMAGE_TYPE...)
+				return middleware.ReqFilterMiddleware(next, fil)
+			})
+			r.Mount("/", catCreatorImageHandler.CategoryCreatorImageRoutes())
+		})
 	})
 
 	return r

@@ -184,6 +184,21 @@ func (ns NullImageProvider) Value() (driver.Value, error) {
 	return string(ns.ImageProvider), nil
 }
 
+type AppCreatorImageProductCategory struct {
+	ID             int64        `json:"id"`
+	IndonesianName string       `json:"indonesian_name"`
+	EnglishName    string       `json:"english_name"`
+	CreatedAt      sql.NullTime `json:"created_at"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+}
+
+type AppCreatorImageTypeCategory struct {
+	ID        int64        `json:"id"`
+	Name      string       `json:"name"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
 type AppRssCategory struct {
 	ID        uuid.UUID    `json:"id"`
 	Name      string       `json:"name"`
@@ -284,6 +299,32 @@ type BusinessTimezonePref struct {
 	Timezone       string       `json:"timezone"`
 	CreatedAt      sql.NullTime `json:"created_at"`
 	UpdatedAt      sql.NullTime `json:"updated_at"`
+}
+
+type CreatorImage struct {
+	ID           int64          `json:"id"`
+	Name         string         `json:"name"`
+	ImageUrl     string         `json:"image_url"`
+	IsPublished  bool           `json:"is_published"`
+	IsBanned     bool           `json:"is_banned"`
+	BannedReason sql.NullString `json:"banned_reason"`
+	Price        sql.NullInt64  `json:"price"`
+	ProfileID    uuid.NullUUID  `json:"profile_id"`
+	CreatedAt    sql.NullTime   `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
+	DeletedAt    sql.NullTime   `json:"deleted_at"`
+}
+
+type CreatorImageProductCategory struct {
+	CreatorImageID    int64        `json:"creator_image_id"`
+	ProductCategoryID int64        `json:"product_category_id"`
+	CreatedAt         sql.NullTime `json:"created_at"`
+}
+
+type CreatorImageTypeCategory struct {
+	CreatorImageID int64        `json:"creator_image_id"`
+	TypeCategoryID int64        `json:"type_category_id"`
+	CreatedAt      sql.NullTime `json:"created_at"`
 }
 
 type Profile struct {

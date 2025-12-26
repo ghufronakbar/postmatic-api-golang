@@ -11,6 +11,8 @@ import (
 )
 
 type Querier interface {
+	CountAllAppCreatorImageProductCategories(ctx context.Context, search interface{}) (int64, error)
+	CountAllAppCreatorImageTypeCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllRSSCategory(ctx context.Context, search interface{}) (int64, error)
 	CountAllRSSFeed(ctx context.Context, arg CountAllRSSFeedParams) (int64, error)
 	CountBusinessProductsByBusinessRootId(ctx context.Context, arg CountBusinessProductsByBusinessRootIdParams) (int64, error)
@@ -26,6 +28,8 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	EditBusinessRssSubscription(ctx context.Context, arg EditBusinessRssSubscriptionParams) (BusinessRssSubscription, error)
 	ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(ctx context.Context, arg ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams) (bool, error)
+	GetAllAppCreatorImageProductCategories(ctx context.Context, arg GetAllAppCreatorImageProductCategoriesParams) ([]GetAllAppCreatorImageProductCategoriesRow, error)
+	GetAllAppCreatorImageTypeCategories(ctx context.Context, arg GetAllAppCreatorImageTypeCategoriesParams) ([]GetAllAppCreatorImageTypeCategoriesRow, error)
 	GetAllRSSCategory(ctx context.Context, arg GetAllRSSCategoryParams) ([]AppRssCategory, error)
 	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)
 	GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error)

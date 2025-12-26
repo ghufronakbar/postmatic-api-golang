@@ -1,6 +1,11 @@
 // pkg/filter/filter.go
 package filter
 
+import (
+	"regexp"
+	"strings"
+)
+
 type ReqFilter struct {
 	Search    string  `json:"search"`
 	Page      int     `json:"page"`
@@ -24,15 +29,28 @@ func (f ReqFilter) Offset() int {
 }
 
 // SortByDB mengubah input user ke nama kolom yang dipakai SQL
+var camelToSnakeRE = regexp.MustCompile(`([a-z0-9])([A-Z])`)
+
+func camelToSnake(s string) string {
+	// createdAt -> created_at, updatedAt -> updated_at, Name -> name
+	s = camelToSnakeRE.ReplaceAllString(s, `$1_$2`)
+	return strings.ToLower(s)
+}
+
 func (f ReqFilter) SortByDB() string {
-	switch f.SortBy {
-	case "name":
-		return "name"
-	case "createdAt":
-		return "created_at"
-	case "updatedAt":
-		return "updated_at"
-	default:
-		return "created_at"
+	// Whitelist kolom DB yang valid (snake_case)
+	allowed := map[string]struct{}{
+		"name":       {},
+		"created_at": {},
+		"updated_at": {},
 	}
+
+	// Ubah camelCase input jadi snake_case
+	sortBy := camelToSnake(f.SortBy)
+
+	// Validasi hasilnya
+	if _, ok := allowed[sortBy]; ok {
+		return sortBy
+	}
+	return "created_at"
 }
