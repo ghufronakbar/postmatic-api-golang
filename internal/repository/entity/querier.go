@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CountAllAppCreatorImageProductCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllAppCreatorImageTypeCategories(ctx context.Context, search interface{}) (int64, error)
+	CountAllCreatorImageByProfileId(ctx context.Context, arg CountAllCreatorImageByProfileIdParams) (int64, error)
 	CountAllPublishedCreatorImage(ctx context.Context) (int64, error)
 	CountAllRSSCategory(ctx context.Context, search interface{}) (int64, error)
 	CountAllRSSFeed(ctx context.Context, arg CountAllRSSFeedParams) (int64, error)
@@ -32,6 +33,7 @@ type Querier interface {
 	ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(ctx context.Context, arg ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams) (bool, error)
 	GetAllAppCreatorImageProductCategories(ctx context.Context, arg GetAllAppCreatorImageProductCategoriesParams) ([]GetAllAppCreatorImageProductCategoriesRow, error)
 	GetAllAppCreatorImageTypeCategories(ctx context.Context, arg GetAllAppCreatorImageTypeCategoriesParams) ([]GetAllAppCreatorImageTypeCategoriesRow, error)
+	GetAllCreatorImageByProfileId(ctx context.Context, arg GetAllCreatorImageByProfileIdParams) ([]GetAllCreatorImageByProfileIdRow, error)
 	GetAllPublishedCreatorImage(ctx context.Context) ([]CreatorImage, error)
 	GetAllRSSCategory(ctx context.Context, arg GetAllRSSCategoryParams) ([]AppRssCategory, error)
 	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)

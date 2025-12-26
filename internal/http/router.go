@@ -152,6 +152,9 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	r.Route("/creator", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middleware.ReqFilterMiddleware(next, creator_image.SORT_BY)
+		})
 		r.Mount("/image", creatorImageHandler.CreatorImageRoutes())
 	})
 

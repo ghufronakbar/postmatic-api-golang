@@ -25,11 +25,70 @@ func NewCreatorImageHandler(creatorImageSvc *creator_image.CreatorImageService) 
 func (h *CreatorImageHandler) CreatorImageRoutes() chi.Router {
 	r := chi.NewRouter()
 
+	r.Get("/", h.GetCreatorImageByProfileId)
 	r.Post("/", h.CreateCreatorImage)
 	r.Put("/{creatorImageId}", h.UpdateCreatorImage)
 	r.Delete("/{creatorImageId}", h.SoftDeleteCreatorImage)
 
 	return r
+}
+
+func (h *CreatorImageHandler) GetCreatorImageByProfileId(w http.ResponseWriter, r *http.Request) {
+	prof, _ := middleware.GetUserFromContext(r.Context())
+
+	filter := middleware.GetFilterFromContext(r.Context())
+
+	q := r.URL.Query()
+	typeCategoryIdQuery := q.Get("typeCategoryId")
+	publishedQuery := q.Get("published")
+
+	var typeCategoryId *int64
+	var productCategoryId *int64
+	var published *bool
+
+	if typeCategoryIdQuery != "" {
+		typeCategoryIdInt, err := strconv.ParseInt(typeCategoryIdQuery, 10, 64)
+		if err != nil {
+			response.ValidationFailed(w, r, map[string]string{"typeCategoryId": "TYPE_CATEGORY_ID_MUST_BE_INTEGER"})
+			return
+		}
+		typeCategoryId = &typeCategoryIdInt
+	}
+
+	if filter.Category != "" {
+		productCategoryIdInt, err := strconv.ParseInt(filter.Category, 10, 64)
+		if err != nil {
+			response.ValidationFailed(w, r, map[string]string{"productCategoryId": "PRODUCT_CATEGORY_ID_MUST_BE_INTEGER"})
+			return
+		}
+		productCategoryId = &productCategoryIdInt
+	}
+
+	if publishedQuery != "" {
+		published = utils.ParseBoolPtr(publishedQuery)
+	}
+
+	filterData := creator_image.GetCreatorImageFilter{
+		Search:            filter.Search,
+		SortBy:            filter.SortBy,
+		PageOffset:        filter.Offset(),
+		PageLimit:         filter.Limit,
+		SortDir:           filter.Sort,
+		Page:              filter.Page,
+		DateStart:         filter.DateStart,
+		DateEnd:           filter.DateEnd,
+		TypeCategoryID:    typeCategoryId,
+		ProductCategoryID: productCategoryId,
+		Published:         published,
+	}
+
+	res, pag, err := h.creatorImageSvc.GetCreatorImageByProfileId(r.Context(), prof.ID, filterData)
+	if err != nil {
+		response.Error(w, r, err, res)
+		return
+	}
+
+	response.LIST(w, r, "GET_CREATOR_IMAGE_SUCCESS", res, &filter, pag)
 }
 
 func (h *CreatorImageHandler) CreateCreatorImage(w http.ResponseWriter, r *http.Request) {

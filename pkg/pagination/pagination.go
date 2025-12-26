@@ -16,12 +16,25 @@ type Pagination struct {
 }
 
 func NewPagination(params *PaginationParams) Pagination {
+	total := params.Total
+	page := params.Page
+	limit := params.Limit
+
+	if page < 1 {
+		page = 1
+	}
+
+	totalPages := 0
+	if limit > 0 {
+		totalPages = (total + limit - 1) / limit // ceil(total/limit)
+	}
+
 	return Pagination{
-		Total:       params.Total,
-		Page:        params.Page,
-		Limit:       params.Limit,
-		TotalPages:  params.Total / params.Limit,
-		HasNextPage: params.Page < params.Total/params.Limit,
-		HasPrevPage: params.Page > 1,
+		Total:       total,
+		Page:        page,
+		Limit:       limit,
+		TotalPages:  totalPages,
+		HasNextPage: page < totalPages,
+		HasPrevPage: page > 1,
 	}
 }

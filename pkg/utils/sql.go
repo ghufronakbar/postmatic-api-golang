@@ -49,3 +49,17 @@ func NullStringToNullTime(s *string) sql.NullTime {
 
 	return sql.NullTime{Time: t, Valid: true}
 }
+
+func NullInt64ToNullInt64(i *int64) sql.NullInt64 {
+	if i == nil {
+		return sql.NullInt64{Valid: false}
+	}
+	return sql.NullInt64{Int64: *i, Valid: true}
+}
+
+func NullBoolPtrToNullBool(b *bool) sql.NullBool {
+	if b == nil {
+		return sql.NullBool{}
+	}
+	return sql.NullBool{Bool: *b, Valid: true}
+}

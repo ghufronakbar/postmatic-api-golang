@@ -13,6 +13,84 @@ import (
 	"github.com/lib/pq"
 )
 
+const countAllCreatorImageByProfileId = `-- name: CountAllCreatorImageByProfileId :one
+SELECT COUNT(*)::bigint AS total
+FROM creator_images ci
+WHERE
+  ci.deleted_at IS NULL
+  AND ci.is_banned = FALSE
+
+  -- ✅ published filter (nullable)
+  AND (
+    $1::boolean IS NULL
+    OR ci.is_published = $1
+  )
+
+  AND (
+    ($2::uuid IS NULL AND ci.profile_id IS NULL)
+    OR ci.profile_id = $2
+  )
+
+  AND (
+    COALESCE($3, '') = ''
+    OR ci.name ILIKE ('%' || $3 || '%')
+  )
+
+  AND (
+    $4::date IS NULL
+    OR ci.created_at::date >= $4::date
+  )
+  AND (
+    $5::date IS NULL
+    OR ci.created_at::date <= $5::date
+  )
+
+  AND (
+    $6::bigint IS NULL
+    OR EXISTS (
+      SELECT 1
+      FROM creator_image_type_categories f
+      WHERE f.creator_image_id = ci.id
+        AND f.type_category_id = $6
+    )
+  )
+
+  AND (
+    $7::bigint IS NULL
+    OR EXISTS (
+      SELECT 1
+      FROM creator_image_product_categories f
+      WHERE f.creator_image_id = ci.id
+        AND f.product_category_id = $7
+    )
+  )
+`
+
+type CountAllCreatorImageByProfileIdParams struct {
+	Published         sql.NullBool  `json:"published"`
+	ProfileID         uuid.NullUUID `json:"profile_id"`
+	Search            interface{}   `json:"search"`
+	DateStart         sql.NullTime  `json:"date_start"`
+	DateEnd           sql.NullTime  `json:"date_end"`
+	TypeCategoryID    sql.NullInt64 `json:"type_category_id"`
+	ProductCategoryID sql.NullInt64 `json:"product_category_id"`
+}
+
+func (q *Queries) CountAllCreatorImageByProfileId(ctx context.Context, arg CountAllCreatorImageByProfileIdParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllCreatorImageByProfileId,
+		arg.Published,
+		arg.ProfileID,
+		arg.Search,
+		arg.DateStart,
+		arg.DateEnd,
+		arg.TypeCategoryID,
+		arg.ProductCategoryID,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const countAllPublishedCreatorImage = `-- name: CountAllPublishedCreatorImage :one
 SELECT COUNT(*)::bigint AS total FROM creator_images WHERE deleted_at IS NULL
 AND is_banned = false AND is_published = true
@@ -117,6 +195,225 @@ func (q *Queries) CreateCreatorImage(ctx context.Context, arg CreateCreatorImage
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const getAllCreatorImageByProfileId = `-- name: GetAllCreatorImageByProfileId :many
+WITH p0 AS (
+  SELECT
+    lower(COALESCE(NULLIF($3,  ''), '')) AS sb_in,
+    lower(COALESCE(NULLIF($4, ''), '')) AS sd_in
+),
+p AS (
+  SELECT
+    CASE
+      WHEN sb_in IN ('name', 'created_at', 'updated_at') THEN sb_in
+      ELSE 'created_at'
+    END AS sort_by,
+    CASE
+      WHEN sd_in IN ('asc', 'desc') THEN sd_in
+      ELSE 'desc'
+    END AS sort_dir
+  FROM p0
+),
+q AS (
+  SELECT
+    ci.id,
+    ci.name,
+    ci.image_url,
+    ci.is_published,
+    ci.price,
+    ci.profile_id,
+    ci.created_at,
+    ci.updated_at,
+
+    pub.id        AS publisher_id,
+    pub.name      AS publisher_name,
+    pub.image_url AS publisher_image,
+
+    COALESCE(
+      jsonb_agg(DISTINCT jsonb_build_object('id', tc.id, 'name', tc.name))
+        FILTER (WHERE tc.id IS NOT NULL),
+      '[]'::jsonb
+    ) AS type_category_subs,
+
+    COALESCE(
+      jsonb_agg(DISTINCT jsonb_build_object('id', pc.id, 'name', pc.indonesian_name))
+        FILTER (WHERE pc.id IS NOT NULL),
+      '[]'::jsonb
+    ) AS product_category_subs
+
+  FROM creator_images ci
+  LEFT JOIN profiles pub ON pub.id = ci.profile_id
+
+  LEFT JOIN creator_image_type_categories citc
+    ON citc.creator_image_id = ci.id
+  LEFT JOIN app_creator_image_type_categories tc
+    ON tc.id = citc.type_category_id
+
+  LEFT JOIN creator_image_product_categories cipc
+    ON cipc.creator_image_id = ci.id
+  LEFT JOIN app_creator_image_product_categories pc
+    ON pc.id = cipc.product_category_id
+
+  WHERE
+    ci.deleted_at IS NULL
+    AND ci.is_banned = FALSE
+
+    -- ✅ published filter (nullable)
+    AND (
+      $5::boolean IS NULL
+      OR ci.is_published = $5
+    )
+
+    -- profile filter:
+    AND (
+      ($6::uuid IS NULL AND ci.profile_id IS NULL)
+      OR ci.profile_id = $6
+    )
+
+    -- search
+    AND (
+      COALESCE($7, '') = ''
+      OR ci.name ILIKE ('%' || $7 || '%')
+    )
+
+    -- date range (created_at)
+    AND (
+      $8::date IS NULL
+      OR ci.created_at::date >= $8::date
+    )
+    AND (
+      $9::date IS NULL
+      OR ci.created_at::date <= $9::date
+    )
+
+    -- filter by type category (EXISTS)
+    AND (
+      $10::bigint IS NULL
+      OR EXISTS (
+        SELECT 1
+        FROM creator_image_type_categories f
+        WHERE f.creator_image_id = ci.id
+          AND f.type_category_id = $10
+      )
+    )
+
+    -- filter by product category (EXISTS)
+    AND (
+      $11::bigint IS NULL
+      OR EXISTS (
+        SELECT 1
+        FROM creator_image_product_categories f
+        WHERE f.creator_image_id = ci.id
+          AND f.product_category_id = $11
+      )
+    )
+
+  GROUP BY
+    ci.id, ci.name, ci.image_url, ci.is_published, ci.price, ci.profile_id, ci.created_at, ci.updated_at,
+    pub.id, pub.name, pub.image_url
+)
+SELECT
+  q.id, q.name, q.image_url, q.is_published, q.price, q.profile_id, q.created_at, q.updated_at, q.publisher_id, q.publisher_name, q.publisher_image, q.type_category_subs, q.product_category_subs
+FROM q
+CROSS JOIN p
+ORDER BY
+  -- name
+  CASE WHEN p.sort_by = 'name' AND p.sort_dir = 'asc'  THEN q.name END ASC,
+  CASE WHEN p.sort_by = 'name' AND p.sort_dir = 'desc' THEN q.name END DESC,
+
+  -- created_at (default)
+  CASE WHEN p.sort_by = 'created_at' AND p.sort_dir = 'asc'  THEN q.created_at END ASC,
+  CASE WHEN p.sort_by = 'created_at' AND p.sort_dir = 'desc' THEN q.created_at END DESC,
+
+  -- updated_at
+  CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'asc'  THEN q.updated_at END ASC,
+  CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'desc' THEN q.updated_at END DESC,
+
+  -- fallback stable order
+  q.created_at DESC,
+  q.id DESC
+LIMIT $2
+OFFSET $1
+`
+
+type GetAllCreatorImageByProfileIdParams struct {
+	PageOffset        int32         `json:"page_offset"`
+	PageLimit         int32         `json:"page_limit"`
+	SortBy            interface{}   `json:"sort_by"`
+	SortDir           interface{}   `json:"sort_dir"`
+	Published         sql.NullBool  `json:"published"`
+	ProfileID         uuid.NullUUID `json:"profile_id"`
+	Search            interface{}   `json:"search"`
+	DateStart         sql.NullTime  `json:"date_start"`
+	DateEnd           sql.NullTime  `json:"date_end"`
+	TypeCategoryID    sql.NullInt64 `json:"type_category_id"`
+	ProductCategoryID sql.NullInt64 `json:"product_category_id"`
+}
+
+type GetAllCreatorImageByProfileIdRow struct {
+	ID                  int64          `json:"id"`
+	Name                string         `json:"name"`
+	ImageUrl            string         `json:"image_url"`
+	IsPublished         bool           `json:"is_published"`
+	Price               int64          `json:"price"`
+	ProfileID           uuid.NullUUID  `json:"profile_id"`
+	CreatedAt           sql.NullTime   `json:"created_at"`
+	UpdatedAt           sql.NullTime   `json:"updated_at"`
+	PublisherID         uuid.NullUUID  `json:"publisher_id"`
+	PublisherName       sql.NullString `json:"publisher_name"`
+	PublisherImage      sql.NullString `json:"publisher_image"`
+	TypeCategorySubs    interface{}    `json:"type_category_subs"`
+	ProductCategorySubs interface{}    `json:"product_category_subs"`
+}
+
+func (q *Queries) GetAllCreatorImageByProfileId(ctx context.Context, arg GetAllCreatorImageByProfileIdParams) ([]GetAllCreatorImageByProfileIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCreatorImageByProfileId,
+		arg.PageOffset,
+		arg.PageLimit,
+		arg.SortBy,
+		arg.SortDir,
+		arg.Published,
+		arg.ProfileID,
+		arg.Search,
+		arg.DateStart,
+		arg.DateEnd,
+		arg.TypeCategoryID,
+		arg.ProductCategoryID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllCreatorImageByProfileIdRow
+	for rows.Next() {
+		var i GetAllCreatorImageByProfileIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.ImageUrl,
+			&i.IsPublished,
+			&i.Price,
+			&i.ProfileID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublisherID,
+			&i.PublisherName,
+			&i.PublisherImage,
+			&i.TypeCategorySubs,
+			&i.ProductCategorySubs,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAllPublishedCreatorImage = `-- name: GetAllPublishedCreatorImage :many

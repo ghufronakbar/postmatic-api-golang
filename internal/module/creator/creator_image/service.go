@@ -4,10 +4,13 @@ package creator_image
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"postmatic-api/internal/module/app/category_creator_image"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/pagination"
+	"postmatic-api/pkg/utils"
 
 	"github.com/google/uuid"
 )
@@ -22,6 +25,138 @@ func NewService(store entity.Store, cat *category_creator_image.CategoryCreatorI
 		store: store,
 		cat:   cat,
 	}
+}
+
+func unmarshalJSONAny(v any, dst any) error {
+	if v == nil {
+		return nil
+	}
+
+	switch t := v.(type) {
+	case []byte:
+		if len(t) == 0 {
+			return nil
+		}
+		return json.Unmarshal(t, dst)
+
+	case string:
+		if t == "" {
+			return nil
+		}
+		return json.Unmarshal([]byte(t), dst)
+
+	case json.RawMessage:
+		if len(t) == 0 {
+			return nil
+		}
+		return json.Unmarshal(t, dst)
+
+	default:
+		// fallback: kalau driver ngasih map/slice (bukan bytes), marshal ulang
+		b, err := json.Marshal(t)
+		if err != nil {
+			return err
+		}
+		if len(b) == 0 {
+			return nil
+		}
+		return json.Unmarshal(b, dst)
+	}
+}
+
+func (s *CreatorImageService) GetCreatorImageByProfileId(
+	ctx context.Context,
+	profileId string,
+	filter GetCreatorImageFilter,
+) ([]CreatorImageResponse, *pagination.Pagination, error) {
+
+	var profileUUID uuid.UUID
+	if profileId != "" {
+		pUUID, _ := uuid.Parse(profileId)
+		profileUUID = pUUID
+	}
+
+	params := entity.GetAllCreatorImageByProfileIdParams{
+		ProfileID:         uuid.NullUUID{UUID: profileUUID, Valid: profileUUID != uuid.Nil},
+		Search:            sql.NullString{String: filter.Search, Valid: filter.Search != ""},
+		SortBy:            sql.NullString{String: filter.SortBy, Valid: filter.SortBy != ""},
+		SortDir:           sql.NullString{String: filter.SortDir, Valid: filter.SortDir != ""},
+		DateStart:         utils.NullStringToNullTime(filter.DateStart),
+		DateEnd:           utils.NullStringToNullTime(filter.DateEnd),
+		TypeCategoryID:    utils.NullInt64ToNullInt64(filter.TypeCategoryID),
+		ProductCategoryID: utils.NullInt64ToNullInt64(filter.ProductCategoryID),
+		PageLimit:         int32(filter.PageLimit),
+		PageOffset:        int32(filter.PageOffset),
+		Published:         utils.NullBoolPtrToNullBool(filter.Published),
+	}
+
+	rows, err := s.store.GetAllCreatorImageByProfileId(ctx, params)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	countParams := entity.CountAllCreatorImageByProfileIdParams{
+		ProfileID:         params.ProfileID,
+		Search:            params.Search,
+		DateStart:         params.DateStart,
+		DateEnd:           params.DateEnd,
+		TypeCategoryID:    params.TypeCategoryID,
+		ProductCategoryID: params.ProductCategoryID,
+		Published:         params.Published,
+	}
+	total, err := s.store.CountAllCreatorImageByProfileId(ctx, countParams)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	pag := pagination.NewPagination(&pagination.PaginationParams{
+		Total: int(total),
+		Page:  filter.Page,
+		Limit: filter.PageLimit,
+	})
+
+	res := make([]CreatorImageResponse, 0, len(rows))
+	for _, r := range rows {
+		// decode jsonb -> []TypeCategorySub / []ProductCategorySub
+		var typeSubs []TypeCategorySub
+		var productSubs []ProductCategorySub
+
+		_ = unmarshalJSONAny(r.TypeCategorySubs, &typeSubs)
+		_ = unmarshalJSONAny(r.ProductCategorySubs, &productSubs)
+
+		var publisher *PublisherSub
+		if r.PublisherID.Valid {
+			// name/image biasanya nullable karena LEFT JOIN
+			name := ""
+			if r.PublisherName.Valid {
+				name = r.PublisherName.String
+			}
+			var img *string
+			if r.PublisherImage.Valid {
+				img = &r.PublisherImage.String
+			}
+			publisher = &PublisherSub{
+				ID:    r.PublisherID.UUID.String(),
+				Name:  name,
+				Image: img,
+			}
+		}
+
+		res = append(res, CreatorImageResponse{
+			ID:                  r.ID,
+			Name:                r.Name,
+			ImageURL:            r.ImageUrl,
+			IsPublished:         r.IsPublished,
+			Price:               r.Price,
+			Publisher:           publisher,
+			TypeCategorySubs:    typeSubs,
+			ProductCategorySubs: productSubs,
+			CreatedAt:           r.CreatedAt.Time,
+			UpdatedAt:           r.UpdatedAt.Time,
+		})
+	}
+
+	return res, &pag, nil
 }
 
 func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input CreateUpdateCreatorImageInput, profileId string) (CreatorImageCreateUpdateDeleteResponse, error) {
