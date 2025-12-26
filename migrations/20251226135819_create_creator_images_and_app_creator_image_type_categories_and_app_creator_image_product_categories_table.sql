@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS creator_images (
     is_published BOOLEAN NOT NULL DEFAULT FALSE,
     is_banned BOOLEAN NOT NULL DEFAULT FALSE,
     banned_reason TEXT,
-    price BIGINT,
+    price BIGINT NOT NULL,
 
 	-- creator profile (if null -> template from app/postmatic)
 	profile_id UUID,

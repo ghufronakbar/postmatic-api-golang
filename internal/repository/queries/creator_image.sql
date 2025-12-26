@@ -5,6 +5,8 @@ AND is_banned = false AND is_published = true;
 -- name: CountAllPublishedCreatorImage :one
 SELECT COUNT(*)::bigint AS total FROM creator_images WHERE deleted_at IS NULL
 AND is_banned = false AND is_published = true;
+
+
 -- name: CreateCreatorImage :one
 WITH ins AS (
   INSERT INTO creator_images (
@@ -92,4 +94,7 @@ ins_type AS (
 SELECT * FROM upd;
 
 -- name: SoftDeleteCreatorImage :exec
-UPDATE creator_images SET deleted_at = NOW() WHERE id = $id;
+UPDATE creator_images SET deleted_at = NOW() WHERE id = $1;
+
+-- name: GetCreatorImageById :one
+SELECT * FROM creator_images WHERE id = $1;

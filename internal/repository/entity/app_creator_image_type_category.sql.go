@@ -7,6 +7,8 @@ package entity
 
 import (
 	"context"
+
+	"github.com/lib/pq"
 )
 
 const countAllAppCreatorImageTypeCategories = `-- name: CountAllAppCreatorImageTypeCategories :one
@@ -119,6 +121,36 @@ func (q *Queries) GetAllAppCreatorImageTypeCategories(ctx context.Context, arg G
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAppCreatorImageTypeCategoriesByIds = `-- name: GetAppCreatorImageTypeCategoriesByIds :many
+SELECT
+  t.id
+FROM app_creator_image_type_categories t
+WHERE t.id = ANY($1::bigint[])
+`
+
+func (q *Queries) GetAppCreatorImageTypeCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error) {
+	rows, err := q.db.QueryContext(ctx, getAppCreatorImageTypeCategoriesByIds, pq.Array(ids))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

@@ -308,7 +308,7 @@ type CreatorImage struct {
 	IsPublished  bool           `json:"is_published"`
 	IsBanned     bool           `json:"is_banned"`
 	BannedReason sql.NullString `json:"banned_reason"`
-	Price        sql.NullInt64  `json:"price"`
+	Price        int64          `json:"price"`
 	ProfileID    uuid.NullUUID  `json:"profile_id"`
 	CreatedAt    sql.NullTime   `json:"created_at"`
 	UpdatedAt    sql.NullTime   `json:"updated_at"`

@@ -8,6 +8,7 @@ import (
 	"postmatic-api/internal/http/handler/account_handler"
 	"postmatic-api/internal/http/handler/app_handler"
 	"postmatic-api/internal/http/handler/business_handler"
+	"postmatic-api/internal/http/handler/creator_handler"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/auth"
 	"postmatic-api/internal/module/account/google_oauth"
@@ -23,6 +24,7 @@ import (
 	"postmatic-api/internal/module/business/business_role"
 	"postmatic-api/internal/module/business/business_rss_subscription"
 	"postmatic-api/internal/module/business/business_timezone_pref"
+	"postmatic-api/internal/module/creator/creator_image"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
@@ -71,6 +73,8 @@ func NewRouter(db *sql.DB) chi.Router {
 	timezoneSvc := timezone.NewTimezoneService()
 	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
 	catCreatorImageSvc := category_creator_image.NewCategoryCreatorImageService(store)
+	// CREATOR
+	creatorImageSvc := creator_image.NewService(store, catCreatorImageSvc)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -90,6 +94,8 @@ func NewRouter(db *sql.DB) chi.Router {
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
 	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
 	catCreatorImageHandler := app_handler.NewCategoryCreatorImageHandler(catCreatorImageSvc)
+	// CREATOR
+	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -142,6 +148,11 @@ func NewRouter(db *sql.DB) chi.Router {
 			})
 			r.Mount("/", catCreatorImageHandler.CategoryCreatorImageRoutes())
 		})
+	})
+
+	r.Route("/creator", func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware)
+		r.Mount("/image", creatorImageHandler.CreatorImageRoutes())
 	})
 
 	return r

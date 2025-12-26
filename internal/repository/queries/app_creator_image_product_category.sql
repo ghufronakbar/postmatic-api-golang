@@ -81,3 +81,9 @@ WHERE
   sqlc.arg(search) = ''
   OR c.indonesian_name ILIKE ('%' || sqlc.arg(search) || '%')
   OR c.english_name ILIKE ('%' || sqlc.arg(search) || '%');
+
+-- name: GetAppCreatorImageProductCategoriesByIds :many
+SELECT
+  t.id
+FROM app_creator_image_product_categories t
+WHERE t.id = ANY(sqlc.arg(ids)::bigint[]);

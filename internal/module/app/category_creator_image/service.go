@@ -3,6 +3,7 @@ package category_creator_image
 
 import (
 	"context"
+	"database/sql"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/pagination"
 )
@@ -98,4 +99,30 @@ func (s *CategoryCreatorImageService) GetCategoryCreatorImageProduct(ctx context
 		})
 	}
 	return responses, &pagination, nil
+}
+
+func (s *CategoryCreatorImageService) GetCategoryCreatorImageProductByIds(ctx context.Context, ids []int64) ([]int64, error) {
+	categories, err := s.store.GetAppCreatorImageProductCategoriesByIds(ctx, ids)
+	if err != nil && err != sql.ErrNoRows {
+		return []int64{}, err
+	}
+
+	if len(categories) == 0 {
+		return []int64{}, nil
+	}
+
+	return categories, nil
+}
+
+func (s *CategoryCreatorImageService) GetCategoryCreatorImageTypeByIds(ctx context.Context, ids []int64) ([]int64, error) {
+	categories, err := s.store.GetAppCreatorImageTypeCategoriesByIds(ctx, ids)
+	if err != nil && err != sql.ErrNoRows {
+		return []int64{}, err
+	}
+
+	if len(categories) == 0 {
+		return []int64{}, nil
+	}
+
+	return categories, nil
 }

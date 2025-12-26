@@ -66,3 +66,9 @@ FROM app_creator_image_type_categories t
 WHERE
   sqlc.arg(search) = ''
   OR t.name ILIKE ('%' || sqlc.arg(search) || '%');
+
+-- name: GetAppCreatorImageTypeCategoriesByIds :many
+SELECT
+  t.id
+FROM app_creator_image_type_categories t
+WHERE t.id = ANY(sqlc.arg(ids)::bigint[]);
