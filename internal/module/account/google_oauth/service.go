@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"strings"
 	"time"
 
@@ -24,6 +25,24 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/api/idtoken"
 )
+
+// allowedFromBase: key -> base URL.
+// from boleh berupa:
+// - key: "dashboard"
+// - key + path/query: "dashboard/xxx?foo=bar"
+// - full url: "https://dashboard.postmatic.id/xxx"
+var allowedFromBase = map[string]string{
+	"postmatic.id":      "https://postmatic.id",
+	"dashboard":         "https://dashboard.postmatic.id",
+	"creator":           "https://creator.postmatic.id",
+	"auth":              "https://auth.postmatic.id",
+	"docs":              "https://docs.postmatic.id",
+	"dashboard-staging": "https://dashboard-staging.postmatic.id",
+	"landing-staging":   "https://landing-staging.postmatic.id",
+	"creator-staging":   "https://creator-staging.postmatic.id",
+	"auth-staging":      "https://auth-staging.postmatic.id",
+	"docs-staging":      "https://docs-staging.postmatic.id",
+}
 
 type GoogleOAuthService struct {
 	store            entity.Store
@@ -57,10 +76,16 @@ func NewService(
 ------------------------------ */
 
 func (s *GoogleOAuthService) GetGoogleAuthURL(ctx context.Context, from string) (GoogleOAuthAuthURLResponse, error) {
+	// normalize + validate from (anti open-redirect)
+	normFrom, err := s.normalizeFrom(from)
+	if err != nil {
+		return GoogleOAuthAuthURLResponse{}, errs.NewBadRequest("GOOGLE_OAUTH_INVALID_FROM")
+	}
+
 	// Scope harus include openid,email,profile di config
 	// State kita sign agar bisa diverifikasi di callback
 	state, err := s.signState(oauthStatePayload{
-		From: from,
+		From: normFrom,
 		Exp:  time.Now().Add(10 * time.Minute).Unix(),
 		N:    uuid.NewString(),
 	})
@@ -93,11 +118,14 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 	if err != nil {
 		return LoginGoogleResponse{}, errs.NewBadRequest("GOOGLE_TOKEN_VERIFY_STATE_FAILED")
 	}
-	input.From = st.From
-	// Optional: pastikan "from" sama dengan yang ada di state
-	if st.From != input.From {
-		return LoginGoogleResponse{}, errs.NewBadRequest("GOOGLE_TOKEN_STATE_MISMATCH")
+
+	// ✅ from sumber kebenaran dari state (Google callback GET tidak membawa "from")
+	// defense-in-depth: validate lagi supaya state tidak bisa mengarah ke domain lain
+	normFrom, err := s.normalizeFrom(st.From)
+	if err != nil {
+		return LoginGoogleResponse{}, errs.NewBadRequest("GOOGLE_OAUTH_INVALID_FROM")
 	}
+	input.From = normFrom
 
 	// 2) exchange code -> token
 	tok, err := s.conf.Exchange(ctx, input.Code)
@@ -261,6 +289,115 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 		ImageUrl:     imageUrl,
 		From:         input.From,
 	}, nil
+}
+
+/* -----------------------------
+   FROM NORMALIZER (allowlist)
+------------------------------ */
+
+// normalizeFrom menerima:
+// - key ("dashboard")
+// - key+path/query ("dashboard/xxx?foo=bar")
+// - full URL ("https://dashboard.postmatic.id/xxx")
+func (s *GoogleOAuthService) normalizeFrom(from string) (string, error) {
+	from = strings.TrimSpace(from)
+	if from == "" {
+		return "", errors.New("empty from")
+	}
+
+	// Full URL mode
+	if strings.HasPrefix(from, "http://") || strings.HasPrefix(from, "https://") {
+		u, err := url.Parse(from)
+		if err != nil {
+			return "", err
+		}
+		if u.Scheme != "http" && u.Scheme != "https" {
+			return "", errors.New("invalid scheme")
+		}
+		if u.Host == "" {
+			return "", errors.New("missing host")
+		}
+		if u.User != nil {
+			return "", errors.New("userinfo not allowed")
+		}
+		u.Fragment = "" // drop fragment
+
+		if !s.isAllowedHost(u.Host) {
+			return "", errors.New("host not allowed")
+		}
+		return u.String(), nil
+	}
+
+	// Key mode: <key>[/path][?query]
+	key := from
+	suffix := ""
+
+	if i := strings.IndexAny(from, "/?"); i != -1 {
+		key = from[:i]
+		suffix = from[i:] // starts with "/" or "?"
+	}
+
+	base, ok := allowedFromBase[key]
+	if !ok {
+		return "", errors.New("unknown from key")
+	}
+
+	baseURL, err := url.Parse(base)
+	if err != nil {
+		return "", err
+	}
+
+	// Optional extra safety: even base mapping must be allowed
+	if !s.isAllowedHost(baseURL.Host) {
+		return "", errors.New("base host not allowed")
+	}
+
+	if suffix == "" {
+		return baseURL.String(), nil
+	}
+
+	// Disallow protocol-relative path ("//evil.com")
+	if strings.HasPrefix(suffix, "//") {
+		return "", errors.New("invalid suffix")
+	}
+
+	su, err := url.Parse(suffix)
+	if err != nil {
+		return "", err
+	}
+
+	// Merge
+	if su.Path != "" {
+		// ensure leading slash
+		if !strings.HasPrefix(su.Path, "/") {
+			su.Path = "/" + su.Path
+		}
+		baseURL.Path = su.Path
+	}
+	baseURL.RawQuery = su.RawQuery
+	baseURL.Fragment = "" // drop fragment
+
+	return baseURL.String(), nil
+}
+
+func (s *GoogleOAuthService) isAllowedHost(host string) bool {
+	// allow hosts from mapping
+	for _, base := range allowedFromBase {
+		u, err := url.Parse(base)
+		if err != nil {
+			continue
+		}
+		if strings.EqualFold(host, u.Host) {
+			return true
+		}
+	}
+
+	// optional: allow localhost for development
+	if strings.HasPrefix(strings.ToLower(host), "localhost") || strings.HasPrefix(strings.ToLower(host), "127.0.0.1") {
+		return true
+	}
+
+	return false
 }
 
 /* -----------------------------
