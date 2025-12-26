@@ -11,7 +11,15 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (h *AuthHandler) SessionRoutes() chi.Router {
+type SessionHandler struct {
+	sessSvc *session.SessionService
+}
+
+func NewSessionHandler(sessSvc *session.SessionService) *SessionHandler {
+	return &SessionHandler{sessSvc: sessSvc}
+}
+
+func (h *SessionHandler) SessionRoutes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Get("/", h.GetSession)
@@ -22,7 +30,7 @@ func (h *AuthHandler) SessionRoutes() chi.Router {
 	return r
 }
 
-func (h *AuthHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
+func (h *SessionHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
@@ -45,7 +53,7 @@ func (h *AuthHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, r, "LOGOUT_ALL_SUCCESS", nil)
 }
 
-func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+func (h *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req session.LogoutInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
@@ -72,7 +80,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, r, "LOGOUT_SUCCESS", res)
 }
 
-func (h *AuthHandler) GetSession(w http.ResponseWriter, r *http.Request) {
+func (h *SessionHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
@@ -96,7 +104,7 @@ func (h *AuthHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, r, "GET_SESSION_SUCCESS", res)
 }
 
-func (h *AuthHandler) GetAllSession(w http.ResponseWriter, r *http.Request) {
+func (h *SessionHandler) GetAllSession(w http.ResponseWriter, r *http.Request) {
 	user, err := middleware.GetUserFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)

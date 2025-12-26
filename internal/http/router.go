@@ -10,6 +10,7 @@ import (
 	"postmatic-api/internal/http/handler/business_handler"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/account/auth"
+	"postmatic-api/internal/module/account/google_oauth"
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/app/image_uploader"
@@ -56,6 +57,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	sessSvc := session.NewService(sessionRepo)
 	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
+	googleSvc := google_oauth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	// BUSINESS
 	busInSvc := business_information.NewService(store, ownedRepo)
 	busKnowledgeSvc := business_knowledge.NewService(store)
@@ -70,8 +72,10 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
-	authHandler := account_handler.NewAuthHandler(authSvc, sessSvc)
+	authHandler := account_handler.NewAuthHandler(authSvc)
+	sessHandler := account_handler.NewSessionHandler(sessSvc)
 	profileHandler := account_handler.NewProfileHandler(profSvc)
+	googleOauthHandler := account_handler.NewGoogleOAuthHandler(googleSvc)
 	// BUSINESS
 	busInHandler := business_handler.NewBusinessInformationHandler(busInSvc, ownedMw)
 	busKnowledgeHandler := business_handler.NewBusinessKnowledgeHandler(busKnowledgeSvc, ownedMw)
@@ -104,9 +108,12 @@ func NewRouter(db *sql.DB) chi.Router {
 		r.Route("/auth", func(r chi.Router) {
 			r.Mount("/", authHandler.AuthRoutes())
 		})
+		r.Route("/google-oauth", func(r chi.Router) {
+			r.Mount("/", googleOauthHandler.GoogleOAuthRoutes())
+		})
 		r.Route("/session", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)
-			r.Mount("/", authHandler.SessionRoutes())
+			r.Mount("/", sessHandler.SessionRoutes())
 		})
 		r.Route("/profile", func(r chi.Router) {
 			r.Use(middleware.AuthMiddleware)

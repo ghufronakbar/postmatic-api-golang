@@ -4,7 +4,6 @@ package account_handler
 import (
 	"net/http"
 	"postmatic-api/internal/module/account/auth"
-	"postmatic-api/internal/module/account/session"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
 
@@ -13,11 +12,10 @@ import (
 
 type AuthHandler struct {
 	authSvc *auth.AuthService
-	sessSvc *session.SessionService
 }
 
-func NewAuthHandler(authSvc *auth.AuthService, sessSvc *session.SessionService) *AuthHandler {
-	return &AuthHandler{authSvc: authSvc, sessSvc: sessSvc}
+func NewAuthHandler(authSvc *auth.AuthService) *AuthHandler {
+	return &AuthHandler{authSvc: authSvc}
 }
 
 func (h *AuthHandler) AuthRoutes() chi.Router {
