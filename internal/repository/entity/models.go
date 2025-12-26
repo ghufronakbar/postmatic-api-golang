@@ -278,6 +278,14 @@ type BusinessRssSubscription struct {
 	AppRssFeedID   uuid.UUID    `json:"app_rss_feed_id"`
 }
 
+type BusinessTimezonePref struct {
+	ID             int32        `json:"id"`
+	BusinessRootID uuid.UUID    `json:"business_root_id"`
+	Timezone       string       `json:"timezone"`
+	CreatedAt      sql.NullTime `json:"created_at"`
+	UpdatedAt      sql.NullTime `json:"updated_at"`
+}
+
 type Profile struct {
 	ID          uuid.UUID      `json:"id"`
 	Name        string         `json:"name"`

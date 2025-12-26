@@ -20,6 +20,7 @@ import (
 	"postmatic-api/internal/module/business/business_product"
 	"postmatic-api/internal/module/business/business_role"
 	"postmatic-api/internal/module/business/business_rss_subscription"
+	"postmatic-api/internal/module/business/business_timezone_pref"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
 	repository "postmatic-api/internal/repository/entity"
@@ -65,6 +66,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	rssSvc := rss.NewRSSService(store)
 	rssSubscriptionSvc := business_rss_subscription.NewService(store, rssSvc)
 	timezoneSvc := timezone.NewTimezoneService()
+	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -76,6 +78,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busRoleHandler := business_handler.NewBusinessRoleHandler(busRoleSvc, ownedMw)
 	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
 	busRssSubscriptionHandler := business_handler.NewBusinessRssSubscriptionHandler(rssSubscriptionSvc, ownedMw)
+	busTimezonePrefHandler := business_handler.NewBusinessTimezonePrefHandler(busTimezonePrefSvc, ownedMw)
 	// APP
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
@@ -94,6 +97,7 @@ func NewRouter(db *sql.DB) chi.Router {
 		r.Mount("/role", busRoleHandler.BusinessRoleRoutes())
 		r.Mount("/product", busProductHandler.BusinessProductRoutes())
 		r.Mount("/rss-subscription", busRssSubscriptionHandler.BusinessRssSubscriptionRoutes())
+		r.Mount("/timezone-pref", busTimezonePrefHandler.BusinessTimezonePrefRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {

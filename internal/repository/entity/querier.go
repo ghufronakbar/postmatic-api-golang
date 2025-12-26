@@ -37,6 +37,7 @@ type Querier interface {
 	GetBusinessRssSubscriptionByIDAndBusinessRootID(ctx context.Context, arg GetBusinessRssSubscriptionByIDAndBusinessRootIDParams) (BusinessRssSubscription, error)
 	GetBusinessRssSubscriptionById(ctx context.Context, id uuid.UUID) (BusinessRssSubscription, error)
 	GetBusinessRssSubscriptionsByBusinessRootID(ctx context.Context, arg GetBusinessRssSubscriptionsByBusinessRootIDParams) ([]GetBusinessRssSubscriptionsByBusinessRootIDRow, error)
+	GetBusinessTimezonePrefByBusinessRootId(ctx context.Context, businessRootID uuid.UUID) (BusinessTimezonePref, error)
 	GetJoinedBusinessesByProfileID(ctx context.Context, arg GetJoinedBusinessesByProfileIDParams) ([]GetJoinedBusinessesByProfileIDRow, error)
 	GetMemberByProfileIdAndBusinessRootId(ctx context.Context, arg GetMemberByProfileIdAndBusinessRootIdParams) (BusinessMember, error)
 	GetMembersByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) ([]GetMembersByBusinessRootIDRow, error)
@@ -61,6 +62,7 @@ type Querier interface {
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 	UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error)
 	UpsertBusinessRoleByBusinessRootID(ctx context.Context, arg UpsertBusinessRoleByBusinessRootIDParams) (BusinessRole, error)
+	UpsertBusinessTimezonePref(ctx context.Context, arg UpsertBusinessTimezonePrefParams) (BusinessTimezonePref, error)
 	VerifyUser(ctx context.Context, id uuid.UUID) (User, error)
 }
 
