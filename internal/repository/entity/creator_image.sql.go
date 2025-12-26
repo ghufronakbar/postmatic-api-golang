@@ -13,7 +13,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const countAllCreatorImageByProfileId = `-- name: CountAllCreatorImageByProfileId :one
+const countAllCreatorImage = `-- name: CountAllCreatorImage :one
 SELECT COUNT(*)::bigint AS total
 FROM creator_images ci
 WHERE
@@ -66,7 +66,7 @@ WHERE
   )
 `
 
-type CountAllCreatorImageByProfileIdParams struct {
+type CountAllCreatorImageParams struct {
 	Published         sql.NullBool  `json:"published"`
 	ProfileID         uuid.NullUUID `json:"profile_id"`
 	Search            interface{}   `json:"search"`
@@ -76,8 +76,8 @@ type CountAllCreatorImageByProfileIdParams struct {
 	ProductCategoryID sql.NullInt64 `json:"product_category_id"`
 }
 
-func (q *Queries) CountAllCreatorImageByProfileId(ctx context.Context, arg CountAllCreatorImageByProfileIdParams) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countAllCreatorImageByProfileId,
+func (q *Queries) CountAllCreatorImage(ctx context.Context, arg CountAllCreatorImageParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllCreatorImage,
 		arg.Published,
 		arg.ProfileID,
 		arg.Search,
@@ -86,18 +86,6 @@ func (q *Queries) CountAllCreatorImageByProfileId(ctx context.Context, arg Count
 		arg.TypeCategoryID,
 		arg.ProductCategoryID,
 	)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
-}
-
-const countAllPublishedCreatorImage = `-- name: CountAllPublishedCreatorImage :one
-SELECT COUNT(*)::bigint AS total FROM creator_images WHERE deleted_at IS NULL
-AND is_banned = false AND is_published = true
-`
-
-func (q *Queries) CountAllPublishedCreatorImage(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countAllPublishedCreatorImage)
 	var total int64
 	err := row.Scan(&total)
 	return total, err
@@ -197,7 +185,7 @@ func (q *Queries) CreateCreatorImage(ctx context.Context, arg CreateCreatorImage
 	return i, err
 }
 
-const getAllCreatorImageByProfileId = `-- name: GetAllCreatorImageByProfileId :many
+const getAllCreatorImage = `-- name: GetAllCreatorImage :many
 WITH p0 AS (
   SELECT
     lower(COALESCE(NULLIF($3,  ''), '')) AS sb_in,
@@ -337,7 +325,7 @@ LIMIT $2
 OFFSET $1
 `
 
-type GetAllCreatorImageByProfileIdParams struct {
+type GetAllCreatorImageParams struct {
 	PageOffset        int32         `json:"page_offset"`
 	PageLimit         int32         `json:"page_limit"`
 	SortBy            interface{}   `json:"sort_by"`
@@ -351,7 +339,7 @@ type GetAllCreatorImageByProfileIdParams struct {
 	ProductCategoryID sql.NullInt64 `json:"product_category_id"`
 }
 
-type GetAllCreatorImageByProfileIdRow struct {
+type GetAllCreatorImageRow struct {
 	ID                  int64          `json:"id"`
 	Name                string         `json:"name"`
 	ImageUrl            string         `json:"image_url"`
@@ -367,8 +355,8 @@ type GetAllCreatorImageByProfileIdRow struct {
 	ProductCategorySubs interface{}    `json:"product_category_subs"`
 }
 
-func (q *Queries) GetAllCreatorImageByProfileId(ctx context.Context, arg GetAllCreatorImageByProfileIdParams) ([]GetAllCreatorImageByProfileIdRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllCreatorImageByProfileId,
+func (q *Queries) GetAllCreatorImage(ctx context.Context, arg GetAllCreatorImageParams) ([]GetAllCreatorImageRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCreatorImage,
 		arg.PageOffset,
 		arg.PageLimit,
 		arg.SortBy,
@@ -385,9 +373,9 @@ func (q *Queries) GetAllCreatorImageByProfileId(ctx context.Context, arg GetAllC
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetAllCreatorImageByProfileIdRow
+	var items []GetAllCreatorImageRow
 	for rows.Next() {
-		var i GetAllCreatorImageByProfileIdRow
+		var i GetAllCreatorImageRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -402,46 +390,6 @@ func (q *Queries) GetAllCreatorImageByProfileId(ctx context.Context, arg GetAllC
 			&i.PublisherImage,
 			&i.TypeCategorySubs,
 			&i.ProductCategorySubs,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getAllPublishedCreatorImage = `-- name: GetAllPublishedCreatorImage :many
-SELECT id, name, image_url, is_published, is_banned, banned_reason, price, profile_id, created_at, updated_at, deleted_at FROM creator_images WHERE deleted_at IS NULL
-AND is_banned = false AND is_published = true
-`
-
-func (q *Queries) GetAllPublishedCreatorImage(ctx context.Context) ([]CreatorImage, error) {
-	rows, err := q.db.QueryContext(ctx, getAllPublishedCreatorImage)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []CreatorImage
-	for rows.Next() {
-		var i CreatorImage
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.ImageUrl,
-			&i.IsPublished,
-			&i.IsBanned,
-			&i.BannedReason,
-			&i.Price,
-			&i.ProfileID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}

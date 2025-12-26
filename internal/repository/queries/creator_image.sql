@@ -1,12 +1,4 @@
--- name: GetAllPublishedCreatorImage :many
-SELECT * FROM creator_images WHERE deleted_at IS NULL
-AND is_banned = false AND is_published = true;
-
--- name: CountAllPublishedCreatorImage :one
-SELECT COUNT(*)::bigint AS total FROM creator_images WHERE deleted_at IS NULL
-AND is_banned = false AND is_published = true;
-
--- name: GetAllCreatorImageByProfileId :many
+-- name: GetAllCreatorImage :many
 WITH p0 AS (
   SELECT
     lower(COALESCE(NULLIF(sqlc.narg(sort_by),  ''), '')) AS sb_in,
@@ -145,7 +137,7 @@ ORDER BY
 LIMIT sqlc.arg(page_limit)
 OFFSET sqlc.arg(page_offset);
 
--- name: CountAllCreatorImageByProfileId :one
+-- name: CountAllCreatorImage :one
 SELECT COUNT(*)::bigint AS total
 FROM creator_images ci
 WHERE

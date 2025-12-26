@@ -76,7 +76,7 @@ func (s *CreatorImageService) GetCreatorImageByProfileId(
 		profileUUID = pUUID
 	}
 
-	params := entity.GetAllCreatorImageByProfileIdParams{
+	params := entity.GetAllCreatorImageParams{
 		ProfileID:         uuid.NullUUID{UUID: profileUUID, Valid: profileUUID != uuid.Nil},
 		Search:            sql.NullString{String: filter.Search, Valid: filter.Search != ""},
 		SortBy:            sql.NullString{String: filter.SortBy, Valid: filter.SortBy != ""},
@@ -90,12 +90,12 @@ func (s *CreatorImageService) GetCreatorImageByProfileId(
 		Published:         utils.NullBoolPtrToNullBool(filter.Published),
 	}
 
-	rows, err := s.store.GetAllCreatorImageByProfileId(ctx, params)
+	rows, err := s.store.GetAllCreatorImage(ctx, params)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, nil, errs.NewInternalServerError(err)
 	}
 
-	countParams := entity.CountAllCreatorImageByProfileIdParams{
+	countParams := entity.CountAllCreatorImageParams{
 		ProfileID:         params.ProfileID,
 		Search:            params.Search,
 		DateStart:         params.DateStart,
@@ -104,7 +104,7 @@ func (s *CreatorImageService) GetCreatorImageByProfileId(
 		ProductCategoryID: params.ProductCategoryID,
 		Published:         params.Published,
 	}
-	total, err := s.store.CountAllCreatorImageByProfileId(ctx, countParams)
+	total, err := s.store.CountAllCreatorImage(ctx, countParams)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, nil, errs.NewInternalServerError(err)
 	}
