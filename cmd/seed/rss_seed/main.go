@@ -16,6 +16,7 @@ import (
 
 	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
 )
 
@@ -44,6 +45,7 @@ type SeedRSS struct {
 }
 
 func main() {
+	_ = godotenv.Load()
 	var (
 		dsn           = flag.String("dsn", os.Getenv("DATABASE_URL"), "Postgres DSN (default: env DATABASE_URL)")
 		runMigrate    = flag.Bool("migrate", true, "Run goose up migrations before seeding")

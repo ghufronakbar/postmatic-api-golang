@@ -1,0 +1,3100 @@
+[
+    {
+        "id": "f716663c-624c-48a7-a1c1-99805d6edef2",
+        "name": "Happy Sandwich Opening Hours",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712443/Crema_Solare_Viso_Sotto_Il_Trucco_Estate_2025__Le_Migliori_Per_Ogni_Pelle_cc4fmj.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.686Z",
+        "updatedAt": "2025-08-16T16:22:16.686Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "9e459413-1a94-46c7-af6a-b4a7d79d9f3c",
+        "name": "KFC Thursday Fried Chicken Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712529/Customizable_Sandwich_Store_Promotion_Design_Template_eppxqf.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.827Z",
+        "updatedAt": "2025-08-16T16:22:16.827Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "6eed1d6a-dcf7-490b-bf5b-17a72dfb045b",
+        "name": "Krispy Kreme Holiday Donuts",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713215/download_1_nh7kon.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.083Z",
+        "updatedAt": "2025-08-16T16:22:17.083Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "2226bc19-416a-445e-be07-55bd59172b33",
+        "name": "FamiCafé Beverage Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712496/download_10_d0grwr.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.207Z",
+        "updatedAt": "2025-08-16T16:22:17.207Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "185c5474-91e0-43d8-ae17-aaaa9794ffec",
+        "name": "Es Kopi Flash Sale",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712493/download_11_vthtl0.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.341Z",
+        "updatedAt": "2025-08-16T16:22:17.341Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "d63efc87-94d4-4d06-9e5f-776344d709f1",
+        "name": "Starbucks Coffee Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712480/download_12_wjjcix.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.485Z",
+        "updatedAt": "2025-08-16T16:22:17.485Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "7d4ace61-90d6-43c5-bc7d-78314c76cac4",
+        "name": "Steal The Moon Mid-Autumn Drink Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712477/download_13_vr01ih.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.629Z",
+        "updatedAt": "2025-08-16T16:22:17.629Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "8393f4b9-8531-488d-a754-64a5893d12d1",
+        "name": "Juyou Sunscreen Creative Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712472/download_14_cwozis.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.817Z",
+        "updatedAt": "2025-08-16T16:22:17.817Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "e2934f5f-7a39-4b2a-9d63-ffab62ff7918",
+        "name": "Realme Neo7 Turbo Ad",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712459/download_15_sewdee.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:17.958Z",
+        "updatedAt": "2025-08-16T16:22:17.958Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "e111cdcb-339f-457f-98af-21a91b94db32",
+        "name": "Fashion and Furniture Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712457/download_16_repffl.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.082Z",
+        "updatedAt": "2025-08-16T16:22:18.082Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "fd7a9b17-fcac-44f2-a5dc-7dae6d8c99b0",
+        "name": "Li-Ning Sporty Chic Outfit",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712456/download_17_gjh13g.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.202Z",
+        "updatedAt": "2025-08-16T16:22:18.202Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "a16279c1-2451-4b7e-b306-d42a76383843",
+        "name": "Luxury Pattern Shirt Ad",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712454/download_18_xoutub.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.340Z",
+        "updatedAt": "2025-08-16T16:22:18.340Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "2608393e-7e02-432c-874d-b9485678e1be",
+        "name": "Nike x The North Face Puffer Jacket",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712453/download_19_al2huz.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.480Z",
+        "updatedAt": "2025-08-16T16:22:18.480Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "998417b9-e675-4580-93fd-4c37bccbda16",
+        "name": "The North Face SS20 Capsule Collection",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713106/download_2_ama844.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.625Z",
+        "updatedAt": "2025-08-16T16:22:18.625Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "7f1ea13a-9edf-4091-b26c-580910501dd8",
+        "name": "JBL Bluetooth Earbuds Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712449/download_20_e0wtki.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.846Z",
+        "updatedAt": "2025-08-16T16:22:18.846Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "d7395a61-fac0-4b42-baba-04561d3481a3",
+        "name": "Xiaomi Smartphone Floating Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712444/download_21_pdlmx0.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:18.970Z",
+        "updatedAt": "2025-08-16T16:22:18.970Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "ec68e18a-62bf-4fbb-8fdf-28c07b8e7918",
+        "name": "Nubank Digital Banking and Card Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712444/download_22_oq2amm.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.108Z",
+        "updatedAt": "2025-08-16T16:22:19.108Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "2e43b2b2-bf3d-4fdf-8527-45732e0c5ed5",
+        "name": "Bizzabo Mobile App Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712434/download_23_le0w1j.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.227Z",
+        "updatedAt": "2025-08-16T16:22:19.227Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "9abb17ea-b4fc-4cbe-8015-ea74d1b1276b",
+        "name": "Mobile Food Ordering App Interface",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712431/download_24_mlfag9.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.370Z",
+        "updatedAt": "2025-08-16T16:22:19.370Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "e1f077bf-d82d-458d-87e2-453f51dcb914",
+        "name": "Zakatpedia Smartphone Tips",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712430/download_25_f8iiph.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.525Z",
+        "updatedAt": "2025-08-16T16:22:19.525Z",
+        "templateImageCategories": [
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "05be48ec-d918-4027-8634-a310e7a316e1",
+        "name": "Berlin Navigation Map",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712429/download_26_xkmebt.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.698Z",
+        "updatedAt": "2025-08-16T16:22:19.698Z",
+        "templateImageCategories": [
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "f91c9e73-3a64-4f94-ad1b-d111157b2976",
+        "name": "iPhone Models Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712428/download_27_bjoejz.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.823Z",
+        "updatedAt": "2025-08-16T16:22:19.823Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "572c7218-b7c8-4fef-abd7-e0dc9b3f7756",
+        "name": "Grolove Multi-Vitamin Bubble Toner",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713240/download_28_xwrzbi.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:19.940Z",
+        "updatedAt": "2025-08-16T16:22:19.940Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "50a621e1-98bb-4597-9b56-d7d24c66941d",
+        "name": "Allie Extra UV Gel Sunscreen",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713094/download_3_texdhj.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.060Z",
+        "updatedAt": "2025-08-16T16:22:20.060Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "b9264510-b717-4b01-9f1d-a1efd3819fd4",
+        "name": "Custom Phone Cases Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713093/download_4_xni4jw.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.195Z",
+        "updatedAt": "2025-08-16T16:22:20.195Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "d9f8785e-b9ca-4a1f-ad23-08568b315dde",
+        "name": "MagSafe Phone Case Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712510/download_5_bu0ypb.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.341Z",
+        "updatedAt": "2025-08-16T16:22:20.341Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "5222493e-f06a-43da-a486-9be3bf3ba083",
+        "name": "Seafood Noodle Winter Edition Poster",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712502/download_6_qsg3tt.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.453Z",
+        "updatedAt": "2025-08-16T16:22:20.453Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "8e0728e8-5958-42b8-9538-a9d328efbc31",
+        "name": "Oliva Moisturizing Hand Cream Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712501/download_7_k6d4ea.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.598Z",
+        "updatedAt": "2025-08-16T16:22:20.598Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "6d384e9b-01d6-4411-b897-52009cf8f491",
+        "name": "Hella Beauty Honey Pomelo Miracle Oils",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712499/download_8_eubyeu.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.732Z",
+        "updatedAt": "2025-08-16T16:22:20.732Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "de212ff0-7761-4747-b2fb-624494938042",
+        "name": "Festive Cupcakes Holiday Promotion",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712497/download_9_odvsnz.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.864Z",
+        "updatedAt": "2025-08-16T16:22:20.864Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "ca7743f6-17b4-4c97-81e7-c3dd36669497",
+        "name": "Jim Rover's Sandwich 50% Discount",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713108/Download_premium_image_of_Festive_cupcakes_Instagram_post_template_editable_social_media_design_about_christmas_tree_xmas_plant_tree_and_cake_12655640_tcyjsi.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:20.989Z",
+        "updatedAt": "2025-08-16T16:22:20.989Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "7caf10ba-5d12-4637-8ed0-dfc0ee5b02df",
+        "name": "New Arrival Smartphone Promotion",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712528/Download_premium_image_of_Sandwich_recipe_poster_template_by_Aew_about_burger_sandwich_snack_bread_and_lunch_14713048_si563a.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.110Z",
+        "updatedAt": "2025-08-16T16:22:21.110Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "18710d03-3e22-453a-a3eb-35705ef4f1fb",
+        "name": "Super Merdeka Sembako Flash Sale",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712446/Download_premium_psd___image_of_Smartphone_screen_mockup_colorful_digital_device_psd_about_torn_paper_hole_paper_hole_phone_mockup_torn_paper_and_ripped_paper_4369574_pal4ev.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.235Z",
+        "updatedAt": "2025-08-16T16:22:21.235Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "48dfc61b-66a2-47f4-9717-f6db9ebd4212",
+        "name": "Ecommerce Banner - T-shirt Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713222/download_x0mce9.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.365Z",
+        "updatedAt": "2025-08-16T16:22:21.365Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "8ab2c133-8695-47b2-a2d6-48067b750a3f",
+        "name": "Feed Special Kemerdekaan Alldaybread",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712487/Ecommerce_Banner_Design_-_Tshirt_Template_Design_balwaq.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.487Z",
+        "updatedAt": "2025-08-16T16:22:21.487Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "bf88162e-34b6-442c-838a-9755d6d90774",
+        "name": "First Kanaphan Edit",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713210/Feed_Special_Kemerdekaan_Alldaybread_i7spfm.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.633Z",
+        "updatedAt": "2025-08-16T16:22:21.633Z",
+        "templateImageCategories": [
+            {
+                "id": "6b93bb2f-3ebf-4876-8088-5cb76668b666",
+                "name": "Entertainment"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "8229d64a-4710-4d17-8e23-a0b36a95e797",
+        "name": "Bakmi Ayam Kecap New Menu",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712475/first_kanaphan_edit_j34wc5.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.779Z",
+        "updatedAt": "2025-08-16T16:22:21.779Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "150020bb-c893-4a4a-a79e-a41da844c1a7",
+        "name": "Porção Super Frango Combo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712525/FnB_Design_sunfki.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:21.896Z",
+        "updatedAt": "2025-08-16T16:22:21.896Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "d343adbe-cc67-447e-8b55-9420e03fd7d9",
+        "name": "Frango Frito Meal Time Post",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712535/Frango_Frito_Chicken_-_Social_Media_-_Joe_Arts_usmkck.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.036Z",
+        "updatedAt": "2025-08-16T16:22:22.036Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "11d6261d-ffab-43e9-83c6-22f4d87faaec",
+                "name": "Interactive"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "ce5a64f4-6052-4559-8dc3-a9682074cc5a",
+        "name": "Frappe Holiday Special",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712534/Frango_Frito_Social_Media_PSD_Edit%C3%A1vel_dx726q.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.159Z",
+        "updatedAt": "2025-08-16T16:22:22.159Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "b03c53b5-2c38-4d75-b52d-538575c35fe9",
+        "name": "Freedom Choice Discount Flyer",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712511/Frappe_Social_Media_Post_Design_kyb2zr.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.284Z",
+        "updatedAt": "2025-08-16T16:22:22.284Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "a696ccf6-50bb-4023-8cbc-4dcca3d5b35f",
+        "name": "Halal Bi Halal Buffet Package",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713211/Freedom_Choice_Discount_Flyer_Poster_Design_wwoya6.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.418Z",
+        "updatedAt": "2025-08-16T16:22:22.418Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "def73940-e47b-4f7f-828e-1019a488420a",
+        "name": "Hello Kitty Poster Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713225/Halal_Bi_Halal_Package_lknopi.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.538Z",
+        "updatedAt": "2025-08-16T16:22:22.538Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "6b93bb2f-3ebf-4876-8088-5cb76668b666",
+                "name": "Entertainment"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "b03a38e2-9e0c-49be-ad55-8d0df7c3cdd8",
+        "name": "Hoodie Manipulation Social Media Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712473/hello_kitty_poster_design_idijpx.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.647Z",
+        "updatedAt": "2025-08-16T16:22:22.647Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "9bf5cdb8-af47-4c39-89fc-c20623e67395",
+        "name": "Mio Mio Fruity Taste Drink",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712513/Macchiato_de_caramelo_izaw68.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.611Z",
+        "updatedAt": "2025-08-16T16:22:23.611Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "794eb501-8dbe-40a6-a82f-72d74bb98f45",
+        "name": "Mockup Device iPhone Business Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713239/marhaban_sddr6f.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.738Z",
+        "updatedAt": "2025-08-16T16:22:23.738Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "cafb1e21-17a9-41b6-b472-fa9346c3a20e",
+        "name": "Multiple Visuelle Phone Display on Books",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712507/Mio_coffee_-_Drink_photography_-_Bluesea_Design_r6pe4w.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.912Z",
+        "updatedAt": "2025-08-16T16:22:23.912Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "4755d858-2804-4a59-968f-a7bb2ec737e2",
+        "name": "Nike Air Force 1 '07 LV8 Poster Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712451/Mockup_Device_Iphone_h7stnc.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.051Z",
+        "updatedAt": "2025-08-16T16:22:24.051Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "bb3662ca-4501-4cc3-bfc7-e2387dd89f4a",
+        "name": "Nike Air Force Limited Edition",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712448/Multiple_visuelle_ibjw3v.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.187Z",
+        "updatedAt": "2025-08-16T16:22:24.187Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "4f16dbdf-99ae-41bf-8888-6c24231fed47",
+        "name": "Mheenimal Bear Milk Frappe Cocoa",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712470/Nike_Air_Force__Nike_Shoes_j6vhrx.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.322Z",
+        "updatedAt": "2025-08-16T16:22:24.322Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "aaaab100-7311-4c5a-b56e-4f5596163f20",
+        "name": "Payday Sale Kilap Premium",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712468/NIKE_AIR_FORCE_1_07_LV8_Poster_Design_efmgz6.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.449Z",
+        "updatedAt": "2025-08-16T16:22:24.449Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "142663ea-546a-4d2f-8d11-cf2634eefe47",
+        "name": "Independence Day Promo Osondoson",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712514/Oh_CoCoa_unvvzj.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.595Z",
+        "updatedAt": "2025-08-16T16:22:24.595Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "8c859ba6-94eb-4b3e-997c-8e58e453fedf",
+        "name": "Poster Kemerdekaan Indonesia ke 79",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713219/Payday_sale_Kilap_Premium_Social_Media_Design_lqenxf.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.739Z",
+        "updatedAt": "2025-08-16T16:22:24.739Z",
+        "templateImageCategories": [
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "6a459191-e32d-43b3-9182-c868d26cae26",
+        "name": "Poster Promosi Buffet Ramadan Modern Putih Pasir Emas dan Coklat",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712480/Poster_cogooq.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:24.880Z",
+        "updatedAt": "2025-08-16T16:22:24.880Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "a8950f62-3dd7-4b96-9f9f-fed22e878eb5",
+        "name": "Poster Nightwolf x Offwhite",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713206/POSTER_DESIGN_tjeqes.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.010Z",
+        "updatedAt": "2025-08-16T16:22:25.010Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "31ee043d-87b6-4ce3-bc53-61b36c1d0a9f",
+                "name": "Fashion"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "49119111-b6a6-47ae-abc7-96d0912cf38c",
+        "name": "Promo Menantea September Ceria",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713214/Poster_Kemerdekaan_Indonesia_ke_79_lo4cqc.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.125Z",
+        "updatedAt": "2025-08-16T16:22:25.125Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "f57cd8d7-91f8-4f5f-88fe-dde91e360c5e",
+        "name": "Promotional design for Instagram post",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713223/Poster_Promosi_Buffet_Ramadan_Modern_Putih_Pasir_Emas_dan_Coklat_hkkkv4.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.254Z",
+        "updatedAt": "2025-08-16T16:22:25.254Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "2ecc4d35-a32c-4361-821c-de0deb00579b",
+        "name": "Social Media - Loja de eletrônicos_celulares - Gustavo Àvalos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712734/Promo_Menantea_September_Ceria_vg6t0o.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.413Z",
+        "updatedAt": "2025-08-16T16:22:25.413Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "93d0611c-cea2-4802-9792-b234a7b857be",
+        "name": "Social Media - Sushi _ Restaurante Japonês - Wendel Costta",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713094/Promotional_design_for_Instagram_post_ohvsxq.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.537Z",
+        "updatedAt": "2025-08-16T16:22:25.537Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "f9765762-edec-419e-b558-b256a6ceb86a",
+        "name": "Undercover Floral Shirt",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713236/Taste_of_Hungary__Vintage_Food_Poster_aioa45.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.324Z",
+        "updatedAt": "2025-08-16T16:22:27.324Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "31ee043d-87b6-4ce3-bc53-61b36c1d0a9f",
+                "name": "Fashion"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "05806130-31df-4c05-9244-4251adeee481",
+        "name": "vista_ Digital Detox Phone",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713205/Tiramisu_Latte_Waffle_-_EPHRAIM_INNOVATION_v79gor.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.458Z",
+        "updatedAt": "2025-08-16T16:22:27.458Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "de6bf86a-0fcc-4561-b775-c71b2911960c",
+                "name": "Technology"
+            },
+            {
+                "id": "6ea7d14d-4653-4777-93b9-c96277ba3737",
+                "name": "Creative Visual"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "a87b8c6b-13ca-4b33-9172-8c94a8aad990",
+        "name": "Wacko Maria Shirt",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712492/Undercover_srvh4l.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.584Z",
+        "updatedAt": "2025-08-16T16:22:27.584Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "31ee043d-87b6-4ce3-bc53-61b36c1d0a9f",
+                "name": "Fashion"
+            },
+            {
+                "id": "6ea7d14d-4653-4777-93b9-c96277ba3737",
+                "name": "Creative Visual"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "6c7514c1-c650-4304-bbf3-4445ba5d4414",
+        "name": "Destiny Sweatshirt Winter Clothing Sale",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712460/vista__Digital_Detox_Phone_-_Junha_Kahm_fmmy7k.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.718Z",
+        "updatedAt": "2025-08-16T16:22:27.718Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "31ee043d-87b6-4ce3-bc53-61b36c1d0a9f",
+                "name": "Fashion"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "b84b5cb3-9ff6-4ff4-99a6-4cc1ef74f0b8",
+        "name": "Avocado Smoothie",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712490/Wacko_Maria_abpnrq.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.846Z",
+        "updatedAt": "2025-08-16T16:22:27.846Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "c235b2da-e5d3-4752-af1c-d5e18b3b8094",
+        "name": "Winter Clothing Sale Banner",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712486/Winter_Clothing_Sale_Banner_Design_sbac5s.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.978Z",
+        "updatedAt": "2025-08-16T16:22:27.978Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "7f386851-32b9-4358-8cae-c61b7ec9a0a7",
+        "name": "Colorful Avocado Poster",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712519/%E0%B8%AA%E0%B8%B5%E0%B9%80%E0%B8%82%E0%B8%B5%E0%B8%A2%E0%B8%A7_%E0%B8%AA%E0%B8%94%E0%B9%83%E0%B8%AA_%E0%B8%AA%E0%B8%99%E0%B8%B8%E0%B8%81%E0%B8%AA%E0%B8%99%E0%B8%B2%E0%B8%99_%E0%B9%80%E0%B8%A1%E0%B8%99%E0%B8%B9_%E0%B8%AD%E0%B8%B0%E0%B9%82%E0%B8%A7%E0%B8%84%E0%B8%B2%E0%B9%82%E0%B8%94_%E0%B9%82%E0%B8%9B%E0%B8%AA%E0%B9%80%E0%B8%95%E0%B8%AD%E0%B8%A3%E0%B9%8C_wshcnp.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:28.112Z",
+        "updatedAt": "2025-08-16T16:22:28.112Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "726ba9b7-4bdb-49fe-9319-37010bf132cf",
+        "name": "template nih bos",
+        "imageUrl": "https://www.rpasukahati.com/wp-content/uploads/2025/05/ayam_geprek.png",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "38c43e77-4259-4a9a-9619-3b8e5b89d386",
+        "deletedAt": null,
+        "createdAt": "2025-10-23T07:30:01.367Z",
+        "updatedAt": "2025-10-23T07:33:07.954Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "f82134ca-3644-41ca-8373-c881fdd59f92",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761212922/uimbehw7dvne4y48ijnl.png",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-23T11:12:14.707Z",
+        "createdAt": "2025-10-23T09:48:43.463Z",
+        "updatedAt": "2025-10-23T11:12:14.708Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "527f7982-55e8-4292-8019-8e44a48fdf3d",
+        "name": "Burger Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761230928/image-1761230925552.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": null,
+        "createdAt": "2025-10-23T14:49:14.972Z",
+        "updatedAt": "2025-10-23T14:49:14.972Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "44d2805e-a075-44d1-b40c-8e2fc0c21b5a",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761263992/f2rxx68i6b2ahrnvosau.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:15.446Z",
+        "createdAt": "2025-10-23T23:59:53.275Z",
+        "updatedAt": "2025-10-24T00:12:15.447Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "d748ca66-9eb9-4b94-b253-040a1c97a27b",
+        "name": "Promo 8.8 Kilap Premium",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713217/8_8_Kilap_Premium_Social_Media_Poster_phiyuu.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:14.747Z",
+        "updatedAt": "2025-08-16T16:22:14.747Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "14e89bd4-af07-404a-ab8b-ffb577b2ad3d",
+        "name": "Avocado Smoothie Special Menu",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712520/Avocado_Ad_laggui.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:14.967Z",
+        "updatedAt": "2025-08-16T16:22:14.967Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "e7d788e4-f4fe-4b59-a674-e1533da56b63",
+        "name": "Rebel Burger Ad",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712530/Burger_Restaurant_Projects____Photos_videos_logos_illustrations_and_branding_mnccee.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.108Z",
+        "updatedAt": "2025-08-16T16:22:15.108Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "203529a6-a9f6-4bbf-a12d-2afe355364ba",
+        "name": "Yakisoba Food Ad",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712428/Cada_detalhe_foi_pensado_para_capturar_a_ess%C3%AAncia_e_a_eleg%C3%A2ncia_da_culin%C3%A1ria_japonesa_destacando_cores_vibrantes_e_uma_tipografia_que_transmite_autenticidade_e_sofistica%C3%A7%C3%A3o__Quer_ver_seu_neg%C3%B3cio_xarr1m.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.301Z",
+        "updatedAt": "2025-08-16T16:22:15.301Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "3f007f2b-b7db-483b-be87-85815605318a",
+        "name": "Caryophy New Year Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713105/CARYOPHY___Key_Visual_Happy_New_Year_agyahx.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.457Z",
+        "updatedAt": "2025-08-16T16:22:15.457Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "54600b55-31e2-4647-ac3f-e872e0b1d04f",
+        "name": "Caryophy Christmas Sale",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713102/CARYOPHY___Key_Visual_Merry_Christmas_vfca6y.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.582Z",
+        "updatedAt": "2025-08-16T16:22:15.582Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "f09754aa-e0e3-4b6f-849b-730a3e623ecc",
+        "name": "Conseda Shower Gel Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712432/Conseda_cosmetics_soft_shower_gel__ALMA__packaging_by_Parvin_enpfhv.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.711Z",
+        "updatedAt": "2025-08-16T16:22:15.711Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "d369628d-78cf-4861-aacd-4df3d2116c2d",
+        "name": "Sunscreen Summer Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712436/Create_content_for_brands_1_g5jzjg.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:15.887Z",
+        "updatedAt": "2025-08-16T16:22:15.887Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "05cb717d-ed26-4f64-9930-e13eaa8671c4",
+        "name": "Renew+ Sunscreen Display",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712435/Create_content_for_brands_2_ivkujm.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.013Z",
+        "updatedAt": "2025-08-16T16:22:16.013Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "f824abb3-845c-436e-87ba-647a6162b709",
+        "name": "Renew SPF 30 Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712437/Create_content_for_brands_gc0h25.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.147Z",
+        "updatedAt": "2025-08-16T16:22:16.147Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "19bd67b9-6b24-475d-a2fb-e5be5de97642",
+        "name": "Sunny Spray Poolside Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712440/Creating_AI-content_for_businesses_worldwide_erf3s5.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.283Z",
+        "updatedAt": "2025-08-16T16:22:16.283Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "cedfd819-6432-4258-94ca-1e6b80f99104",
+        "name": "Allie UV Gel Water Visual",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712433/Creation___ALLIE%E9%98%B2%E6%99%92%E9%9C%9C%E4%BA%A7%E5%93%81%E5%88%9B%E6%84%8F%E6%8B%8D%E6%91%84_rbzfni.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.406Z",
+        "updatedAt": "2025-08-16T16:22:16.406Z",
+        "templateImageCategories": [
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "71df86d9-a798-47b0-8d0b-1f09e620734a",
+        "name": "Grillme Meal Box Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712726/Creative_Poster_qducmp.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.539Z",
+        "updatedAt": "2025-08-16T16:22:16.539Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "9ec14cc4-ef0b-4f27-ba70-9ff5fce9cf2e",
+        "name": "Agustus Merdeka Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712645/Desain_Sosial_Media_pw122v.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:16.953Z",
+        "updatedAt": "2025-08-16T16:22:16.953Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "8fe8b2d2-d9e3-496f-8b40-b48dad8f5850",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761204819/hfu6j9zaycsla0jashcs.png",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "38c43e77-4259-4a9a-9619-3b8e5b89d386",
+        "deletedAt": "2025-10-23T07:34:08.018Z",
+        "createdAt": "2025-10-23T07:33:40.905Z",
+        "updatedAt": "2025-10-23T07:34:08.020Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "70925164-4717-44d1-b505-a8bf3f7729f2",
+        "name": "Monitor Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761217351/image-1761217346128.jpg",
+        "isPublished": false,
+        "price": 20000,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-23T11:10:02.909Z",
+        "createdAt": "2025-10-23T11:02:57.327Z",
+        "updatedAt": "2025-10-23T11:10:02.910Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "41984d47-0d98-4292-8a0c-105126ff5ae5",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264154/ihpvk4jg7b3splbegveb.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": null,
+        "createdAt": "2025-10-24T00:02:35.578Z",
+        "updatedAt": "2025-10-24T00:03:00.502Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "2ed9e347-f055-4fb5-b861-a1f2b55de43b",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264051/pd3pbhbe7qevfxv0nnjw.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:43.715Z",
+        "createdAt": "2025-10-24T00:00:52.300Z",
+        "updatedAt": "2025-10-24T00:12:43.716Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "1c833f39-a3c9-49a9-bd75-42c7d511ceaa",
+        "name": "sedsed",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761662353/image-1761662350282.webp",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-28T14:40:01.281Z",
+        "createdAt": "2025-10-28T14:39:32.398Z",
+        "updatedAt": "2025-10-28T14:40:01.282Z",
+        "templateImageCategories": [
+            {
+                "id": "11d6261d-ffab-43e9-83c6-22f4d87faaec",
+                "name": "Interactive"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "de357c22-57be-43dc-b042-f08257565933",
+        "name": "Grand Opening",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761217667/image-1761217664781.webp",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": null,
+        "createdAt": "2025-10-23T11:08:09.565Z",
+        "updatedAt": "2025-10-23T11:13:50.225Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "6ceff31a-4ede-4359-b7d5-88bb58741310",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264058/dy8kbxnhjd6us5aqgaok.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:49.156Z",
+        "createdAt": "2025-10-24T00:00:59.033Z",
+        "updatedAt": "2025-10-24T00:12:49.156Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "16a4aa0a-aa5d-4aac-98ae-745b20792c20",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264131/xi07punptrvm7ziuefju.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": null,
+        "createdAt": "2025-10-24T00:02:12.140Z",
+        "updatedAt": "2025-10-24T00:03:01.827Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "07674daf-3ddb-412d-965d-dcaa3bfc8d00",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264110/dmeirxjekua5s5sawitt.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:23.240Z",
+        "createdAt": "2025-10-24T00:01:51.226Z",
+        "updatedAt": "2025-10-24T00:12:23.241Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "bc31954b-af6f-460e-a32a-eb4ab97b96c2",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264101/enydi6vcqq535l5pqkbj.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:27.934Z",
+        "createdAt": "2025-10-24T00:01:42.607Z",
+        "updatedAt": "2025-10-24T00:12:27.935Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "55a521d0-0bf7-405b-9fff-ee1c792b267a",
+        "name": "Hoodie Poster Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712483/Hoodie_Manipulation_Social_Media_Design___clothing_social_media_post_pz7x9k.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.769Z",
+        "updatedAt": "2025-08-16T16:22:22.769Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "8d8668e2-1524-4747-8c98-b47861892f2e",
+        "name": "Hoodie Social Media Post",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712484/Hoodie_Poster_Design___Hoodie_Social_Media_banner_design___Clothing_poster_djfjdn.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:22.891Z",
+        "updatedAt": "2025-08-16T16:22:22.891Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "09519de5-11a3-46a0-9697-1f47f761dd59",
+        "name": "Kamu Tea Single Day",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712495/Hoodie_social_media_post_unrq2r.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.032Z",
+        "updatedAt": "2025-08-16T16:22:23.032Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "bd61fec6-c76b-4f32-aab6-d371f4ad4ad4",
+        "name": "Limited-Time Promo Ayam Betutu",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713236/Instagram_Feed_Ramadhan_Promotion_Design_for_Ramen_Restaurant_l8hhb8.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.171Z",
+        "updatedAt": "2025-08-16T16:22:23.171Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "9142525b-3848-4bee-9e40-d5ec6c8a89ef",
+        "name": "Macchiato de Caramelo La Paleta",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713101/Kamu_Tea_Signle_Day_esbqrx.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.316Z",
+        "updatedAt": "2025-08-16T16:22:23.316Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "54529fcc-7965-4765-b196-5e956e79464c",
+        "name": "Ramadan Special Menu Discount",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712730/Limited-Time_Promo_Template_Design_Banner_lz2mtk.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:23.463Z",
+        "updatedAt": "2025-08-16T16:22:23.463Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "d64af269-3dce-47c8-ba0f-01a5698c0f1d",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264116/fnvfz1a1mox4pxammns6.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:54.085Z",
+        "createdAt": "2025-10-24T00:01:57.041Z",
+        "updatedAt": "2025-10-24T00:12:54.086Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "2a52c531-f6ae-478b-9c6b-0bba0528ac4c",
+        "name": "template nih bos",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1761264124/kmkmajcypaol7ne3mlug.png",
+        "isPublished": false,
+        "price": 0,
+        "publisherId": "a927b541-ed85-4cda-8ac0-408954a43196",
+        "deletedAt": "2025-10-24T00:12:58.282Z",
+        "createdAt": "2025-10-24T00:02:05.104Z",
+        "updatedAt": "2025-10-24T00:12:58.283Z",
+        "templateImageCategories": [
+            {
+                "id": "902b5cee-ca96-481f-8947-975920a3beaf",
+                "name": "Announcement"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "5145e5ad-b8fe-4e93-9db2-8b16fc97f6cc",
+        "name": "Social Media - Sushi _ Restaurante Japonês - Wendel Costta",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712466/Social_Media_-_Loja_de_eletr%C3%B4nicos_celulares_-_Gustavo_%C3%80valos_tn0jsv.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.679Z",
+        "updatedAt": "2025-08-16T16:22:25.679Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "1360005b-40d2-4f0c-998b-7f94feda328f",
+        "name": "Social Media Banco Digital_ Instagram Post Template & Social Media Design",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712427/Social_Media_-_Sushi___Restaurante_Japon%C3%AAs_-_Wendel_Costta_1_mmgjpc.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.821Z",
+        "updatedAt": "2025-08-16T16:22:25.821Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "3e6a7cf4-ecf4-4d71-a05d-d5d21bd6dc17",
+        "name": "Social Media Design _ Banco Digital Startup",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712428/Social_Media_-_Sushi___Restaurante_Japon%C3%AAs_-_Wendel_Costta_c8i09j.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:25.941Z",
+        "updatedAt": "2025-08-16T16:22:25.941Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "2e461b99-05fe-42b2-bc7b-b5d4e0ab9aff",
+        "name": "Social Media Design - Quiz Menu yang Bikin Kamu Nanya",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712465/Social_Media_Banco_Digital__Instagram_Post_Template_Social_Media_Design_sgvbtf.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.084Z",
+        "updatedAt": "2025-08-16T16:22:26.084Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "6b93bb2f-3ebf-4876-8088-5cb76668b666",
+                "name": "Entertainment"
+            },
+            {
+                "id": "11d6261d-ffab-43e9-83c6-22f4d87faaec",
+                "name": "Interactive"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "9dccd5a8-1d20-4944-9cb4-dc04a0615c1a",
+        "name": "SeginamM - 18K Bisa Dapat Kopita, Sutejo, Suren",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712462/Social_Media_Design___Banco_Digital_Startup_hrgjtd.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.219Z",
+        "updatedAt": "2025-08-16T16:22:26.219Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "5d559042-4616-4d7f-8e3e-140e2ed0f639",
+        "name": "Chikiez - We Fry It Fresh",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712524/Social_Media_Design_dithoo.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.350Z",
+        "updatedAt": "2025-08-16T16:22:26.350Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "6634e294-6aae-4116-8579-e01569696608",
+        "name": "Malabar Makkan - Chicken Kondattam",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712522/Social_Media_Feed_reh1sj.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.476Z",
+        "updatedAt": "2025-08-16T16:22:26.476Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "e20b8de3-6540-4a13-8335-be5995ac0c95",
+        "name": "Starbucks Merdeka Duo Promo",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712535/Social_Media_Vol_1_-_Yasser_Charisma_n63qwb.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.606Z",
+        "updatedAt": "2025-08-16T16:22:26.606Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "b69acd24-ec16-48e9-a72b-5166aa6c3598",
+        "name": "Sunscreen, Sip, and Slay – All Day, Every Day!",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712646/Spice_lovers_your_perfect_dish_has_arrived_Presenting_our_fiery_and_flavourful_Chicken_Kondattam_rf8mv3.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.745Z",
+        "updatedAt": "2025-08-16T16:22:26.745Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            },
+            {
+                "id": "6b93bb2f-3ebf-4876-8088-5cb76668b666",
+                "name": "Entertainment"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    },
+    {
+        "id": "25e5b5a0-6ffb-4d77-851a-b7994fba6c27",
+        "name": "Goulash Stew Hungary Food",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753713207/Starbucks_Indonesia_s_Instagram_post__Siap-siap_menyambut_Hari_Kemerdekaan_dengan_menikmati_beragam_promo_eksklusif_dari_Starbucks_Mulai_dari_paket_2_minuman_Merdeka_wwabbq.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:26.869Z",
+        "updatedAt": "2025-08-16T16:22:26.869Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "8f6058b1-e6c8-4056-88b9-bc451dcdb3ac",
+                "name": "Informational"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "de41fb73-93e9-418c-a285-79d9c254e76b",
+                "indonesianName": "snack"
+            }
+        ]
+    },
+    {
+        "id": "548d25da-0dff-4d08-b231-792586a02358",
+        "name": "Tiramisu Latte",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712441/Sunscreen_Sip_and_Slay_All_Day_Every_Day_kjxwih.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.002Z",
+        "updatedAt": "2025-08-16T16:22:27.002Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            },
+            {
+                "id": "99a2e262-408d-420d-8084-5f5a07c96cdd",
+                "name": "Seasonal"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "965b34d2-dd1a-43a1-8b44-c50c58a5d103",
+                "indonesianName": "makanan"
+            }
+        ]
+    },
+    {
+        "id": "96a92a6f-de42-471b-902b-382b779dfdb4",
+        "name": "Green Potter T-shirt",
+        "imageUrl": "https://res.cloudinary.com/dudo4q4je/image/upload/v1753712489/T-shirt_Social_Media_Post_Design_-_Mojahidul_Islam_giijbn.jpg",
+        "isPublished": true,
+        "price": 0,
+        "publisherId": null,
+        "deletedAt": null,
+        "createdAt": "2025-08-16T16:22:27.189Z",
+        "updatedAt": "2025-08-16T16:22:27.189Z",
+        "templateImageCategories": [
+            {
+                "id": "ab4627d8-28e6-46bc-85d9-18e0fe9da752",
+                "name": "Promotional"
+            },
+            {
+                "id": "cfdf3884-3779-42b1-9600-1187696960fc",
+                "name": "Product Showcase"
+            }
+        ],
+        "templateProductCategories": [
+            {
+                "id": "cf7fdbbe-78f7-4198-b6ad-a4f61a307820",
+                "indonesianName": "minuman"
+            }
+        ]
+    }
+]
