@@ -70,6 +70,15 @@ type Config struct {
 	OAUTH_GOOGLE_CLIENT_SECRET string
 	OAUTH_GOOGLE_SECRET        string
 	OAUTH_GOOGLE_REDIRECT_URL  string
+
+	// S3
+	S3_REGION                  string
+	S3_ENDPOINT_URL            string
+	S3_ACCESS_KEY_ID           string
+	S3_SECRET_ACCESS_KEY       string
+	S3_BUCKET                  string
+	S3_PRESIGN_EXPIRES_SECONDS time.Duration
+	S3_PUBLIC_BASE_URL         string
 }
 
 func Load() *Config {
@@ -95,6 +104,12 @@ func Load() *Config {
 	jwtRefreshTokenRenewalDuration := time.Duration(jwtRefreshTokenRenewal) * time.Hour * 24
 	jwtCreateAccountTokenExpiredDuration := time.Duration(jwtCreateAccountTokenExpired) * time.Minute
 	canResendEmailAfterDuration := int64(canResendEmailAfter * 60)
+
+	s3PresignExpiresInt, err := strconv.Atoi(getEnv("S3_PRESIGN_EXPIRES_SECONDS"))
+	if err != nil {
+		panic("ENV S3_PRESIGN_EXPIRES_SECONDS is required number")
+	}
+	s3PresignExpiresDuration := time.Duration(s3PresignExpiresInt) * time.Second
 
 	return &Config{
 		// COMMON
@@ -155,6 +170,15 @@ func Load() *Config {
 		OAUTH_GOOGLE_CLIENT_SECRET: getEnv("OAUTH_GOOGLE_CLIENT_SECRET"),
 		OAUTH_GOOGLE_SECRET:        getEnv("OAUTH_GOOGLE_SECRET"),
 		OAUTH_GOOGLE_REDIRECT_URL:  getEnv("OAUTH_GOOGLE_REDIRECT_URL"),
+
+		// S3
+		S3_REGION:                  getEnv("S3_REGION"),
+		S3_ENDPOINT_URL:            getEnv("S3_ENDPOINT_URL"),
+		S3_ACCESS_KEY_ID:           getEnv("S3_ACCESS_KEY_ID"),
+		S3_SECRET_ACCESS_KEY:       getEnv("S3_SECRET_ACCESS_KEY"),
+		S3_BUCKET:                  getEnv("S3_BUCKET"),
+		S3_PRESIGN_EXPIRES_SECONDS: s3PresignExpiresDuration,
+		S3_PUBLIC_BASE_URL:         getEnvOptional("S3_PUBLIC_BASE_URL", ""),
 	}
 }
 
@@ -163,4 +187,11 @@ func getEnv(key string) string {
 		return value
 	}
 	panic("ENV " + key + " is required")
+}
+
+func getEnvOptional(key string, def string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return def
 }

@@ -27,6 +27,7 @@ import (
 	"postmatic-api/internal/module/creator/creator_image"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/s3_uploader"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	ownedBusinessRepo "postmatic-api/internal/repository/redis/owned_business_repository"
@@ -56,6 +57,10 @@ func NewRouter(db *sql.DB) chi.Router {
 	if err != nil {
 		panic("Cannot connect to Cloudinary" + err.Error())
 	}
+	s3Svc, err := s3_uploader.NewService(cfg)
+	if err != nil {
+		panic("Cannot connect to S3" + err.Error())
+	}
 	// ACCOUNT
 	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
 	sessSvc := session.NewService(sessionRepo)
@@ -67,7 +72,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
 	// APP
-	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, store)
+	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, s3Svc, store)
 	rssSvc := rss.NewRSSService(store)
 	rssSubscriptionSvc := business_rss_subscription.NewService(store, rssSvc)
 	timezoneSvc := timezone.NewTimezoneService()

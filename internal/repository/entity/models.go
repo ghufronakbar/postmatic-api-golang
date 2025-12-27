@@ -147,6 +147,7 @@ type ImageProvider string
 
 const (
 	ImageProviderCloudinary ImageProvider = "cloudinary"
+	ImageProviderS3         ImageProvider = "s3"
 )
 
 func (e *ImageProvider) Scan(src interface{}) error {

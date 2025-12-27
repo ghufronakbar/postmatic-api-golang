@@ -7,8 +7,10 @@ import (
 	"io"
 	"net/http"
 	"postmatic-api/internal/module/app/image_uploader"
+	"postmatic-api/internal/module/headless/s3_uploader"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
+	"postmatic-api/pkg/utils"
 	"strings"
 	"time"
 
@@ -27,6 +29,7 @@ func (h *ImageUploaderHandler) ImageUploaderRoutes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/upload-single-image", h.UploadSingleImage)
+	r.Post("/presign-upload-image", h.PresignUploadImage)
 
 	return r
 }
@@ -91,4 +94,19 @@ func (h *ImageUploaderHandler) UploadSingleImage(w http.ResponseWriter, r *http.
 
 	response.OK(w, r, "SUCCESS_UPLOAD_IMAGE", upRes)
 
+}
+
+func (h *ImageUploaderHandler) PresignUploadImage(w http.ResponseWriter, r *http.Request) {
+	var req s3_uploader.PresignUploadImageInput
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
+		return
+	}
+
+	res, err := h.imageUploaderService.PresignUploadImage(r.Context(), req)
+	if err != nil {
+		response.Error(w, r, err, nil)
+		return
+	}
+	response.OK(w, r, "SUCCESS_PRESIGN_UPLOAD_IMAGE", res)
 }
