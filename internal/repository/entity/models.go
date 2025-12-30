@@ -55,6 +55,48 @@ func (ns NullAuthProvider) Value() (driver.Value, error) {
 	return string(ns.AuthProvider), nil
 }
 
+type BusinessImageContentType string
+
+const (
+	BusinessImageContentTypePersonal  BusinessImageContentType = "personal"
+	BusinessImageContentTypeGenerated BusinessImageContentType = "generated"
+)
+
+func (e *BusinessImageContentType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = BusinessImageContentType(s)
+	case string:
+		*e = BusinessImageContentType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for BusinessImageContentType: %T", src)
+	}
+	return nil
+}
+
+type NullBusinessImageContentType struct {
+	BusinessImageContentType BusinessImageContentType `json:"business_image_content_type"`
+	Valid                    bool                     `json:"valid"` // Valid is true if BusinessImageContentType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullBusinessImageContentType) Scan(value interface{}) error {
+	if value == nil {
+		ns.BusinessImageContentType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.BusinessImageContentType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullBusinessImageContentType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.BusinessImageContentType), nil
+}
+
 type BusinessMemberRole string
 
 const (
@@ -217,6 +259,20 @@ type AppRssFeed struct {
 	DeletedAt        sql.NullTime `json:"deleted_at"`
 	CreatedAt        time.Time    `json:"created_at"`
 	UpdatedAt        time.Time    `json:"updated_at"`
+}
+
+type BusinessImageContent struct {
+	ID                int64                    `json:"id"`
+	ImageUrls         []string                 `json:"image_urls"`
+	Caption           sql.NullString           `json:"caption"`
+	Type              BusinessImageContentType `json:"type"`
+	ReadyToPost       bool                     `json:"ready_to_post"`
+	Category          string                   `json:"category"`
+	BusinessProductID sql.NullInt64            `json:"business_product_id"`
+	BusinessRootID    int64                    `json:"business_root_id"`
+	CreatedAt         sql.NullTime             `json:"created_at"`
+	UpdatedAt         sql.NullTime             `json:"updated_at"`
+	DeletedAt         sql.NullTime             `json:"deleted_at"`
 }
 
 type BusinessKnowledge struct {

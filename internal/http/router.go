@@ -18,6 +18,7 @@ import (
 	"postmatic-api/internal/module/app/image_uploader"
 	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/app/timezone"
+	"postmatic-api/internal/module/business/business_image_content"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
 	"postmatic-api/internal/module/business/business_product"
@@ -76,6 +77,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busKnowledgeSvc := business_knowledge.NewService(store)
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
+	busImageContentSvc := business_image_content.NewService(store)
 	// APP
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, s3Svc, store)
 	rssSvc := rss.NewRSSService(store)
@@ -99,6 +101,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busProductHandler := business_handler.NewBusinessProductHandler(busProductSvc, ownedMw)
 	busRssSubscriptionHandler := business_handler.NewBusinessRssSubscriptionHandler(rssSubscriptionSvc, ownedMw)
 	busTimezonePrefHandler := business_handler.NewBusinessTimezonePrefHandler(busTimezonePrefSvc, ownedMw)
+	busImageContentHandler := business_handler.NewBusinessImageContentHandler(busImageContentSvc, ownedMw)
 	// APP
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
@@ -124,6 +127,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 		r.Mount("/product", busProductHandler.BusinessProductRoutes())
 		r.Mount("/rss-subscription", busRssSubscriptionHandler.BusinessRssSubscriptionRoutes())
 		r.Mount("/timezone-pref", busTimezonePrefHandler.BusinessTimezonePrefRoutes())
+		r.Mount("/image-content", busImageContentHandler.BusinessImageContentRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {
