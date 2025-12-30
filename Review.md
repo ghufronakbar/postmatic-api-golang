@@ -392,7 +392,7 @@ linters-settings:
 
 ---
 
-### T7: Tidak Ada CI/CD Pipeline [HIGH]
+### T7: Tidak Ada CI/CD Pipeline [HIGH] [SOON]
 
 **Bukti:**
 Tidak ditemukan file `.github/workflows/`, `Jenkinsfile`, atau CI configuration lainnya.
@@ -426,7 +426,7 @@ jobs:
 
 ---
 
-### T8: Error Handling Tidak Konsisten [MEDIUM]
+### T8: Error Handling Tidak Konsisten [MEDIUM] [NEED_RESOLVE]
 
 **Bukti:**
 
@@ -456,7 +456,7 @@ _ = godotenv.Load() // ignore: .env optional in production
 
 ---
 
-### T9: Goroutine Leak Potential [MEDIUM]
+### T9: Goroutine Leak Potential [MEDIUM] [NEED_RESOLVE]
 
 **Bukti:**
 `auth/service.go` (baris 526-536):
@@ -494,7 +494,7 @@ Atau lebih baik: gunakan worker pool / message queue.
 
 ---
 
-### T10: Context Timeout Tidak Dikonfigurasi [MEDIUM]
+### T10: Context Timeout Tidak Dikonfigurasi [MEDIUM] [NEED_RESOLVE]
 
 **Bukti:**
 External calls tanpa timeout:
