@@ -15,6 +15,7 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
@@ -46,7 +47,7 @@ var allowedFromBase = map[string]string{
 
 type GoogleOAuthService struct {
 	store            entity.Store
-	mailer           mailer.MailerService
+	queue            queue.MailerProducer
 	cfg              config.Config
 	sessionRepo      *sessRepo.SessionRepository
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
@@ -56,7 +57,7 @@ type GoogleOAuthService struct {
 
 func NewService(
 	store entity.Store,
-	mailer mailer.MailerService,
+	queue queue.MailerProducer,
 	cfg config.Config,
 	sessionRepo *sessRepo.SessionRepository,
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo,
@@ -65,7 +66,7 @@ func NewService(
 	oauthConf := cfg.GoogleOAuthConfig()
 	return &GoogleOAuthService{
 		store:            store,
-		mailer:           mailer,
+		queue:            queue,
 		cfg:              cfg,
 		sessionRepo:      sessionRepo,
 		emailLimiterRepo: emailLimiterRepo,
@@ -220,10 +221,17 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 			userGoogleFound = true
 			return nil
 		})
-		// TODO: send welcome email
 		if e != nil {
 			return LoginGoogleResponse{}, errs.NewInternalServerError(e)
 		}
+		// ENQUEUE WELCOME EMAIL
+		ctxQ, cancelQ := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelQ()
+		s.queue.EnqueueWelcomeEmail(ctxQ, mailer.WelcomeInputDTO{
+			Email: profile.Email,
+			Name:  profile.Name,
+			From:  normFrom,
+		})
 	}
 
 	// 7) profile ada tapi belum ada user google -> buat user google
@@ -246,10 +254,17 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 			targetUser = user
 			return nil
 		})
-		// TODO: send welcome email
 		if e != nil {
 			return LoginGoogleResponse{}, errs.NewInternalServerError(e)
 		}
+		// ENQUEUE WELCOME EMAIL
+		ctxQ, cancelQ := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelQ()
+		s.queue.EnqueueWelcomeEmail(ctxQ, mailer.WelcomeInputDTO{
+			Email: profile.Email,
+			Name:  profile.Name,
+			From:  normFrom,
+		})
 	}
 
 	// 8) final imageUrl (kalau profile kosong tapi google ada picture, boleh update kemudian kalau kamu mau)

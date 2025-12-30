@@ -9,6 +9,7 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
@@ -22,7 +23,7 @@ import (
 
 type AuthService struct {
 	store            entity.Store
-	mailer           mailer.MailerService
+	queue            queue.MailerProducer
 	cfg              config.Config
 	sessionRepo      *sessRepo.SessionRepository
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
@@ -30,10 +31,10 @@ type AuthService struct {
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, sessionRepo *sessRepo.SessionRepository, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *AuthService {
+func NewService(store entity.Store, queue queue.MailerProducer, cfg config.Config, sessionRepo *sessRepo.SessionRepository, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *AuthService {
 	return &AuthService{
 		store:            store,
-		mailer:           mailer,
+		queue:            queue,
 		cfg:              cfg,
 		sessionRepo:      sessionRepo,
 		emailLimiterRepo: emailLimiterRepo,
@@ -49,6 +50,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 
 	var finalProfile entity.Profile // Variable untuk menampung hasil dari dalam transaksi
+	var createAccountToken string
 
 	// PANGGIL TRANSAKSI
 	// Semua yang ada di dalam fungsi ini bersifat ATOMIC (All or Nothing)
@@ -97,22 +99,11 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		createAccountToken, e := s.tm.GenerateCreateAccountToken(token.GenerateCreateAccountTokenInput{
+		createAccountToken, e = s.tm.GenerateCreateAccountToken(token.GenerateCreateAccountTokenInput{
 			ID:       profile.ID.String(),
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: nil,
-		})
-		if e != nil {
-			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
-		}
-
-		// TODO: add to queue instead synchronous (and place outside db transaction)
-		e = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
-			Name:  profile.Name,
-			To:    profile.Email,
-			Token: createAccountToken,
-			From:  input.From,
 		})
 		if e != nil {
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
@@ -126,6 +117,19 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	if err != nil {
 		// Error sudah dibungkus dari dalam ExecTx
 		return RegisterResponse{}, err
+	}
+
+	// SEND EMAIL IN QUEUE
+	ctxQ, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	e = s.queue.EnqueueUserVerification(ctxQ, mailer.VerificationInputDTO{
+		Name:  finalProfile.Name,
+		To:    finalProfile.Email,
+		Token: createAccountToken,
+		From:  input.From,
+	})
+	if e != nil {
+		logger.From(ctx).Warn("enqueue user verification failed", "err", e)
 	}
 
 	//  SET RATE LIMITER BARU
@@ -228,16 +232,17 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
 
-		// Kirim Email
-		// TODO: add to queue instead synchronous
-		err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+		// Enqueue User Verification
+		ctxQ, cancel := context.WithTimeout(ctx, 2*time.Second)
+		defer cancel()
+		err = s.queue.EnqueueUserVerification(ctxQ, mailer.VerificationInputDTO{
 			Name:  profile.Name,
 			To:    profile.Email,
 			Token: createAccountToken,
 			From:  input.From,
 		})
 		if err != nil {
-			return LoginResponse{}, errs.NewInternalServerError(err)
+			logger.From(ctx).Warn("enqueue user verification failed", "err", err)
 		}
 
 		// SET LIMITER (PENTING)
@@ -572,17 +577,16 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
 
-	// GO ROUTINE FOR SENDING EMAIL IN BACKGROUND
-	// TODO: add to queue instead of using go routine
-	go func() {
-		ctxTo, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		s.mailer.SendWelcomeEmail(ctxTo, mailer.WelcomeInputDTO{
-			Name:  *valid.Name,
-			Email: *valid.Email,
-			From:  input.From,
-		})
-	}()
+	ctxQ, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	if err := s.queue.EnqueueWelcomeEmail(ctxQ, mailer.WelcomeInputDTO{
+		Name:  *valid.Name,
+		Email: *valid.Email,
+		From:  input.From,
+	}); err != nil {
+		logger.From(ctx).Warn("enqueue welcome email failed", "err", err)
+	}
 
 	return VerifyCreateAccountResponse{
 		ID:           valid.ID,
@@ -670,8 +674,10 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
 	}
 
-	// TODO: add to queue instead synchronous
-	err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+	// Enqueue User Verification
+	ctxQ, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+	err = s.queue.EnqueueUserVerification(ctxQ, mailer.VerificationInputDTO{
 		Name:  profile.Name,
 		To:    profile.Email,
 		Token: token,

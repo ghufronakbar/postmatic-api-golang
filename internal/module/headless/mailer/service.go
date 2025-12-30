@@ -26,7 +26,12 @@ type MailerService struct {
 	cfg    *config.Config
 }
 
-func NewService(cfg *config.Config) *MailerService {
+type Mailer interface {
+	SendWelcomeEmail(ctx context.Context, input WelcomeInputDTO) error
+	SendVerificationEmail(ctx context.Context, input VerificationInputDTO) error
+}
+
+func NewService(cfg *config.Config) Mailer {
 	d := gomail.NewDialer(
 		cfg.SMTP_HOST,
 		cfg.SMTP_PORT,
@@ -34,6 +39,7 @@ func NewService(cfg *config.Config) *MailerService {
 		cfg.SMTP_PASS,
 	)
 
+	// ✅ return *MailerService sebagai Mailer (interface)
 	return &MailerService{
 		dialer: d,
 		cfg:    cfg,
@@ -59,6 +65,9 @@ var funcMap = template.FuncMap{
 }
 
 func (s *MailerService) sendEmail(ctx context.Context, input SendEmailInput) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	m := gomail.NewMessage()
 	m.SetHeader("From", s.cfg.SMTP_SENDER)
 	m.SetHeader("To", input.To)

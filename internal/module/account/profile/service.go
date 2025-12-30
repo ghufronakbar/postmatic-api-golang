@@ -8,9 +8,11 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/logger"
 
 	"postmatic-api/pkg/utils"
 
@@ -21,17 +23,17 @@ import (
 
 type ProfileService struct {
 	store            entity.Store
-	mailer           mailer.MailerService
+	queue            queue.MailerProducer
 	cfg              config.Config
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
 	tm               token.TokenMaker
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *ProfileService {
+func NewService(store entity.Store, queue queue.MailerProducer, cfg config.Config, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *ProfileService {
 	return &ProfileService{
 		store:            store,
-		mailer:           mailer,
+		queue:            queue,
 		cfg:              cfg,
 		emailLimiterRepo: emailLimiterRepo,
 		tm:               tm,
@@ -293,14 +295,16 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 
 		// 3. KIRIM EMAIL (Kirim JWT Token, bukan User ID)
 		// TODO: add to queue instead synchronous (and place outside db transaction)
-		err = s.mailer.SendVerificationEmail(ctx, mailer.VerificationInputDTO{
+		ctxQ, cancelQ := context.WithTimeout(ctx, 5*time.Second)
+		defer cancelQ()
+		err = s.queue.EnqueueUserVerification(ctxQ, mailer.VerificationInputDTO{
 			Name:  profile.Name,
 			To:    profile.Email,
 			Token: createAccountToken,
 			From:  input.From,
 		})
 		if err != nil {
-			return err
+			logger.From(ctx).Error("Failed to enqueue user verification", "error", err)
 		}
 
 		// 4. Simpan Limiter (Gunakan Email)

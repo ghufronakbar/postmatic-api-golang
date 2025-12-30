@@ -26,7 +26,7 @@ import (
 	"postmatic-api/internal/module/business/business_timezone_pref"
 	"postmatic-api/internal/module/creator/creator_image"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
-	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/s3_uploader"
 	"postmatic-api/internal/module/headless/token"
 	repository "postmatic-api/internal/repository/entity"
@@ -35,12 +35,13 @@ import (
 	sessionRepo "postmatic-api/internal/repository/redis/session_repository"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/hibiken/asynq"
 )
 
-func NewRouter(db *sql.DB) chi.Router {
+func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Router {
 	// 1. =========== INITIAL REPOSITORY ===========
 	store := repository.NewStore(db)
-	cfg := config.Load()
+
 	rdb, err := config.ConnectRedis(cfg)
 	if err != nil {
 		panic("Cannot connect to Redis" + err.Error())
@@ -54,7 +55,6 @@ func NewRouter(db *sql.DB) chi.Router {
 	// 2. =========== INITIAL SERVICE ===========
 	// HEADLESS
 	tokenSvc := token.NewTokenMaker(cfg)
-	mailerSvc := mailer.NewService(cfg)
 	cldSvc, err := cloudinary_uploader.NewService(cfg)
 	if err != nil {
 		panic("Cannot connect to Cloudinary" + err.Error())
@@ -63,11 +63,14 @@ func NewRouter(db *sql.DB) chi.Router {
 	if err != nil {
 		panic("Cannot connect to S3" + err.Error())
 	}
+	// ✅ asynq client untuk enqueue
+	queueProducer := queue.NewProducer(asynqClient)
+
 	// ACCOUNT
-	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
+	authSvc := auth.NewService(store, queueProducer, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
 	sessSvc := session.NewService(sessionRepo, *tokenSvc)
-	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo, *tokenSvc)
-	googleSvc := google_oauth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
+	profSvc := profile.NewService(store, queueProducer, *cfg, emailLimiterRepo, *tokenSvc)
+	googleSvc := google_oauth.NewService(store, queueProducer, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
 	// BUSINESS
 	busInSvc := business_information.NewService(store, ownedRepo)
 	busKnowledgeSvc := business_knowledge.NewService(store)
