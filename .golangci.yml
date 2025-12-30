@@ -1,0 +1,24 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - ineffassign
+    - gosec
+    - bodyclose
+    - contextcheck
+    - nilerr
+    - errorlint
+
+  settings:
+    errcheck:
+      check-blank: true
+    gosec:
+      excludes:
+        - G104

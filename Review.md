@@ -352,7 +352,7 @@ func init() {
 
 ---
 
-### T6: Tidak Ada Linter Configuration [HIGH]
+### T6: Tidak Ada Linter Configuration [HIGH] [NEED_RESOLVE]
 
 **Bukti:**
 Tidak ditemukan file `.golangci.yml` atau `.golangci.yaml` di repository.
