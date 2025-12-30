@@ -1,4 +1,4 @@
-// pkg/token/token.go
+// internal/module/headless/token/service.go
 package token
 
 import (
@@ -24,40 +24,60 @@ type RefreshTokenClaims struct {
 	jwt.RegisteredClaims
 }
 
+type TokenMaker struct {
+	accessSecret        []byte
+	refreshSecret       []byte
+	createAccountSecret []byte
+	accessTTL           time.Duration
+	refreshTTL          time.Duration
+	createAccountTTL    time.Duration
+}
+
+func NewTokenMaker(cfg *config.Config) *TokenMaker {
+	return &TokenMaker{
+		accessSecret:        []byte(cfg.JWT_ACCESS_TOKEN_SECRET),
+		refreshSecret:       []byte(cfg.JWT_REFRESH_TOKEN_SECRET),
+		createAccountSecret: []byte(cfg.JWT_CREATE_ACCOUNT_TOKEN_SECRET),
+		accessTTL:           cfg.JWT_ACCESS_TOKEN_EXPIRED,
+		refreshTTL:          cfg.JWT_REFRESH_TOKEN_EXPIRED,
+		createAccountTTL:    cfg.JWT_CREATE_ACCOUNT_TOKEN_EXPIRED,
+	}
+}
+
 // JWT AUTH
-func GenerateAccessToken(ID, email, name string, imageUrl *string) (string, error) {
-	expirationTime := time.Now().Add(config.Load().JWT_ACCESS_TOKEN_EXPIRED)
+func (tm *TokenMaker) GenerateAccessToken(input GenerateAccessTokenInput) (string, error) {
+	expirationTime := time.Now().Add(tm.accessTTL)
 	claims := &Claims{
-		ID:       ID,
-		Email:    email,
-		Name:     name,
-		ImageUrl: imageUrl,
+		ID:       input.ID,
+		Email:    input.Email,
+		Name:     input.Name,
+		ImageUrl: input.ImageUrl,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.Load().JWT_ACCESS_TOKEN_SECRET))
+	return token.SignedString(tm.accessSecret)
 }
 
-func GenerateRefreshToken(ID, email string) (string, error) {
-	expirationTime := time.Now().Add(config.Load().JWT_REFRESH_TOKEN_EXPIRED)
+func (tm *TokenMaker) GenerateRefreshToken(input GenerateRefreshTokenInput) (string, error) {
+	expirationTime := time.Now().Add(tm.refreshTTL)
 	claims := &RefreshTokenClaims{
-		ID:    ID,
-		Email: email,
+		ID:    input.ID,
+		Email: input.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.Load().JWT_REFRESH_TOKEN_SECRET))
+	return token.SignedString(tm.refreshSecret)
 }
 
-func ValidateAccessToken(tokenString string) (*Claims, error) {
+func (tm *TokenMaker) ValidateAccessToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Load().JWT_ACCESS_TOKEN_SECRET), nil
+		return tm.accessSecret, nil
 	})
 	if err != nil {
 		return nil, err
@@ -68,9 +88,9 @@ func ValidateAccessToken(tokenString string) (*Claims, error) {
 	return token.Claims.(*Claims), nil
 }
 
-func ValidateRefreshToken(tokenString string) (*Claims, error) {
+func (tm *TokenMaker) ValidateRefreshToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Load().JWT_REFRESH_TOKEN_SECRET), nil
+		return tm.refreshSecret, nil
 	})
 	if err != nil {
 		return nil, err
@@ -83,25 +103,25 @@ func ValidateRefreshToken(tokenString string) (*Claims, error) {
 
 // JWT CREATE ACCOUNT
 
-func GenerateCreateAccountToken(ID, email, name string, imageUrl *string) (string, error) {
-	expirationTime := time.Now().Add(config.Load().JWT_CREATE_ACCOUNT_TOKEN_EXPIRED)
+func (tm *TokenMaker) GenerateCreateAccountToken(input GenerateCreateAccountTokenInput) (string, error) {
+	expirationTime := time.Now().Add(tm.createAccountTTL)
 	claims := &Claims{
-		ID:       ID,
-		Email:    email,
-		Name:     name,
-		ImageUrl: imageUrl,
+		ID:       input.ID,
+		Email:    input.Email,
+		Name:     input.Name,
+		ImageUrl: input.ImageUrl,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.Load().JWT_CREATE_ACCOUNT_TOKEN_SECRET))
+	return token.SignedString(tm.createAccountSecret)
 }
 
-func ValidateCreateAccountToken(tokenString string) (*Claims, error) {
+func (tm *TokenMaker) ValidateCreateAccountToken(tokenString string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Load().JWT_CREATE_ACCOUNT_TOKEN_SECRET), nil
+		return tm.createAccountSecret, nil
 	})
 	if err != nil {
 		return nil, err
@@ -113,7 +133,7 @@ func ValidateCreateAccountToken(tokenString string) (*Claims, error) {
 }
 
 // DECODE TOKEN
-func DecodeTokenWithoutVerify(tokenString string) (*Claims, error) {
+func (tm *TokenMaker) DecodeTokenWithoutVerify(tokenString string) (*Claims, error) {
 	parser := jwt.NewParser(
 		jwt.WithoutClaimsValidation(),
 	)

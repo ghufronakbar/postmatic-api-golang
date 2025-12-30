@@ -4,18 +4,20 @@ import (
 	"context"
 	"errors"
 
+	"postmatic-api/internal/module/headless/token"
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
-	"postmatic-api/pkg/token"
 )
 
 type SessionService struct {
 	sessionRepo *sessRepo.SessionRepository
+	tm          token.TokenMaker
 }
 
-func NewService(sessionRepo *sessRepo.SessionRepository) *SessionService {
+func NewService(sessionRepo *sessRepo.SessionRepository, tm token.TokenMaker) *SessionService {
 	return &SessionService{
 		sessionRepo: sessionRepo,
+		tm:          tm,
 	}
 }
 
@@ -67,7 +69,7 @@ func (s *SessionService) GetSession(ctx context.Context, claims *token.Claims, r
 		return nil, errs.NewUnauthorized("")
 	}
 
-	decoded, err := token.DecodeTokenWithoutVerify(refreshToken)
+	decoded, err := s.tm.DecodeTokenWithoutVerify(refreshToken)
 
 	if decoded == nil {
 		return nil, errs.NewUnauthorized("INVALID_REFRESH_TOKEN")

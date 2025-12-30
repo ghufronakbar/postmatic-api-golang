@@ -15,11 +15,11 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
-	"postmatic-api/pkg/token"
 
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
@@ -51,6 +51,7 @@ type GoogleOAuthService struct {
 	sessionRepo      *sessRepo.SessionRepository
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
 	conf             *oauth2.Config
+	tm               token.TokenMaker
 }
 
 func NewService(
@@ -59,6 +60,7 @@ func NewService(
 	cfg config.Config,
 	sessionRepo *sessRepo.SessionRepository,
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo,
+	tm token.TokenMaker,
 ) *GoogleOAuthService {
 	oauthConf := cfg.GoogleOAuthConfig()
 	return &GoogleOAuthService{
@@ -68,6 +70,7 @@ func NewService(
 		sessionRepo:      sessionRepo,
 		emailLimiterRepo: emailLimiterRepo,
 		conf:             oauthConf,
+		tm:               tm,
 	}
 }
 
@@ -256,11 +259,23 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 	}
 
 	// 9) issue token app kamu
-	accessToken, err := token.GenerateAccessToken(targetUser.ID.String(), profile.Email, profile.Name, imageUrl)
+	accessToken, err := s.tm.GenerateAccessToken(
+		token.GenerateAccessTokenInput{
+			ID:       targetUser.ID.String(),
+			Email:    profile.Email,
+			Name:     profile.Name,
+			ImageUrl: imageUrl,
+		},
+	)
 	if err != nil {
 		return LoginGoogleResponse{}, errs.NewInternalServerError(err)
 	}
-	refreshToken, err := token.GenerateRefreshToken(targetUser.ID.String(), profile.Email)
+	refreshToken, err := s.tm.GenerateRefreshToken(
+		token.GenerateRefreshTokenInput{
+			ID:    targetUser.ID.String(),
+			Email: profile.Email,
+		},
+	)
 	if err != nil {
 		return LoginGoogleResponse{}, errs.NewInternalServerError(err)
 	}

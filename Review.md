@@ -299,7 +299,7 @@ func Init(mode string) {
 
 ---
 
-### T5: Config Loaded Berulang Kali [HIGH]
+### T5: Config Loaded Berulang Kali [HIGH] [NEED_CHECK]
 
 **Bukti:**
 `pkg/token/token.go` — setiap function memanggil `config.Load()`:

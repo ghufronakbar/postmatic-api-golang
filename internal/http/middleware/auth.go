@@ -1,4 +1,5 @@
 // internal/http/middleware/auth.go
+// internal/http/middleware/auth.go
 package middleware
 
 import (
@@ -6,77 +7,56 @@ import (
 	"net/http"
 	"strings"
 
+	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
-	"postmatic-api/pkg/token"
 )
 
-// ContextKey adalah tipe data khusus untuk key context agar tidak bentrok dengan library lain
 type contextKey string
 
-const (
-	UserContextKey contextKey = "userClaims"
-)
+const UserContextKey contextKey = "userClaims"
 
-// AuthMiddleware adalah middleware utama
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func AuthMiddleware(tm token.TokenMaker) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			tokenStr := extractToken(r)
+			if tokenStr == "" {
+				response.Error(w, r, errs.NewUnauthorized("MISSING_TOKEN"), nil)
+				return
+			}
 
-		// 1. Ekstrak Token dari 3 Sumber
-		tokenStr := extractToken(r)
+			claims, err := tm.ValidateAccessToken(tokenStr)
+			if err != nil {
+				response.Error(w, r, errs.NewUnauthorized("INVALID_OR_EXPIRED_TOKEN"), nil)
+				return
+			}
 
-		if tokenStr == "" {
-			response.Error(w, r, errs.NewUnauthorized("MISSING_TOKEN"), nil)
-			return
-		}
-
-		// 2. Validasi Token menggunakan pkg/token Anda
-		claims, err := token.ValidateAccessToken(tokenStr)
-		if err != nil {
-			// Error bisa karena expired, signature salah, dll
-			response.Error(w, r, errs.NewUnauthorized("INVALID_OR_EXPIRED_TOKEN"), nil)
-			return
-		}
-
-		// 3. Simpan Claims ke Context
-		// Agar bisa diakses di handler selanjutnya (Service/Controller)
-		ctx := context.WithValue(r.Context(), UserContextKey, claims)
-
-		// 4. Lanjut ke Next Handler dengan Context baru
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+			ctx := context.WithValue(r.Context(), UserContextKey, claims)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
-// Helper untuk mengekstrak token berdasarkan prioritas
 func extractToken(r *http.Request) string {
-	// Prioritas 1: Query Param (?postmaticAccessToken=xxx)
-	queryToken := r.URL.Query().Get("postmaticAccessToken")
-	if queryToken != "" {
-		return queryToken
+	if q := r.URL.Query().Get("postmaticAccessToken"); q != "" {
+		return q
 	}
-
-	// Prioritas 2: Custom Header (X-Postmatic-AccessToken)
-	headerToken := r.Header.Get("X-Postmatic-AccessToken")
-	if headerToken != "" {
-		return headerToken
+	if h := r.Header.Get("X-Postmatic-AccessToken"); h != "" {
+		return h
 	}
-
-	// Prioritas 3: Authorization: Bearer xxx
-	bearerToken := r.Header.Get("Authorization")
-	if len(strings.Split(bearerToken, " ")) == 2 {
-		return strings.Split(bearerToken, " ")[1]
+	auth := r.Header.Get("Authorization")
+	parts := strings.Split(auth, " ")
+	if len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") {
+		return parts[1]
 	}
-
 	return ""
 }
 
-// --- HELPER UNTUK HANDLER ---
-
-// GetUserFromContext memudahkan pengambilan data user di Controller/Service
 func GetUserFromContext(ctx context.Context) (*token.Claims, error) {
 	claims, ok := ctx.Value(UserContextKey).(*token.Claims)
-	if !ok {
-		return nil, errs.NewInternalServerError(nil) // Seharusnya tidak terjadi jika lewat middleware
+	if !ok || claims == nil {
+		// lebih cocok 401/forbidden daripada internal error
+		return nil, errs.NewUnauthorized("MISSING_AUTH_CONTEXT")
 	}
 	return claims, nil
 }

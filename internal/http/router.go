@@ -28,6 +28,7 @@ import (
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/s3_uploader"
+	"postmatic-api/internal/module/headless/token"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	ownedBusinessRepo "postmatic-api/internal/repository/redis/owned_business_repository"
@@ -52,6 +53,7 @@ func NewRouter(db *sql.DB) chi.Router {
 
 	// 2. =========== INITIAL SERVICE ===========
 	// HEADLESS
+	tokenSvc := token.NewTokenMaker(cfg)
 	mailerSvc := mailer.NewService(cfg)
 	cldSvc, err := cloudinary_uploader.NewService(cfg)
 	if err != nil {
@@ -62,10 +64,10 @@ func NewRouter(db *sql.DB) chi.Router {
 		panic("Cannot connect to S3" + err.Error())
 	}
 	// ACCOUNT
-	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
-	sessSvc := session.NewService(sessionRepo)
-	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo)
-	googleSvc := google_oauth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo)
+	authSvc := auth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
+	sessSvc := session.NewService(sessionRepo, *tokenSvc)
+	profSvc := profile.NewService(store, *mailerSvc, *cfg, emailLimiterRepo, *tokenSvc)
+	googleSvc := google_oauth.NewService(store, *mailerSvc, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
 	// BUSINESS
 	busInSvc := business_information.NewService(store, ownedRepo)
 	busKnowledgeSvc := business_knowledge.NewService(store)
@@ -102,11 +104,14 @@ func NewRouter(db *sql.DB) chi.Router {
 	// CREATOR
 	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
 
+	// 4. =========== INITIAL MIDDLEWARE ===========
+	authMiddleware := middleware.AuthMiddleware(*tokenSvc)
+
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
 
 	r.Route("/business", func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware)
+		r.Use(authMiddleware)
 		r.Use(func(next http.Handler) http.Handler {
 			return middleware.ReqFilterMiddleware(next, business_information.SORT_BY)
 		})
@@ -126,17 +131,17 @@ func NewRouter(db *sql.DB) chi.Router {
 			r.Mount("/", googleOauthHandler.GoogleOAuthRoutes())
 		})
 		r.Route("/session", func(r chi.Router) {
-			r.Use(middleware.AuthMiddleware)
+			r.Use(authMiddleware)
 			r.Mount("/", sessHandler.SessionRoutes())
 		})
 		r.Route("/profile", func(r chi.Router) {
-			r.Use(middleware.AuthMiddleware)
+			r.Use(authMiddleware)
 			r.Mount("/", profileHandler.ProfileRoutes())
 		})
 	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware)
+		r.Use(authMiddleware)
 		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
 		r.Route("/rss", func(r chi.Router) {
 			r.Use(func(next http.Handler) http.Handler {
@@ -156,7 +161,7 @@ func NewRouter(db *sql.DB) chi.Router {
 	})
 
 	r.Route("/creator", func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware)
+		r.Use(authMiddleware)
 		r.Use(func(next http.Handler) http.Handler {
 			return middleware.ReqFilterMiddleware(next, creator_image.SORT_BY)
 		})

@@ -9,12 +9,12 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
-	"postmatic-api/pkg/token"
 	"postmatic-api/pkg/utils"
 
 	"github.com/google/uuid"
@@ -26,16 +26,18 @@ type AuthService struct {
 	cfg              config.Config
 	sessionRepo      *sessRepo.SessionRepository
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
+	tm               token.TokenMaker
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, sessionRepo *sessRepo.SessionRepository, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo) *AuthService {
+func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, sessionRepo *sessRepo.SessionRepository, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *AuthService {
 	return &AuthService{
 		store:            store,
 		mailer:           mailer,
 		cfg:              cfg,
 		sessionRepo:      sessionRepo,
 		emailLimiterRepo: emailLimiterRepo,
+		tm:               tm,
 	}
 }
 
@@ -95,7 +97,12 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
 
-		createAccountToken, e := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
+		createAccountToken, e := s.tm.GenerateCreateAccountToken(token.GenerateCreateAccountTokenInput{
+			ID:       profile.ID.String(),
+			Email:    profile.Email,
+			Name:     profile.Name,
+			ImageUrl: nil,
+		})
 		if e != nil {
 			return e // Otomatis Rollback (Profile yang tadi dibuat juga akan hilang)
 		}
@@ -209,7 +216,14 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		}
 
 		// Jika belum kena limit, baru kirim email
-		createAccountToken, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, nil)
+		createAccountToken, err := s.tm.GenerateCreateAccountToken(
+			token.GenerateCreateAccountTokenInput{
+				ID:       profile.ID.String(),
+				Email:    profile.Email,
+				Name:     profile.Name,
+				ImageUrl: nil,
+			},
+		)
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -248,12 +262,24 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		imageUrl = &profile.ImageUrl.String
 	}
 
-	accessToken, err := token.GenerateAccessToken(pID, profile.Email, profile.Name, imageUrl)
+	accessToken, err := s.tm.GenerateAccessToken(
+		token.GenerateAccessTokenInput{
+			ID:       pID,
+			Email:    profile.Email,
+			Name:     profile.Name,
+			ImageUrl: imageUrl,
+		},
+	)
 	if err != nil {
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
 
-	refreshToken, err := token.GenerateRefreshToken(pID, profile.Email)
+	refreshToken, err := s.tm.GenerateRefreshToken(
+		token.GenerateRefreshTokenInput{
+			ID:    pID,
+			Email: profile.Email,
+		},
+	)
 	if err != nil {
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
@@ -291,7 +317,7 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 }
 func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput) (LoginResponse, error) {
 	// 1. Validasi Signature JWT
-	valid, err := token.ValidateRefreshToken(input.RefreshToken)
+	valid, err := s.tm.ValidateRefreshToken(input.RefreshToken)
 	if err != nil {
 		return LoginResponse{}, errs.NewUnauthorized("INVALID_REFRESH_TOKEN")
 	}
@@ -308,7 +334,14 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 	}
 
 	// 3. Generate Access Token Baru (Selalu dilakukan)
-	accessToken, err := token.GenerateAccessToken(valid.ID, valid.Email, valid.Name, valid.ImageUrl)
+	accessToken, err := s.tm.GenerateAccessToken(
+		token.GenerateAccessTokenInput{
+			ID:       valid.ID,
+			Email:    valid.Email,
+			Name:     valid.Name,
+			ImageUrl: valid.ImageUrl,
+		},
+	)
 	if err != nil {
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
@@ -322,7 +355,12 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 	// Jika sisa waktu kurang dari batas renewal (misal kurang dari 1 hari), ROTASI TOKEN
 	if timeLeft < s.cfg.JWT_REFRESH_TOKEN_RENEWAL {
 		// A. Generate Token Baru
-		newRefreshToken, err := token.GenerateRefreshToken(valid.ID, valid.Email)
+		newRefreshToken, err := s.tm.GenerateRefreshToken(
+			token.GenerateRefreshTokenInput{
+				ID:    valid.ID,
+				Email: valid.Email,
+			},
+		)
 		if err != nil {
 			return LoginResponse{}, errs.NewInternalServerError(err)
 		}
@@ -357,7 +395,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 
 // FOR GET THERE'S NO STORE IN DB (ONLY CHECK FOR UI)
 func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (VerifyCreateAccountTokenResponse, error) {
-	valid, err := token.ValidateCreateAccountToken(input)
+	valid, err := s.tm.ValidateCreateAccountToken(input)
 	if err != nil {
 		// Token Invalid
 		return VerifyCreateAccountTokenResponse{
@@ -367,7 +405,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 			Valid: false,
 		}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
-	decoded, err := token.DecodeTokenWithoutVerify(input)
+	decoded, err := s.tm.DecodeTokenWithoutVerify(input)
 	if err != nil || decoded == nil {
 		// Token Invalid
 		return VerifyCreateAccountTokenResponse{
@@ -493,12 +531,24 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		imageUrl = valid.ImageUrl
 	}
 
-	accessToken, err := token.GenerateAccessToken(profileId.String(), *valid.Email, *valid.Name, imageUrl)
+	accessToken, err := s.tm.GenerateAccessToken(
+		token.GenerateAccessTokenInput{
+			ID:       profileId.String(),
+			Email:    *valid.Email,
+			Name:     *valid.Name,
+			ImageUrl: imageUrl,
+		},
+	)
 	if err != nil {
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
 
-	refreshToken, err := token.GenerateRefreshToken(profileId.String(), *valid.Email)
+	refreshToken, err := s.tm.GenerateRefreshToken(
+		token.GenerateRefreshTokenInput{
+			ID:    profileId.String(),
+			Email: *valid.Email,
+		},
+	)
 	if err != nil {
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
@@ -608,7 +658,14 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 		imageUrl = &profile.ImageUrl.String
 	}
 
-	token, err := token.GenerateCreateAccountToken(profile.ID.String(), profile.Email, profile.Name, imageUrl)
+	token, err := s.tm.GenerateCreateAccountToken(
+		token.GenerateCreateAccountTokenInput{
+			ID:       profile.ID.String(),
+			Email:    profile.Email,
+			Name:     profile.Name,
+			ImageUrl: imageUrl,
+		},
+	)
 	if err != nil {
 		return ResendEmailVerificationResponse{}, errs.NewInternalServerError(err)
 	}

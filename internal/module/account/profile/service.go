@@ -8,14 +8,13 @@ import (
 
 	"postmatic-api/config"
 	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 
 	"postmatic-api/pkg/utils"
 
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
-
-	"postmatic-api/pkg/token" // JANGAN LUPA IMPORT TOKEN
 
 	"github.com/google/uuid"
 )
@@ -25,15 +24,17 @@ type ProfileService struct {
 	mailer           mailer.MailerService
 	cfg              config.Config
 	emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo
+	tm               token.TokenMaker
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo) *ProfileService {
+func NewService(store entity.Store, mailer mailer.MailerService, cfg config.Config, emailLimiterRepo *emailLimiterRepo.LimiterEmailRepo, tm token.TokenMaker) *ProfileService {
 	return &ProfileService{
 		store:            store,
 		mailer:           mailer,
 		cfg:              cfg,
 		emailLimiterRepo: emailLimiterRepo,
+		tm:               tm,
 	}
 }
 
@@ -152,7 +153,14 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, in
 		UpdatedAt:   profile.UpdatedAt,
 	}
 
-	accessToken, err := token.GenerateAccessToken(profileUpdated.ID.String(), profileUpdated.Email, profileUpdated.Name, &imageUrl)
+	accessToken, err := s.tm.GenerateAccessToken(
+		token.GenerateAccessTokenInput{
+			ID:       profileUpdated.ID.String(),
+			Email:    profileUpdated.Email,
+			Name:     profileUpdated.Name,
+			ImageUrl: &imageUrl,
+		},
+	)
 	if err != nil {
 		return UpdateProfileResponse{}, err
 	}
@@ -271,11 +279,13 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 
 		// 2. GENERATE JWT TOKEN (BUKAN UUID)
 		// Kita butuh token untuk verifikasi email, sama seperti saat register
-		createAccountToken, err := token.GenerateCreateAccountToken(
-			profile.ID, // ID Profile string
-			profile.Email,
-			profile.Name,
-			profile.ImageUrl,
+		createAccountToken, err := s.tm.GenerateCreateAccountToken(
+			token.GenerateCreateAccountTokenInput{
+				ID:       profile.ID, // ID Profile string
+				Email:    profile.Email,
+				Name:     profile.Name,
+				ImageUrl: profile.ImageUrl,
+			},
 		)
 		if err != nil {
 			return err
