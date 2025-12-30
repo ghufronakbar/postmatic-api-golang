@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"postmatic-api/config"
 	handler "postmatic-api/internal/http"
+	"postmatic-api/internal/http/middleware"
 
 	_ "time/tzdata"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chiMw "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -26,9 +27,9 @@ func main() {
 
 	// 3. Setup Router
 	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer) // Wajib ada agar server tidak crash saat panic
+	r.Use(chiMw.RequestID)
+	r.Use(middleware.RequestLogger)
+	r.Use(chiMw.Recoverer)
 
 	// 4. Register All Modules
 	// Kita lempar DB ke fungsi init modules

@@ -2,8 +2,8 @@
 package errs
 
 import (
-	"fmt"
 	"net/http"
+	"postmatic-api/pkg/logger"
 )
 
 // AppError adalah custom error struct kita
@@ -16,6 +16,17 @@ type AppError struct {
 
 // Implement interface error bawaan Go
 func (e *AppError) Error() string {
+	if e == nil {
+		return ""
+	}
+	if e.Code >= 500 {
+		logger.L().Error("REQUEST_FAILED", "status", e.Code, "err", e.Err)
+	}
+	if e.Code >= http.StatusInternalServerError {
+		// TODO: send to sentry
+		return "INTERNAL_SERVER_ERROR"
+	}
+	// logger.L().Error(strconv.Itoa(e.Code), "error", e.Err.Error())
 	return e.Message
 }
 
@@ -54,11 +65,10 @@ func NewForbidden(message string) *AppError {
 }
 
 func NewInternalServerError(err error) *AppError {
-	fmt.Println(err.Error())
 	return &AppError{
 		Code:    http.StatusInternalServerError,
 		Message: "INTERNAL_SERVER_ERROR",
-		Err:     err, // Simpan error asli untuk keperluan logging nanti
+		Err:     err,
 	}
 }
 

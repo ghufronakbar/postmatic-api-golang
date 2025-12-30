@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"postmatic-api/config"
@@ -14,6 +13,7 @@ import (
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/logger"
 	"postmatic-api/pkg/token"
 	"postmatic-api/pkg/utils"
 
@@ -129,8 +129,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	// Simpan ke Redis (Hanya Email & TTL)
 	err = s.emailLimiterRepo.SaveLimiterEmail(ctx, input.Email, retryAfterDuration)
 	if err != nil {
-		// Log error saja, jangan gagalkan response karena email sudah terkirim
-		fmt.Printf("Failed to set email limiter: %v\n", err)
+		logger.From(ctx).Warn("failed to save email limiter", "err", err)
 	}
 
 	return RegisterResponse{
@@ -633,8 +632,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 	// Simpan ke Redis (Hanya Email & TTL)
 	err = s.emailLimiterRepo.SaveLimiterEmail(ctx, profile.Email, retryAfterDuration)
 	if err != nil {
-		// Log error saja, jangan gagalkan response karena email sudah terkirim
-		fmt.Printf("Failed to set email limiter: %v\n", err)
+		logger.From(ctx).Warn("failed to save email limiter", "err", err)
 	}
 
 	return ResendEmailVerificationResponse{
