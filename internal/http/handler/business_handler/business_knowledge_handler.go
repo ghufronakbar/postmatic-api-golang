@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/business/business_knowledge"
+	"strconv"
 
+	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
 
@@ -55,6 +57,14 @@ func (h *BusinessKnowledgeHandler) GetBusinessKnowledgeByBusinessRootId(w http.R
 func (h *BusinessKnowledgeHandler) UpsertBusinessKnowledgeByBusinessRootID(w http.ResponseWriter, r *http.Request) {
 	businessId := chi.URLParam(r, "businessId")
 
+	intBusinessId, err := strconv.ParseInt(businessId, 10, 64)
+	if err != nil {
+		response.Error(w, r, errs.NewValidationFailed(map[string]string{
+			"businessId": "businessId must be an integer64",
+		}), nil)
+		return
+	}
+
 	var req business_knowledge.UpsertBusinessKnowledgeInput
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
@@ -62,7 +72,7 @@ func (h *BusinessKnowledgeHandler) UpsertBusinessKnowledgeByBusinessRootID(w htt
 		return
 	}
 
-	res, err := h.busInSvc.UpsertBusinessKnowledgeByBusinessRootID(r.Context(), businessId, req)
+	res, err := h.busInSvc.UpsertBusinessKnowledgeByBusinessRootID(r.Context(), intBusinessId, req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

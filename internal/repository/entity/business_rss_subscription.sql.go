@@ -9,8 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const countBusinessRssSubscriptionsByBusinessRootID = `-- name: CountBusinessRssSubscriptionsByBusinessRootID :one
@@ -36,7 +34,7 @@ WHERE
 `
 
 type CountBusinessRssSubscriptionsByBusinessRootIDParams struct {
-	BusinessRootID uuid.UUID   `json:"business_root_id"`
+	BusinessRootID int64       `json:"business_root_id"`
 	Search         interface{} `json:"search"`
 }
 
@@ -62,10 +60,10 @@ INSERT INTO business_rss_subscriptions (
 `
 
 type CreateBusinessRssSubscriptionParams struct {
-	BusinessRootID uuid.UUID `json:"business_root_id"`
-	Title          string    `json:"title"`
-	IsActive       bool      `json:"is_active"`
-	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
+	BusinessRootID int64  `json:"business_root_id"`
+	Title          string `json:"title"`
+	IsActive       bool   `json:"is_active"`
+	AppRssFeedID   int64  `json:"app_rss_feed_id"`
 }
 
 func (q *Queries) CreateBusinessRssSubscription(ctx context.Context, arg CreateBusinessRssSubscriptionParams) (BusinessRssSubscription, error) {
@@ -100,10 +98,10 @@ RETURNING id, title, is_active, business_root_id, created_at, updated_at, delete
 `
 
 type EditBusinessRssSubscriptionParams struct {
-	Title        string    `json:"title"`
-	IsActive     bool      `json:"is_active"`
-	AppRssFeedID uuid.UUID `json:"app_rss_feed_id"`
-	ID           uuid.UUID `json:"id"`
+	Title        string `json:"title"`
+	IsActive     bool   `json:"is_active"`
+	AppRssFeedID int64  `json:"app_rss_feed_id"`
+	ID           int64  `json:"id"`
 }
 
 func (q *Queries) EditBusinessRssSubscription(ctx context.Context, arg EditBusinessRssSubscriptionParams) (BusinessRssSubscription, error) {
@@ -139,9 +137,9 @@ SELECT EXISTS (
 `
 
 type ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams struct {
-	BusinessRootID uuid.UUID `json:"business_root_id"`
-	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
-	ID             uuid.UUID `json:"id"`
+	BusinessRootID int64 `json:"business_root_id"`
+	AppRssFeedID   int64 `json:"app_rss_feed_id"`
+	ID             int64 `json:"id"`
 }
 
 func (q *Queries) ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(ctx context.Context, arg ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams) (bool, error) {
@@ -159,8 +157,8 @@ AND deleted_at IS NULL
 `
 
 type GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams struct {
-	BusinessRootID uuid.UUID `json:"business_root_id"`
-	AppRssFeedID   uuid.UUID `json:"app_rss_feed_id"`
+	BusinessRootID int64 `json:"business_root_id"`
+	AppRssFeedID   int64 `json:"app_rss_feed_id"`
 }
 
 func (q *Queries) GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedId(ctx context.Context, arg GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams) (BusinessRssSubscription, error) {
@@ -189,8 +187,8 @@ LIMIT 1
 `
 
 type GetBusinessRssSubscriptionByIDAndBusinessRootIDParams struct {
-	ID             uuid.UUID `json:"id"`
-	BusinessRootID uuid.UUID `json:"business_root_id"`
+	ID             int64 `json:"id"`
+	BusinessRootID int64 `json:"business_root_id"`
 }
 
 func (q *Queries) GetBusinessRssSubscriptionByIDAndBusinessRootID(ctx context.Context, arg GetBusinessRssSubscriptionByIDAndBusinessRootIDParams) (BusinessRssSubscription, error) {
@@ -214,7 +212,7 @@ SELECT id, title, is_active, business_root_id, created_at, updated_at, deleted_a
 WHERE id = $1
 `
 
-func (q *Queries) GetBusinessRssSubscriptionById(ctx context.Context, id uuid.UUID) (BusinessRssSubscription, error) {
+func (q *Queries) GetBusinessRssSubscriptionById(ctx context.Context, id int64) (BusinessRssSubscription, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessRssSubscriptionById, id)
 	var i BusinessRssSubscription
 	err := row.Scan(
@@ -288,8 +286,10 @@ ORDER BY
   CASE WHEN $3 = 'updated_at' AND $4 = 'asc'  THEN brs.updated_at END ASC,
   CASE WHEN $3 = 'updated_at' AND $4 = 'desc' THEN brs.updated_at END DESC,
 
+  CASE WHEN $3 = 'id' AND $4 = 'asc'  THEN brs.id END ASC,
+  CASE WHEN $3 = 'id' AND $4 = 'desc' THEN brs.id END DESC,
+
   -- fallback stable order
-  brs.created_at DESC,
   brs.id DESC
 
 LIMIT $6
@@ -297,7 +297,7 @@ OFFSET $5
 `
 
 type GetBusinessRssSubscriptionsByBusinessRootIDParams struct {
-	BusinessRootID uuid.UUID   `json:"business_root_id"`
+	BusinessRootID int64       `json:"business_root_id"`
 	Search         interface{} `json:"search"`
 	SortBy         interface{} `json:"sort_by"`
 	SortDir        interface{} `json:"sort_dir"`
@@ -306,21 +306,21 @@ type GetBusinessRssSubscriptionsByBusinessRootIDParams struct {
 }
 
 type GetBusinessRssSubscriptionsByBusinessRootIDRow struct {
-	SubscriptionID             uuid.UUID      `json:"subscription_id"`
+	SubscriptionID             int64          `json:"subscription_id"`
 	SubscriptionTitle          string         `json:"subscription_title"`
 	SubscriptionIsActive       bool           `json:"subscription_is_active"`
-	SubscriptionBusinessRootID uuid.UUID      `json:"subscription_business_root_id"`
-	SubscriptionAppRssFeedID   uuid.UUID      `json:"subscription_app_rss_feed_id"`
+	SubscriptionBusinessRootID int64          `json:"subscription_business_root_id"`
+	SubscriptionAppRssFeedID   int64          `json:"subscription_app_rss_feed_id"`
 	SubscriptionCreatedAt      time.Time      `json:"subscription_created_at"`
 	SubscriptionUpdatedAt      time.Time      `json:"subscription_updated_at"`
 	SubscriptionDeletedAt      sql.NullTime   `json:"subscription_deleted_at"`
-	FeedID                     uuid.NullUUID  `json:"feed_id"`
+	FeedID                     sql.NullInt64  `json:"feed_id"`
 	FeedTitle                  sql.NullString `json:"feed_title"`
 	FeedUrl                    sql.NullString `json:"feed_url"`
 	FeedPublisher              sql.NullString `json:"feed_publisher"`
-	FeedAppRssCategoryID       uuid.NullUUID  `json:"feed_app_rss_category_id"`
+	FeedAppRssCategoryID       sql.NullInt64  `json:"feed_app_rss_category_id"`
 	FeedDeletedAt              sql.NullTime   `json:"feed_deleted_at"`
-	CategoryID                 uuid.NullUUID  `json:"category_id"`
+	CategoryID                 sql.NullInt64  `json:"category_id"`
 	CategoryName               sql.NullString `json:"category_name"`
 	CategoryDeletedAt          sql.NullTime   `json:"category_deleted_at"`
 }
@@ -378,7 +378,7 @@ DELETE FROM business_rss_subscriptions
 WHERE id = $1
 `
 
-func (q *Queries) HardDeleteBusinessRssSubscriptionByID(ctx context.Context, id uuid.UUID) error {
+func (q *Queries) HardDeleteBusinessRssSubscriptionByID(ctx context.Context, id int64) error {
 	_, err := q.db.ExecContext(ctx, hardDeleteBusinessRssSubscriptionByID, id)
 	return err
 }

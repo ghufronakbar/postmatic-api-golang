@@ -40,13 +40,13 @@ func ReqFilterMiddleware(next http.Handler, allowedSortBy []string) http.Handler
 		}
 
 		if !slices.Contains(allowedSort, sort) {
-			sort = "asc"
+			sort = "desc"
 		}
 
 		allSortBy := append([]string{}, allowedSortByDefault...)
 		allSortBy = append(allSortBy, allowedSortBy...)
 		if !slices.Contains(allSortBy, sortBy) {
-			sortBy = "createdAt"
+			sortBy = "id"
 		}
 
 		// ✅ DateStart/DateEnd: hanya set kalau valid (YYYY-MM-DD)
@@ -79,10 +79,10 @@ func GetFilterFromContext(ctx context.Context) filter.ReqFilter {
 	if !ok {
 		return filter.ReqFilter{
 			Search:    "",
-			SortBy:    "createdAt",
+			SortBy:    "id",
 			Page:      1,
 			Limit:     10,
-			Sort:      "asc",
+			Sort:      "desc",
 			Category:  "",
 			DateStart: nil,
 			DateEnd:   nil,

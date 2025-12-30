@@ -13,7 +13,7 @@ FROM business_members bm
 JOIN profiles p
   ON p.id = bm.profile_id
 
-WHERE bm.business_root_id = ANY(sqlc.arg(business_root_ids)::uuid[])
+WHERE bm.business_root_id = ANY(sqlc.arg(business_root_ids)::bigint[])
 
 ORDER BY bm.business_root_id, bm.created_at ASC;
 

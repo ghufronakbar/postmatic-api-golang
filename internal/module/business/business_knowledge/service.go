@@ -9,8 +9,6 @@ import (
 	"postmatic-api/pkg/errs"
 
 	"postmatic-api/pkg/utils"
-
-	"github.com/google/uuid"
 )
 
 type BusinessKnowledgeService struct {
@@ -24,13 +22,9 @@ func NewService(store entity.Store) *BusinessKnowledgeService {
 	}
 }
 
-func (s *BusinessKnowledgeService) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootId string) (BusinessKnowledgeResponse, error) {
-	businessRootUUID, err := uuid.Parse(businessRootId)
-	if err != nil {
-		return BusinessKnowledgeResponse{}, errs.NewInternalServerError(err)
-	}
+func (s *BusinessKnowledgeService) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootId int64) (BusinessKnowledgeResponse, error) {
 
-	bk, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessRootUUID)
+	bk, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessRootId)
 	if err != nil && err != sql.ErrNoRows {
 		return BusinessKnowledgeResponse{}, errs.NewInternalServerError(err)
 	}
@@ -41,7 +35,7 @@ func (s *BusinessKnowledgeService) GetBusinessKnowledgeByBusinessRootID(ctx cont
 	}
 
 	result := BusinessKnowledgeResponse{
-		RootBusinessId:     businessRootUUID.String(),
+		RootBusinessId:     businessRootId,
 		Name:               bk.Name,
 		PrimaryLogoUrl:     bk.PrimaryLogoUrl.String,
 		Description:        bk.Description.String,
@@ -58,19 +52,14 @@ func (s *BusinessKnowledgeService) GetBusinessKnowledgeByBusinessRootID(ctx cont
 	return result, nil
 }
 
-func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootId string, input UpsertBusinessKnowledgeInput) (BusinessKnowledgeResponse, error) {
-	businessRootUUID, err := uuid.Parse(businessRootId)
-	if err != nil {
-		return BusinessKnowledgeResponse{}, errs.NewInternalServerError(err)
-	}
-
+func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootId int64, input UpsertBusinessKnowledgeInput) (BusinessKnowledgeResponse, error) {
 	var websiteUrl string
 	if input.WebsiteUrl != nil {
 		websiteUrl = *input.WebsiteUrl
 	}
 
 	bk, err := s.store.UpsertBusinessKnowledgeByBusinessRootID(ctx, entity.UpsertBusinessKnowledgeByBusinessRootIDParams{
-		BusinessRootID:     businessRootUUID,
+		BusinessRootID:     businessRootId,
 		Name:               input.Name,
 		PrimaryLogoUrl:     sql.NullString{String: input.PrimaryLogoUrl, Valid: input.PrimaryLogoUrl != ""},
 		Category:           input.Category,
@@ -86,7 +75,7 @@ func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx c
 	}
 
 	res := BusinessKnowledgeResponse{
-		RootBusinessId:     businessRootUUID.String(),
+		RootBusinessId:     businessRootId,
 		Name:               bk.Name,
 		PrimaryLogoUrl:     bk.PrimaryLogoUrl.String,
 		Description:        bk.Description.String,

@@ -4,8 +4,8 @@ package business_product
 import "time"
 
 type BusinessProductResponse struct {
-	ID             string    `json:"id"`
-	BusinessRootID string    `json:"businessRootId"`
+	ID             int64     `json:"id"`
+	BusinessRootID int64     `json:"businessRootId"`
 	Name           string    `json:"name" validate:"required"`
 	Category       string    `json:"category" validate:"required"`
 	Description    string    `json:"description" validate:"required"`
@@ -17,5 +17,5 @@ type BusinessProductResponse struct {
 }
 
 type SoftDeleteBusinessProductResponse struct {
-	ID string `json:"id"`
+	ID int64 `json:"id"`
 }

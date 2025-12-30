@@ -91,7 +91,7 @@ func (r *OwnedBusinessRepository) UpsertOneBusiness(ctx context.Context, profile
 }
 
 // 4) Delete 1 business tertentu dari list cache
-func (r *OwnedBusinessRepository) DeleteOneBusiness(ctx context.Context, profileID string, businessRootID string, defaultTTL time.Duration) error {
+func (r *OwnedBusinessRepository) DeleteOneBusiness(ctx context.Context, profileID string, businessRootID int64, defaultTTL time.Duration) error {
 	key := r.constructKey(profileID)
 
 	list, err := r.GetOwnedBusinessByProfileID(ctx, profileID)

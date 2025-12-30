@@ -7,8 +7,6 @@ import (
 
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
-
-	"github.com/google/uuid"
 )
 
 type BusinessRoleService struct {
@@ -22,13 +20,8 @@ func NewService(store entity.Store) *BusinessRoleService {
 	}
 }
 
-func (s *BusinessRoleService) GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootId string) (BusinessRoleResponse, error) {
-	businessRootUUID, err := uuid.Parse(businessRootId)
-	if err != nil {
-		return BusinessRoleResponse{}, errs.NewInternalServerError(err)
-	}
-
-	bk, err := s.store.GetBusinessRoleByBusinessRootID(ctx, businessRootUUID)
+func (s *BusinessRoleService) GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootId int64) (BusinessRoleResponse, error) {
+	bk, err := s.store.GetBusinessRoleByBusinessRootID(ctx, businessRootId)
 	if err != nil && err != sql.ErrNoRows {
 		return BusinessRoleResponse{}, errs.NewInternalServerError(err)
 	}
@@ -46,7 +39,7 @@ func (s *BusinessRoleService) GetBusinessRoleByBusinessRootID(ctx context.Contex
 	}
 
 	result := BusinessRoleResponse{
-		BusinessRootId:  businessRootUUID.String(),
+		BusinessRootId:  businessRootId,
 		AudiencePersona: bk.AudiencePersona,
 		CallToAction:    bk.CallToAction,
 		Goals:           goals,
@@ -60,14 +53,9 @@ func (s *BusinessRoleService) GetBusinessRoleByBusinessRootID(ctx context.Contex
 	return result, nil
 }
 
-func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Context, businessRootId string, input UpsertBusinessRoleInput) (BusinessRoleResponse, error) {
-	businessRootUUID, err := uuid.Parse(businessRootId)
-	if err != nil {
-		return BusinessRoleResponse{}, errs.NewInternalServerError(err)
-	}
-
+func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Context, businessRootId int64, input UpsertBusinessRoleInput) (BusinessRoleResponse, error) {
 	bk, err := s.store.UpsertBusinessRoleByBusinessRootID(ctx, entity.UpsertBusinessRoleByBusinessRootIDParams{
-		BusinessRootID:  businessRootUUID,
+		BusinessRootID:  businessRootId,
 		AudiencePersona: input.AudiencePersona,
 		CallToAction:    input.CallToAction,
 		Goals:           sql.NullString{String: input.Goals, Valid: input.Goals != ""},
@@ -80,7 +68,7 @@ func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Con
 	}
 
 	res := BusinessRoleResponse{
-		BusinessRootId:  businessRootUUID.String(),
+		BusinessRootId:  businessRootId,
 		AudiencePersona: bk.AudiencePersona,
 		CallToAction:    bk.CallToAction,
 		Goals:           bk.Goals.String,

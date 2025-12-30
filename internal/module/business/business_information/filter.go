@@ -11,4 +11,4 @@ type GetJoinedBusinessesByProfileIDFilter struct {
 	DateEnd    *string `json:"dateEnd"`
 }
 
-var SORT_BY = []string{"name", "created_at", "updated_at", "answered_at"}
+var SORT_BY = []string{"name", "created_at", "updated_at", "answered_at", "id"}

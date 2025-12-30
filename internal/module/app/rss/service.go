@@ -7,8 +7,6 @@ import (
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/pagination"
-
-	"github.com/google/uuid"
 )
 
 type RSSService struct {
@@ -50,7 +48,7 @@ func (s *RSSService) GetRSSCategory(ctx context.Context, filter GetRSSCategoryFi
 	var responses []RSSCategoryResponse
 	for _, category := range categories {
 		responses = append(responses, RSSCategoryResponse{
-			ID:        category.ID.String(),
+			ID:        category.ID,
 			Name:      category.Name,
 			CreatedAt: category.CreatedAt,
 			UpdatedAt: category.UpdatedAt,
@@ -61,23 +59,13 @@ func (s *RSSService) GetRSSCategory(ctx context.Context, filter GetRSSCategoryFi
 
 func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([]RSSResponse, *pagination.Pagination, error) {
 
-	var categoryUUID uuid.UUID
-	if filter.Category != "" {
-		cUUID, err := uuid.Parse(filter.Category)
-		if err != nil {
-			categoryUUID = uuid.Nil
-		} else {
-			categoryUUID = cUUID
-		}
-	}
-
 	filterData := entity.GetAllRSSFeedParams{
 		Search:     filter.Search,
 		SortBy:     filter.SortBy,
 		SortDir:    filter.SortDir,
 		PageOffset: int32(filter.PageOffset),
 		PageLimit:  int32(filter.PageLimit),
-		Category:   uuid.NullUUID{UUID: categoryUUID, Valid: categoryUUID != uuid.Nil},
+		Category:   sql.NullInt64{Int64: filter.Category, Valid: filter.Category != 0},
 	}
 	feeds, err := s.store.GetAllRSSFeed(ctx, filterData)
 	if err != nil {
@@ -85,7 +73,7 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 	}
 	filterCount := entity.CountAllRSSFeedParams{
 		Search:   filter.Search,
-		Category: uuid.NullUUID{UUID: categoryUUID, Valid: categoryUUID != uuid.Nil},
+		Category: sql.NullInt64{Int64: filter.Category, Valid: filter.Category != 0},
 	}
 	count, err := s.store.CountAllRSSFeed(ctx, filterCount)
 	if err != nil {
@@ -102,11 +90,11 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 	var responses []RSSResponse
 	for _, feed := range feeds {
 		responses = append(responses, RSSResponse{
-			ID:                  feed.ID.String(),
+			ID:                  feed.ID,
 			Title:               feed.Title,
 			URL:                 feed.Url,
 			Publisher:           feed.Publisher,
-			MasterRSSCategoryID: feed.AppRssCategoryID.String(),
+			MasterRSSCategoryID: feed.AppRssCategoryID,
 			CreatedAt:           feed.CreatedAt,
 			UpdatedAt:           feed.UpdatedAt,
 		})
@@ -114,8 +102,8 @@ func (s *RSSService) GetRSSFeed(ctx context.Context, filter GetRSSFeedFilter) ([
 	return responses, &pagination, nil
 }
 
-func (s *RSSService) GetRSSFeedById(ctx context.Context, id string) (RSSResponse, error) {
-	feed, err := s.store.GetRssFeedById(ctx, uuid.MustParse(id))
+func (s *RSSService) GetRSSFeedById(ctx context.Context, id int64) (RSSResponse, error) {
+	feed, err := s.store.GetRssFeedById(ctx, id)
 	if err == sql.ErrNoRows {
 		return RSSResponse{}, errs.NewNotFound("RSS_FEED_NOT_FOUND")
 	}
@@ -123,11 +111,11 @@ func (s *RSSService) GetRSSFeedById(ctx context.Context, id string) (RSSResponse
 		return RSSResponse{}, err
 	}
 	return RSSResponse{
-		ID:                  feed.ID.String(),
+		ID:                  feed.ID,
 		Title:               feed.Title,
 		URL:                 feed.Url,
 		Publisher:           feed.Publisher,
-		MasterRSSCategoryID: feed.AppRssCategoryID.String(),
+		MasterRSSCategoryID: feed.AppRssCategoryID,
 		CreatedAt:           feed.CreatedAt,
 		UpdatedAt:           feed.UpdatedAt,
 	}, nil

@@ -5,9 +5,9 @@ import "postmatic-api/internal/repository/entity"
 
 type RedisOwnedBusinessResponse struct {
 	// Member ID
-	MemberID string `json:"memberId"`
+	MemberID int64 `json:"memberId"`
 	// Business Root ID
-	BusinessRootID string `json:"businessRootId"`
+	BusinessRootID int64 `json:"businessRootId"`
 	// Role
 	Role entity.BusinessMemberRole `json:"role"`
 }

@@ -5,14 +5,14 @@ CREATE TYPE business_member_status AS ENUM ('pending', 'accepted', 'rejected', '
 CREATE TYPE business_member_role   AS ENUM ('owner', 'admin', 'member');
 
 CREATE TABLE IF NOT EXISTS business_members (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
 
     status business_member_status NOT NULL DEFAULT 'pending',
     role   business_member_role   NOT NULL DEFAULT 'member',
 
     answered_at TIMESTAMPTZ,
 
-    business_root_id UUID NOT NULL,
+    business_root_id BIGINT NOT NULL,
     profile_id       UUID NOT NULL,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

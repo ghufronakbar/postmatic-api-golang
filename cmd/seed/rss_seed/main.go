@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
@@ -23,29 +23,29 @@ import (
 //go:embed rss.json
 var rssJSON []byte
 
-// JSON shape (sesuai TS types kamu)
 type SeedCategory struct {
-	ID         string     `json:"id"`
+	ID         string     `json:"id"` // hanya untuk mapping internal seed
 	Name       string     `json:"name"`
 	DeletedAt  *time.Time `json:"deletedAt"`
-	CreatedAt  string     `json:"createdAt"` // diabaikan (DB handle)
-	UpdatedAt  string     `json:"updatedAt"` // diabaikan (DB handle)
+	CreatedAt  string     `json:"createdAt"`
+	UpdatedAt  string     `json:"updatedAt"`
 	MasterRsss []SeedRSS  `json:"masterRsses"`
 }
 
 type SeedRSS struct {
-	ID                  string     `json:"id"`
+	ID                  string     `json:"id"` // tidak dipakai untuk PK DB
 	Title               string     `json:"title"`
 	URL                 string     `json:"url"`
 	Publisher           string     `json:"publisher"`
-	MasterRssCategoryID string     `json:"masterRssCategoryId"`
+	MasterRssCategoryID string     `json:"masterRssCategoryId"` // tidak perlu, sudah nested
 	DeletedAt           *time.Time `json:"deletedAt"`
-	CreatedAt           string     `json:"createdAt"` // diabaikan (DB handle)
-	UpdatedAt           string     `json:"updatedAt"` // diabaikan (DB handle)
+	CreatedAt           string     `json:"createdAt"`
+	UpdatedAt           string     `json:"updatedAt"`
 }
 
 func main() {
 	_ = godotenv.Load()
+
 	var (
 		dsn           = flag.String("dsn", os.Getenv("DATABASE_URL"), "Postgres DSN (default: env DATABASE_URL)")
 		runMigrate    = flag.Bool("migrate", true, "Run goose up migrations before seeding")
@@ -53,18 +53,17 @@ func main() {
 	)
 	flag.Parse()
 
-	fmt.Println("dsn:", *dsn)
-
 	if strings.TrimSpace(*dsn) == "" {
 		log.Fatal("DATABASE_URL empty. Set env DATABASE_URL or pass -dsn.")
 	}
+
 	ctx := context.Background()
 
 	db, err := sql.Open("pgx", *dsn)
 	if err != nil {
 		log.Fatalf("open db: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	if err := db.PingContext(ctx); err != nil {
 		log.Fatalf("ping db: %v", err)
@@ -90,7 +89,6 @@ func main() {
 
 func runGooseUp(db *sql.DB, migrationsDir string) error {
 	goose.SetDialect("postgres")
-	// goose.Up akan jalankan semua migration yang belum applied
 	if err := goose.Up(db, migrationsDir); err != nil {
 		return fmt.Errorf("goose.Up(%s): %w", migrationsDir, err)
 	}
@@ -104,81 +102,67 @@ func seedRSS(ctx context.Context, db *sql.DB, categories []SeedCategory) error {
 	}
 	defer func() { _ = tx.Rollback() }()
 
-	// map untuk memastikan RSS yang insert pakai category id yang benar (kalau nama sudah ada di DB)
-	seedCatIDToDBCatID := make(map[string]uuid.UUID)
+	// mapping seed category id (string) => DB category id (int64)
+	seedCatIDToDBCatID := make(map[string]int64)
 
 	var insertedCat, updatedCat, insertedRSS, updatedRSS int
 
 	for _, c := range categories {
-		catSeedID, err := uuid.Parse(c.ID)
-		if err != nil {
-			return fmt.Errorf("invalid category id %q: %w", c.ID, err)
-		}
 		catName := strings.TrimSpace(c.Name)
 		if catName == "" {
-			return fmt.Errorf("category name empty for id=%s", c.ID)
+			return fmt.Errorf("category name empty for seed id=%s", c.ID)
 		}
 
+		// 1) find by name (dedupe)
 		dbCatID, found, err := findCategoryIDByName(ctx, tx, catName)
 		if err != nil {
 			return err
 		}
 
-		switch {
-		case found:
-			// update existing category (avoid duplicate by name)
+		if found {
+			// update existing category
 			if err := updateCategory(ctx, tx, dbCatID, catName, c.DeletedAt); err != nil {
 				return err
 			}
 			updatedCat++
-			seedCatIDToDBCatID[catSeedID.String()] = dbCatID
-
-		default:
-			// insert new category (use seed id)
-			if err := insertCategory(ctx, tx, catSeedID, catName, c.DeletedAt); err != nil {
-				// kalau ternyata id sudah ada (misalnya pernah seed), update aja
+		} else {
+			// insert new category, let DB generate id
+			newID, err := insertCategory(ctx, tx, catName, c.DeletedAt)
+			if err != nil {
+				// kalau race/seed ulang dan ada unique constraint name, fallback ke find+update
 				if isUniqueViolation(err) {
-					if err2 := updateCategory(ctx, tx, catSeedID, catName, c.DeletedAt); err2 != nil {
+					dbCatID, found2, err2 := findCategoryIDByName(ctx, tx, catName)
+					if err2 != nil {
 						return err2
+					}
+					if !found2 {
+						return fmt.Errorf("unique violation but category not found by name: %w", err)
+					}
+					if err := updateCategory(ctx, tx, dbCatID, catName, c.DeletedAt); err != nil {
+						return err
 					}
 					updatedCat++
 				} else {
 					return err
 				}
 			} else {
+				dbCatID = newID
 				insertedCat++
 			}
-			seedCatIDToDBCatID[catSeedID.String()] = catSeedID
 		}
 
-		// seed RSS items under category
+		seedCatIDToDBCatID[c.ID] = dbCatID
+
+		// seed RSS items under category (FK pasti nyambung karena pakai dbCatID)
 		for _, r := range c.MasterRsss {
-			rssSeedID, err := uuid.Parse(r.ID)
-			if err != nil {
-				return fmt.Errorf("invalid rss id %q: %w", r.ID, err)
-			}
 			title := strings.TrimSpace(r.Title)
 			url := strings.TrimSpace(r.URL)
 			publisher := strings.TrimSpace(r.Publisher)
 			if title == "" || url == "" || publisher == "" {
-				return fmt.Errorf("rss has empty field (id=%s title=%q url=%q publisher=%q)", r.ID, title, url, publisher)
+				return fmt.Errorf("rss has empty field (seed id=%s title=%q url=%q publisher=%q)", r.ID, title, url, publisher)
 			}
 
-			// pilih category id yang sudah “dinormalisasi” (by name dedupe)
-			dbCatID := seedCatIDToDBCatID[catSeedID.String()]
-
-			// 1) kalau id sudah ada -> update by id
-			if existingID, ok, err := findRssIDByID(ctx, tx, rssSeedID); err != nil {
-				return err
-			} else if ok {
-				if err := updateRssByID(ctx, tx, existingID, title, url, publisher, dbCatID, r.DeletedAt); err != nil {
-					return err
-				}
-				updatedRSS++
-				continue
-			}
-
-			// 2) kalau url sudah ada -> update by url (avoid duplicate by url)
+			// dedupe RSS by url (lebih stabil daripada seed UUID)
 			if existingID, ok, err := findRssIDByURL(ctx, tx, url); err != nil {
 				return err
 			} else if ok {
@@ -189,8 +173,22 @@ func seedRSS(ctx context.Context, db *sql.DB, categories []SeedCategory) error {
 				continue
 			}
 
-			// 3) else insert baru
-			if err := insertRss(ctx, tx, rssSeedID, title, url, publisher, dbCatID, r.DeletedAt); err != nil {
+			if _, err := insertRss(ctx, tx, title, url, publisher, dbCatID, r.DeletedAt); err != nil {
+				// kalau url unique dan seed ulang
+				if isUniqueViolation(err) {
+					existingID, ok, err2 := findRssIDByURL(ctx, tx, url)
+					if err2 != nil {
+						return err2
+					}
+					if !ok {
+						return fmt.Errorf("unique violation but rss not found by url: %w", err)
+					}
+					if err := updateRssByID(ctx, tx, existingID, title, url, publisher, dbCatID, r.DeletedAt); err != nil {
+						return err
+					}
+					updatedRSS++
+					continue
+				}
 				return err
 			}
 			insertedRSS++
@@ -204,38 +202,41 @@ func seedRSS(ctx context.Context, db *sql.DB, categories []SeedCategory) error {
 	log.Printf("✅ categories: inserted=%d updated=%d | rss: inserted=%d updated=%d\n",
 		insertedCat, updatedCat, insertedRSS, updatedRSS)
 
+	_ = seedCatIDToDBCatID // kalau mau dipakai debugging/logging
 	return nil
 }
 
-func findCategoryIDByName(ctx context.Context, tx *sql.Tx, name string) (uuid.UUID, bool, error) {
-	var id uuid.UUID
+func findCategoryIDByName(ctx context.Context, tx *sql.Tx, name string) (int64, bool, error) {
+	var id int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
 		FROM app_rss_categories
-		WHERE deleted_at IS NULL AND lower(name) = lower($1)
+		WHERE lower(name) = lower($1)
 		LIMIT 1
 	`, name).Scan(&id)
 	if err == nil {
 		return id, true, nil
 	}
 	if errors.Is(err, sql.ErrNoRows) {
-		return uuid.UUID{}, false, nil
+		return 0, false, nil
 	}
-	return uuid.UUID{}, false, fmt.Errorf("find category by name: %w", err)
+	return 0, false, fmt.Errorf("find category by name: %w", err)
 }
 
-func insertCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, deletedAt *time.Time) error {
-	_, err := tx.ExecContext(ctx, `
-		INSERT INTO app_rss_categories (id, name, deleted_at)
-		VALUES ($1, $2, $3)
-	`, id, name, deletedAt)
+func insertCategory(ctx context.Context, tx *sql.Tx, name string, deletedAt *time.Time) (int64, error) {
+	var id int64
+	err := tx.QueryRowContext(ctx, `
+		INSERT INTO app_rss_categories (name, deleted_at)
+		VALUES ($1, $2)
+		RETURNING id
+	`, name, deletedAt).Scan(&id)
 	if err != nil {
-		return fmt.Errorf("insert category: %w", err)
+		return 0, fmt.Errorf("insert category: %w", err)
 	}
-	return nil
+	return id, nil
 }
 
-func updateCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, deletedAt *time.Time) error {
+func updateCategory(ctx context.Context, tx *sql.Tx, id int64, name string, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
 		UPDATE app_rss_categories
 		SET name = $2,
@@ -248,49 +249,37 @@ func updateCategory(ctx context.Context, tx *sql.Tx, id uuid.UUID, name string, 
 	return nil
 }
 
-func findRssIDByID(ctx context.Context, tx *sql.Tx, id uuid.UUID) (uuid.UUID, bool, error) {
-	var got uuid.UUID
-	err := tx.QueryRowContext(ctx, `
-		SELECT id FROM app_rss_feeds WHERE id = $1 LIMIT 1
-	`, id).Scan(&got)
-	if err == nil {
-		return got, true, nil
-	}
-	if errors.Is(err, sql.ErrNoRows) {
-		return uuid.UUID{}, false, nil
-	}
-	return uuid.UUID{}, false, fmt.Errorf("find rss by id: %w", err)
-}
-
-func findRssIDByURL(ctx context.Context, tx *sql.Tx, url string) (uuid.UUID, bool, error) {
-	var id uuid.UUID
+func findRssIDByURL(ctx context.Context, tx *sql.Tx, url string) (int64, bool, error) {
+	var id int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
 		FROM app_rss_feeds
-		WHERE deleted_at IS NULL AND url = $1
+		WHERE url = $1
 		LIMIT 1
 	`, url).Scan(&id)
 	if err == nil {
 		return id, true, nil
 	}
 	if errors.Is(err, sql.ErrNoRows) {
-		return uuid.UUID{}, false, nil
+		return 0, false, nil
 	}
-	return uuid.UUID{}, false, fmt.Errorf("find rss by url: %w", err)
+	return 0, false, fmt.Errorf("find rss by url: %w", err)
 }
 
-func insertRss(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, publisher string, categoryID uuid.UUID, deletedAt *time.Time) error {
-	_, err := tx.ExecContext(ctx, `
-		INSERT INTO app_rss_feeds (id, title, url, publisher, app_rss_category_id, deleted_at)
-		VALUES ($1, $2, $3, $4, $5, $6)
-	`, id, title, url, publisher, categoryID, deletedAt)
+func insertRss(ctx context.Context, tx *sql.Tx, title, url, publisher string, categoryID int64, deletedAt *time.Time) (int64, error) {
+	var id int64
+	err := tx.QueryRowContext(ctx, `
+		INSERT INTO app_rss_feeds (title, url, publisher, app_rss_category_id, deleted_at)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id
+	`, title, url, publisher, categoryID, deletedAt).Scan(&id)
 	if err != nil {
-		return fmt.Errorf("insert rss: %w", err)
+		return 0, fmt.Errorf("insert rss: %w", err)
 	}
-	return nil
+	return id, nil
 }
 
-func updateRssByID(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, publisher string, categoryID uuid.UUID, deletedAt *time.Time) error {
+func updateRssByID(ctx context.Context, tx *sql.Tx, id int64, title, url, publisher string, categoryID int64, deletedAt *time.Time) error {
 	_, err := tx.ExecContext(ctx, `
 		UPDATE app_rss_feeds
 		SET title = $2,
@@ -306,10 +295,13 @@ func updateRssByID(ctx context.Context, tx *sql.Tx, id uuid.UUID, title, url, pu
 	return nil
 }
 
-// Sederhana: deteksi unique violation via string (driver bisa beda-beda).
 func isUniqueViolation(err error) bool {
 	if err == nil {
 		return false
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
 	}
 	s := strings.ToLower(err.Error())
 	return strings.Contains(s, "duplicate key") || strings.Contains(s, "unique constraint") || strings.Contains(s, "23505")

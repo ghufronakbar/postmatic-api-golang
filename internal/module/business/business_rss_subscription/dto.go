@@ -3,6 +3,6 @@ package business_rss_subscription
 
 type CreateUpdateBusinessRSSSubscriptionInput struct {
 	Title        string `json:"title" validate:"required"`
-	AppRssFeedId string `json:"appRssFeedId" validate:"required"`
+	AppRssFeedId int64  `json:"appRssFeedId" validate:"required"`
 	IsActive     bool   `json:"isActive" validate:"required"`
 }

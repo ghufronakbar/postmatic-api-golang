@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -42,7 +41,7 @@ type CreateBusinessRoleParams struct {
 	Hashtags        []string       `json:"hashtags"`
 	CallToAction    string         `json:"call_to_action"`
 	Goals           sql.NullString `json:"goals"`
-	BusinessRootID  uuid.UUID      `json:"business_root_id"`
+	BusinessRootID  int64          `json:"business_root_id"`
 }
 
 func (q *Queries) CreateBusinessRole(ctx context.Context, arg CreateBusinessRoleParams) (BusinessRole, error) {
@@ -79,7 +78,7 @@ WHERE br.business_root_id = $1
   AND br.deleted_at IS NULL
 `
 
-func (q *Queries) GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (BusinessRole, error) {
+func (q *Queries) GetBusinessRoleByBusinessRootID(ctx context.Context, businessRootID int64) (BusinessRole, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessRoleByBusinessRootID, businessRootID)
 	var i BusinessRole
 	err := row.Scan(
@@ -105,9 +104,9 @@ WHERE business_root_id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessRoleByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessRoleByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessRoleByBusinessRootID, businessRootID)
-	var id uuid.UUID
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
@@ -148,7 +147,7 @@ type UpsertBusinessRoleByBusinessRootIDParams struct {
 	Hashtags        []string       `json:"hashtags"`
 	CallToAction    string         `json:"call_to_action"`
 	Goals           sql.NullString `json:"goals"`
-	BusinessRootID  uuid.UUID      `json:"business_root_id"`
+	BusinessRootID  int64          `json:"business_root_id"`
 }
 
 func (q *Queries) UpsertBusinessRoleByBusinessRootID(ctx context.Context, arg UpsertBusinessRoleByBusinessRootIDParams) (BusinessRole, error) {

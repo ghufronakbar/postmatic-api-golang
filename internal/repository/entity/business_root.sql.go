@@ -63,9 +63,9 @@ DEFAULT VALUES
 RETURNING id
 `
 
-func (q *Queries) CreateBusinessRoot(ctx context.Context) (uuid.UUID, error) {
+func (q *Queries) CreateBusinessRoot(ctx context.Context) (int64, error) {
 	row := q.db.QueryRowContext(ctx, createBusinessRoot)
-	var id uuid.UUID
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
@@ -77,11 +77,11 @@ WHERE id = $1
 `
 
 type GetBusinessRootByIdRow struct {
-	ID        uuid.UUID    `json:"id"`
+	ID        int64        `json:"id"`
 	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
-func (q *Queries) GetBusinessRootById(ctx context.Context, id uuid.UUID) (GetBusinessRootByIdRow, error) {
+func (q *Queries) GetBusinessRootById(ctx context.Context, id int64) (GetBusinessRootByIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessRootById, id)
 	var i GetBusinessRootByIdRow
 	err := row.Scan(&i.ID, &i.DeletedAt)
@@ -140,9 +140,12 @@ ORDER BY
   CASE WHEN $5 = 'updated_at' AND $6 = 'asc'  THEN br.updated_at END ASC,
   CASE WHEN $5 = 'updated_at' AND $6 = 'desc' THEN br.updated_at END DESC,
 
+  -- id
+  CASE WHEN $5 = 'id' AND $6 = 'asc'  THEN bm.id END ASC,
+  CASE WHEN $5 = 'id' AND $6 = 'desc' THEN bm.id END DESC,
+
   -- fallback stable order
-  br.created_at DESC,
-  br.id DESC
+  bm.id DESC
 
 LIMIT $8
 OFFSET $7
@@ -160,11 +163,11 @@ type GetJoinedBusinessesByProfileIDParams struct {
 }
 
 type GetJoinedBusinessesByProfileIDRow struct {
-	MemberID              uuid.UUID            `json:"member_id"`
+	MemberID              int64                `json:"member_id"`
 	MemberStatus          BusinessMemberStatus `json:"member_status"`
 	MemberRole            BusinessMemberRole   `json:"member_role"`
 	MemberAnsweredAt      sql.NullTime         `json:"member_answered_at"`
-	BusinessRootID        uuid.UUID            `json:"business_root_id"`
+	BusinessRootID        int64                `json:"business_root_id"`
 	BusinessRootCreatedAt time.Time            `json:"business_root_created_at"`
 	BusinessRootUpdatedAt time.Time            `json:"business_root_updated_at"`
 	BusinessName          string               `json:"business_name"`
@@ -222,7 +225,7 @@ WHERE id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessRoot(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessRoot(ctx context.Context, id int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessRoot, id)
 	err := row.Scan(&id)
 	return id, err

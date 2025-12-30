@@ -97,8 +97,10 @@ ORDER BY
   CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'asc'  THEN bp.price END ASC,
   CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'desc' THEN bp.price END DESC,
 
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'asc'  THEN bp.id END ASC,
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'desc' THEN bp.id END DESC,
+
   -- fallback stable order
-  bp.created_at DESC,
   bp.id DESC
 
 LIMIT sqlc.arg(page_limit)

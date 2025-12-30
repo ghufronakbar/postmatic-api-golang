@@ -7,15 +7,13 @@ package entity
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const getBusinessTimezonePrefByBusinessRootId = `-- name: GetBusinessTimezonePrefByBusinessRootId :one
 SELECT id, business_root_id, timezone, created_at, updated_at FROM business_timezone_prefs WHERE business_root_id = $1 LIMIT 1
 `
 
-func (q *Queries) GetBusinessTimezonePrefByBusinessRootId(ctx context.Context, businessRootID uuid.UUID) (BusinessTimezonePref, error) {
+func (q *Queries) GetBusinessTimezonePrefByBusinessRootId(ctx context.Context, businessRootID int64) (BusinessTimezonePref, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessTimezonePrefByBusinessRootId, businessRootID)
 	var i BusinessTimezonePref
 	err := row.Scan(
@@ -37,8 +35,8 @@ RETURNING id, business_root_id, timezone, created_at, updated_at
 `
 
 type UpsertBusinessTimezonePrefParams struct {
-	BusinessRootID uuid.UUID `json:"business_root_id"`
-	Timezone       string    `json:"timezone"`
+	BusinessRootID int64  `json:"business_root_id"`
+	Timezone       string `json:"timezone"`
 }
 
 func (q *Queries) UpsertBusinessTimezonePref(ctx context.Context, arg UpsertBusinessTimezonePrefParams) (BusinessTimezonePref, error) {

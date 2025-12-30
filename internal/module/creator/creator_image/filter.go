@@ -15,4 +15,4 @@ type GetCreatorImageFilter struct {
 	Published         *bool   `json:"published"`
 }
 
-var SORT_BY = []string{"name", "created_at", "updated_at"}
+var SORT_BY = []string{"name", "created_at", "updated_at", "id"}

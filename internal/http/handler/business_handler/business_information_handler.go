@@ -26,12 +26,14 @@ func (h *BusinessInformationHandler) BusinessInformationRoutes() chi.Router {
 	r := chi.NewRouter()
 
 	// owned business middleware
-	r.Route("/", func(r chi.Router) {
+	r.Route("/{businessId}", func(r chi.Router) {
 		r.Use(h.middleware.OwnedBusinessMiddleware)
+		r.Get("/", h.GetBusinessById)
+		r.Delete("/", h.DeleteBusinessById)
+	})
+	r.Route("/", func(r chi.Router) {
 		r.Get("/", h.GetJoinedBusinessesByProfileID)
-		r.Get("/{businessId}", h.GetBusinessById)
 		r.Post("/", h.SetupBusinessRootFirstTime)
-		r.Delete("/{businessId}", h.DeleteBusinessById)
 	})
 
 	return r
@@ -84,11 +86,11 @@ func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseW
 }
 
 func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *http.Request) {
-	businessId := chi.URLParam(r, "businessId")
+	business, _ := middleware.OwnedBusinessFromContext(r.Context())
 
 	prof, _ := middleware.GetUserFromContext(r.Context())
 
-	res, err := h.busInSvc.GetBusinessById(r.Context(), businessId, prof.ID)
+	res, err := h.busInSvc.GetBusinessById(r.Context(), business.BusinessRootID, prof.ID)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -98,11 +100,11 @@ func (h *BusinessInformationHandler) GetBusinessById(w http.ResponseWriter, r *h
 }
 
 func (h *BusinessInformationHandler) DeleteBusinessById(w http.ResponseWriter, r *http.Request) {
-	businessId := chi.URLParam(r, "businessId")
+	business, _ := middleware.OwnedBusinessFromContext(r.Context())
 
 	prof, _ := middleware.GetUserFromContext(r.Context())
 
-	res, err := h.busInSvc.DeleteBusinessById(r.Context(), businessId, prof.ID)
+	res, err := h.busInSvc.DeleteBusinessById(r.Context(), business.BusinessRootID, prof.ID)
 	if err != nil {
 		fmt.Println(err)
 		response.Error(w, r, err, nil)

@@ -10,4 +10,4 @@ type GetBusinessRssSubscriptionByBusinessRootIdFilter struct {
 	Page       int    `json:"page"`
 }
 
-var SORT_BY = []string{"title", "created_at", "updated_at"}
+var SORT_BY = []string{"title", "created_at", "updated_at", "id"}

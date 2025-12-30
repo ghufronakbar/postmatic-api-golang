@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/app/rss"
+	"strconv"
 
+	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
 
 	"github.com/go-chi/chi/v5"
@@ -38,7 +40,17 @@ func (h *RSSHandler) GetRSSFeed(w http.ResponseWriter, r *http.Request) {
 		PageLimit:  filter.Limit,
 		SortDir:    filter.Sort,
 		Page:       filter.Page,
-		Category:   filter.Category,
+	}
+
+	if filter.Category != "" {
+		intCatId, err := strconv.ParseInt(filter.Category, 10, 64)
+		if err != nil {
+			response.Error(w, r, errs.NewValidationFailed(map[string]string{
+				"category": "category must be an integer64 or optional",
+			}), nil)
+			return
+		}
+		filterQuery.Category = intCatId
 	}
 
 	res, pagination, err := h.rssSvc.GetRSSFeed(r.Context(), filterQuery)

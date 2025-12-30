@@ -7,7 +7,7 @@ type GetRSSFeedFilter struct {
 	PageLimit  int    `json:"pageLimit"`
 	SortDir    string `json:"sortDir"`
 	Page       int    `json:"page"`
-	Category   string `json:"category"` // uuid untuk category jika ada
+	Category   int64  `json:"category"`
 }
 
 var SORT_BY_RSS_FEED = []string{"title", "created_at", "updated_at"}
@@ -21,4 +21,4 @@ type GetRSSCategoryFilter struct {
 	Page       int    `json:"page"`
 }
 
-var SORT_BY_RSS_CATEGORY = []string{"name", "created_at", "updated_at"}
+var SORT_BY_RSS_CATEGORY = []string{"name", "created_at", "updated_at", "id"}

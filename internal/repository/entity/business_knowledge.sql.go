@@ -9,8 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const createBusinessKnowledge = `-- name: CreateBusinessKnowledge :one
@@ -51,7 +49,7 @@ type CreateBusinessKnowledgeParams struct {
 	VisionMission      sql.NullString `json:"vision_mission"`
 	Location           sql.NullString `json:"location"`
 	ColorTone          sql.NullString `json:"color_tone"`
-	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	BusinessRootID     int64          `json:"business_root_id"`
 }
 
 func (q *Queries) CreateBusinessKnowledge(ctx context.Context, arg CreateBusinessKnowledgeParams) (BusinessKnowledge, error) {
@@ -95,7 +93,7 @@ WHERE root.id = $1 AND root.deleted_at IS NULL AND kn.deleted_at IS NULL
 `
 
 type GetBusinessKnowledgeByBusinessRootIDRow struct {
-	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	BusinessRootID     int64          `json:"business_root_id"`
 	Name               string         `json:"name"`
 	PrimaryLogoUrl     sql.NullString `json:"primary_logo_url"`
 	Category           string         `json:"category"`
@@ -109,7 +107,7 @@ type GetBusinessKnowledgeByBusinessRootIDRow struct {
 	Location           sql.NullString `json:"location"`
 }
 
-func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (GetBusinessKnowledgeByBusinessRootIDRow, error) {
+func (q *Queries) GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID int64) (GetBusinessKnowledgeByBusinessRootIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessKnowledgeByBusinessRootID, businessRootID)
 	var i GetBusinessKnowledgeByBusinessRootIDRow
 	err := row.Scan(
@@ -136,9 +134,9 @@ WHERE business_root_id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessKnowledgeByBusinessRootID, businessRootID)
-	var id uuid.UUID
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
@@ -191,7 +189,7 @@ type UpsertBusinessKnowledgeByBusinessRootIDParams struct {
 	VisionMission      sql.NullString `json:"vision_mission"`
 	Location           sql.NullString `json:"location"`
 	ColorTone          sql.NullString `json:"color_tone"`
-	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	BusinessRootID     int64          `json:"business_root_id"`
 }
 
 func (q *Queries) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error) {

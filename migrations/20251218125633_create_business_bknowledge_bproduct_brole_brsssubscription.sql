@@ -1,14 +1,14 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS business_roots ( 
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- 1 to 1 with business_root
 CREATE TABLE IF NOT EXISTS business_knowledges ( 
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
 
     name VARCHAR(255) NOT NULL,
     primary_logo_url VARCHAR(255),
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS business_knowledges (
     location VARCHAR(255),
     color_tone VARCHAR(6),
 
-    business_root_id UUID NOT NULL UNIQUE,
+    business_root_id BIGINT NOT NULL UNIQUE,
     FOREIGN KEY (business_root_id) REFERENCES business_roots(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -31,18 +31,18 @@ CREATE TABLE IF NOT EXISTS business_knowledges (
 
 -- 1 to many with business_root
 CREATE TABLE IF NOT EXISTS business_products ( 
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
 
     name VARCHAR(255) NOT NULL,
     category VARCHAR(255) NOT NULL,
     description TEXT,
 
     currency CHAR(3) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
+    price BIGINT NOT NULL,
 
     image_urls VARCHAR(255)[] NOT NULL,
 
-    business_root_id UUID NOT NULL,
+    business_root_id BIGINT NOT NULL,
     FOREIGN KEY (business_root_id) REFERENCES business_roots(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS business_products (
 
 -- 1 to 1 with business_root
 CREATE TABLE IF NOT EXISTS business_roles ( 
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
 
     target_audience VARCHAR(255) NOT NULL,
     tone VARCHAR(255) NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS business_roles (
     call_to_action VARCHAR(255) NOT NULL,
     goals TEXT,
 
-    business_root_id UUID NOT NULL UNIQUE,
+    business_root_id BIGINT NOT NULL UNIQUE,
     FOREIGN KEY (business_root_id) REFERENCES business_roots(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -71,12 +71,12 @@ CREATE TABLE IF NOT EXISTS business_roles (
 
 -- 1 to many with business_root
 CREATE TABLE IF NOT EXISTS business_rss_subscriptions ( 
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id BIGSERIAL PRIMARY KEY,
 
     title VARCHAR(255) NOT NULL,
     is_active BOOLEAN NOT NULL,
 
-    business_root_id UUID NOT NULL,
+    business_root_id BIGINT NOT NULL,
     FOREIGN KEY (business_root_id) REFERENCES business_roots(id) ON DELETE CASCADE,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

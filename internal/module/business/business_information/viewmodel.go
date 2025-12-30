@@ -5,11 +5,11 @@ import "time"
 
 type SetupBusinessRootFirstTimeResponse struct {
 	// Business Root ID
-	ID string `json:"id"`
+	ID int64 `json:"id"`
 }
 
 type GetJoinedBusinessesByProfileIDResponse struct {
-	ID           string              `json:"id"`
+	ID           int64               `json:"id"`
 	Name         string              `json:"name"`
 	Description  string              `json:"description"`
 	CreatedAt    time.Time           `json:"createdAt"`
@@ -33,7 +33,7 @@ type ProfileSub struct {
 }
 
 type GetBusinessByIdResponse struct {
-	ID             string              `json:"id"`
+	ID             int64               `json:"id"`
 	Name           string              `json:"name"`
 	PrimaryLogoUrl *string             `json:"primaryLogoUrl"`
 	Category       string              `json:"category"`
@@ -47,5 +47,5 @@ type GetBusinessByIdResponse struct {
 
 type DeleteBusinessByIdResponse struct {
 	// Business Root ID
-	ID string `json:"id"`
+	ID int64 `json:"id"`
 }

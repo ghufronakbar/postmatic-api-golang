@@ -11,8 +11,8 @@ WHERE
     OR f.url ILIKE ('%' || sqlc.narg(search) || '%')
   )
   AND (
-    sqlc.narg(category)::uuid IS NULL
-    OR f.app_rss_category_id = sqlc.narg(category)::uuid
+    sqlc.narg(category)::bigint IS NULL
+    OR f.app_rss_category_id = sqlc.narg(category)::bigint
   )
 ORDER BY
   -- title
@@ -27,8 +27,11 @@ ORDER BY
   CASE WHEN sqlc.arg(sort_by) = 'updated_at' AND sqlc.arg(sort_dir) = 'asc'  THEN f.updated_at END ASC,
   CASE WHEN sqlc.arg(sort_by) = 'updated_at' AND sqlc.arg(sort_dir) = 'desc' THEN f.updated_at END DESC,
 
+  -- id
+  CASE WHEN sqlc.arg(sort_by) = 'id' AND sqlc.arg(sort_dir) = 'asc'  THEN f.id END ASC,
+  CASE WHEN sqlc.arg(sort_by) = 'id' AND sqlc.arg(sort_dir) = 'desc' THEN f.id END DESC,
+
   -- fallback stable order
-  f.created_at DESC,
   f.id DESC
 LIMIT sqlc.arg(page_limit)
 OFFSET sqlc.arg(page_offset);
@@ -46,8 +49,8 @@ WHERE
     OR f.url ILIKE ('%' || sqlc.narg(search) || '%')
   )
   AND (
-    sqlc.narg(category)::uuid IS NULL
-    OR f.app_rss_category_id = sqlc.narg(category)::uuid
+    sqlc.narg(category)::bigint IS NULL
+    OR f.app_rss_category_id = sqlc.narg(category)::bigint
   );
 
 -- name: GetRssFeedById :one

@@ -131,8 +131,11 @@ ORDER BY
   CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'asc'  THEN q.updated_at END ASC,
   CASE WHEN p.sort_by = 'updated_at' AND p.sort_dir = 'desc' THEN q.updated_at END DESC,
 
+  -- id
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'asc'  THEN q.id END ASC,
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'desc' THEN q.id END DESC,
+
   -- fallback stable order
-  q.created_at DESC,
   q.id DESC
 LIMIT sqlc.arg(page_limit)
 OFFSET sqlc.arg(page_offset);

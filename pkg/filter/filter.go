@@ -40,6 +40,7 @@ func camelToSnake(s string) string {
 func (f ReqFilter) SortByDB() string {
 	// Whitelist kolom DB yang valid (snake_case)
 	allowed := map[string]struct{}{
+		"id":         {},
 		"name":       {},
 		"created_at": {},
 		"updated_at": {},
@@ -52,5 +53,5 @@ func (f ReqFilter) SortByDB() string {
 	if _, ok := allowed[sortBy]; ok {
 		return sortBy
 	}
-	return "created_at"
+	return "id"
 }

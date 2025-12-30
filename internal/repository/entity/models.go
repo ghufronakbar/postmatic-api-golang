@@ -201,7 +201,7 @@ type AppCreatorImageTypeCategory struct {
 }
 
 type AppRssCategory struct {
-	ID        uuid.UUID    `json:"id"`
+	ID        int64        `json:"id"`
 	Name      string       `json:"name"`
 	DeletedAt sql.NullTime `json:"deleted_at"`
 	CreatedAt time.Time    `json:"created_at"`
@@ -209,18 +209,18 @@ type AppRssCategory struct {
 }
 
 type AppRssFeed struct {
-	ID               uuid.UUID    `json:"id"`
+	ID               int64        `json:"id"`
 	Title            string       `json:"title"`
 	Url              string       `json:"url"`
 	Publisher        string       `json:"publisher"`
-	AppRssCategoryID uuid.UUID    `json:"app_rss_category_id"`
+	AppRssCategoryID int64        `json:"app_rss_category_id"`
 	DeletedAt        sql.NullTime `json:"deleted_at"`
 	CreatedAt        time.Time    `json:"created_at"`
 	UpdatedAt        time.Time    `json:"updated_at"`
 }
 
 type BusinessKnowledge struct {
-	ID                 uuid.UUID      `json:"id"`
+	ID                 int64          `json:"id"`
 	Name               string         `json:"name"`
 	PrimaryLogoUrl     sql.NullString `json:"primary_logo_url"`
 	Category           string         `json:"category"`
@@ -230,18 +230,18 @@ type BusinessKnowledge struct {
 	VisionMission      sql.NullString `json:"vision_mission"`
 	Location           sql.NullString `json:"location"`
 	ColorTone          sql.NullString `json:"color_tone"`
-	BusinessRootID     uuid.UUID      `json:"business_root_id"`
+	BusinessRootID     int64          `json:"business_root_id"`
 	CreatedAt          time.Time      `json:"created_at"`
 	UpdatedAt          time.Time      `json:"updated_at"`
 	DeletedAt          sql.NullTime   `json:"deleted_at"`
 }
 
 type BusinessMember struct {
-	ID             uuid.UUID            `json:"id"`
+	ID             int64                `json:"id"`
 	Status         BusinessMemberStatus `json:"status"`
 	Role           BusinessMemberRole   `json:"role"`
 	AnsweredAt     sql.NullTime         `json:"answered_at"`
-	BusinessRootID uuid.UUID            `json:"business_root_id"`
+	BusinessRootID int64                `json:"business_root_id"`
 	ProfileID      uuid.UUID            `json:"profile_id"`
 	CreatedAt      time.Time            `json:"created_at"`
 	UpdatedAt      time.Time            `json:"updated_at"`
@@ -249,54 +249,54 @@ type BusinessMember struct {
 }
 
 type BusinessProduct struct {
-	ID             uuid.UUID      `json:"id"`
+	ID             int64          `json:"id"`
 	Name           string         `json:"name"`
 	Category       string         `json:"category"`
 	Description    sql.NullString `json:"description"`
 	Currency       string         `json:"currency"`
 	Price          int64          `json:"price"`
 	ImageUrls      []string       `json:"image_urls"`
-	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	BusinessRootID int64          `json:"business_root_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      sql.NullTime   `json:"deleted_at"`
 }
 
 type BusinessRole struct {
-	ID              uuid.UUID      `json:"id"`
+	ID              int64          `json:"id"`
 	TargetAudience  string         `json:"target_audience"`
 	Tone            string         `json:"tone"`
 	AudiencePersona string         `json:"audience_persona"`
 	Hashtags        []string       `json:"hashtags"`
 	CallToAction    string         `json:"call_to_action"`
 	Goals           sql.NullString `json:"goals"`
-	BusinessRootID  uuid.UUID      `json:"business_root_id"`
+	BusinessRootID  int64          `json:"business_root_id"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       sql.NullTime   `json:"deleted_at"`
 }
 
 type BusinessRoot struct {
-	ID        uuid.UUID    `json:"id"`
+	ID        int64        `json:"id"`
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
 	DeletedAt sql.NullTime `json:"deleted_at"`
 }
 
 type BusinessRssSubscription struct {
-	ID             uuid.UUID    `json:"id"`
+	ID             int64        `json:"id"`
 	Title          string       `json:"title"`
 	IsActive       bool         `json:"is_active"`
-	BusinessRootID uuid.UUID    `json:"business_root_id"`
+	BusinessRootID int64        `json:"business_root_id"`
 	CreatedAt      time.Time    `json:"created_at"`
 	UpdatedAt      time.Time    `json:"updated_at"`
 	DeletedAt      sql.NullTime `json:"deleted_at"`
-	AppRssFeedID   uuid.UUID    `json:"app_rss_feed_id"`
+	AppRssFeedID   int64        `json:"app_rss_feed_id"`
 }
 
 type BusinessTimezonePref struct {
 	ID             int32        `json:"id"`
-	BusinessRootID uuid.UUID    `json:"business_root_id"`
+	BusinessRootID int64        `json:"business_root_id"`
 	Timezone       string       `json:"timezone"`
 	CreatedAt      sql.NullTime `json:"created_at"`
 	UpdatedAt      sql.NullTime `json:"updated_at"`

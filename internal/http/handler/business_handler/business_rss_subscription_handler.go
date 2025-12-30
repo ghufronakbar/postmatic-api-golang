@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/business/business_rss_subscription"
+	"strconv"
 
+	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
 
@@ -87,9 +89,18 @@ func (h *BusinessRssSubscriptionHandler) UpdateBusinessRssSubscriptionByBusiness
 	}
 
 	businessRssSubscriptionId := chi.URLParam(r, "businessRssSubscriptionId")
+
+	intBusinessRssSubscriptionId, err := strconv.ParseInt(businessRssSubscriptionId, 10, 64)
+	if err != nil {
+		response.Error(w, r, errs.NewValidationFailed(map[string]string{
+			"businessRssSubscriptionId": "businessRssSubscriptionId must be an integer64",
+		}), nil)
+		return
+	}
+
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
 
-	res, err := h.rssSvc.UpdateBusinessRssSubscription(r.Context(), business.BusinessRootID, businessRssSubscriptionId, req)
+	res, err := h.rssSvc.UpdateBusinessRssSubscription(r.Context(), business.BusinessRootID, intBusinessRssSubscriptionId, req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -101,7 +112,15 @@ func (h *BusinessRssSubscriptionHandler) UpdateBusinessRssSubscriptionByBusiness
 func (h *BusinessRssSubscriptionHandler) HardDeleteBusinessRssSubscriptionByBusinessRootID(w http.ResponseWriter, r *http.Request) {
 	businessRssSubscriptionId := chi.URLParam(r, "businessRssSubscriptionId")
 
-	res, err := h.rssSvc.DeleteBusinessRssSubscription(r.Context(), businessRssSubscriptionId)
+	intBusinessRssSubscriptionId, err := strconv.ParseInt(businessRssSubscriptionId, 10, 64)
+	if err != nil {
+		response.Error(w, r, errs.NewValidationFailed(map[string]string{
+			"businessRssSubscriptionId": "businessRssSubscriptionId must be an integer64",
+		}), nil)
+		return
+	}
+
+	res, err := h.rssSvc.DeleteBusinessRssSubscription(r.Context(), intBusinessRssSubscriptionId)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

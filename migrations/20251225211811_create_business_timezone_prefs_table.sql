@@ -3,7 +3,7 @@
 -- 1 to 1 with business_roots(id)
 CREATE TABLE IF NOT EXISTS business_timezone_prefs (
 	id SERIAL PRIMARY KEY,
-	business_root_id UUID NOT NULL UNIQUE,
+	business_root_id BIGSERIAL NOT NULL UNIQUE,
     FOREIGN KEY (business_root_id) REFERENCES business_roots (id) ON DELETE CASCADE,
 	timezone VARCHAR(255) NOT NULL DEFAULT 'Asia/Jakarta',
 	created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,

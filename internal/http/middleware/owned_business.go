@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"postmatic-api/internal/repository/entity"
@@ -52,9 +53,11 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 			response.Error(w, r, errs.NewBadRequest("INVALID_PROFILE_ID"), nil)
 			return
 		}
-		businessUUID, err := uuid.Parse(businessId)
+		intBusinessId, err := strconv.ParseInt(businessId, 10, 64)
 		if err != nil {
-			response.Error(w, r, errs.NewBadRequest("INVALID_BUSINESS_ID"), nil)
+			response.Error(w, r, errs.NewValidationFailed(map[string]string{
+				"businessId": "businessId must be an integer64",
+			}), nil)
 			return
 		}
 
@@ -66,7 +69,7 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 			list = nil
 		} else {
 			for _, v := range list {
-				if v.BusinessRootID == businessId {
+				if v.BusinessRootID == intBusinessId {
 					ctx := context.WithValue(r.Context(), OwnedBusinessContextKey, &OwnedBusinessContext{
 						MemberID:       v.MemberID,
 						BusinessRootID: v.BusinessRootID,
@@ -82,7 +85,7 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 		dbMember, err := o.store.GetMemberByProfileIdAndBusinessRootId(r.Context(),
 			entity.GetMemberByProfileIdAndBusinessRootIdParams{
 				ProfileID:      profUUID,
-				BusinessRootID: businessUUID,
+				BusinessRootID: intBusinessId,
 			},
 		)
 
@@ -106,15 +109,15 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 
 		// 3) upsert ke redis (best-effort; kalau gagal jangan block request)
 		_ = o.repo.UpsertOneBusiness(r.Context(), prof.ID, ownedBusinessRepo.RedisBusinessSub{
-			MemberID:       dbMember.ID.String(),
-			BusinessRootID: dbMember.BusinessRootID.String(),
+			MemberID:       dbMember.ID,
+			BusinessRootID: dbMember.BusinessRootID,
 			Role:           dbMember.Role,
 		}, o.ttl)
 
 		// 4) set context dan lanjut
 		ctx := context.WithValue(r.Context(), OwnedBusinessContextKey, &OwnedBusinessContext{
-			MemberID:       dbMember.ID.String(),
-			BusinessRootID: dbMember.BusinessRootID.String(),
+			MemberID:       dbMember.ID,
+			BusinessRootID: dbMember.BusinessRootID,
 			Role:           dbMember.Role,
 		})
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -122,8 +125,8 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 }
 
 type OwnedBusinessContext struct {
-	MemberID       string                    `json:"memberId"`
-	BusinessRootID string                    `json:"businessRootId"`
+	MemberID       int64                     `json:"memberId"`
+	BusinessRootID int64                     `json:"businessRootId"`
 	Role           entity.BusinessMemberRole `json:"role"`
 }
 

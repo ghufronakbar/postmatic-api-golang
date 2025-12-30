@@ -338,13 +338,28 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 		return LoginResponse{}, errs.NewUnauthorized("SESSION_EXPIRED_OR_REVOKED")
 	}
 
+	profUUID, err := uuid.Parse(valid.ID)
+	if err != nil {
+		return LoginResponse{}, errs.NewUnauthorized("SESSION_EXPIRED_OR_REVOKED")
+	}
+
+	profile, err := s.store.GetProfileById(ctx, profUUID)
+	if err != nil {
+		return LoginResponse{}, errs.NewInternalServerError(err)
+	}
+
+	var imageUrl *string
+	if profile.ImageUrl.Valid {
+		imageUrl = &profile.ImageUrl.String
+	}
+
 	// 3. Generate Access Token Baru (Selalu dilakukan)
 	accessToken, err := s.tm.GenerateAccessToken(
 		token.GenerateAccessTokenInput{
 			ID:       valid.ID,
 			Email:    valid.Email,
-			Name:     valid.Name,
-			ImageUrl: valid.ImageUrl,
+			Name:     profile.Name,
+			ImageUrl: imageUrl,
 		},
 	)
 	if err != nil {

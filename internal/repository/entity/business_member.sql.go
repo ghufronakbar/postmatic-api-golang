@@ -35,7 +35,7 @@ type CreateBusinessMemberParams struct {
 	Status         BusinessMemberStatus `json:"status"`
 	Role           BusinessMemberRole   `json:"role"`
 	AnsweredAt     sql.NullTime         `json:"answered_at"`
-	BusinessRootID uuid.UUID            `json:"business_root_id"`
+	BusinessRootID int64                `json:"business_root_id"`
 	ProfileID      uuid.UUID            `json:"profile_id"`
 }
 
@@ -71,7 +71,7 @@ AND deleted_at IS NULL
 
 type GetMemberByProfileIdAndBusinessRootIdParams struct {
 	ProfileID      uuid.UUID `json:"profile_id"`
-	BusinessRootID uuid.UUID `json:"business_root_id"`
+	BusinessRootID int64     `json:"business_root_id"`
 }
 
 func (q *Queries) GetMemberByProfileIdAndBusinessRootId(ctx context.Context, arg GetMemberByProfileIdAndBusinessRootIdParams) (BusinessMember, error) {
@@ -112,7 +112,7 @@ ORDER BY bm.business_root_id, bm.created_at ASC
 `
 
 type GetMembersByBusinessRootIDRow struct {
-	BusinessRootID  uuid.UUID            `json:"business_root_id"`
+	BusinessRootID  int64                `json:"business_root_id"`
 	Status          BusinessMemberStatus `json:"status"`
 	Role            BusinessMemberRole   `json:"role"`
 	ProfileID       uuid.UUID            `json:"profile_id"`
@@ -121,7 +121,7 @@ type GetMembersByBusinessRootIDRow struct {
 	ProfileEmail    string               `json:"profile_email"`
 }
 
-func (q *Queries) GetMembersByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) ([]GetMembersByBusinessRootIDRow, error) {
+func (q *Queries) GetMembersByBusinessRootID(ctx context.Context, businessRootID int64) ([]GetMembersByBusinessRootIDRow, error) {
 	rows, err := q.db.QueryContext(ctx, getMembersByBusinessRootID, businessRootID)
 	if err != nil {
 		return nil, err
@@ -167,13 +167,13 @@ FROM business_members bm
 JOIN profiles p
   ON p.id = bm.profile_id
 
-WHERE bm.business_root_id = ANY($1::uuid[])
+WHERE bm.business_root_id = ANY($1::bigint[])
 
 ORDER BY bm.business_root_id, bm.created_at ASC
 `
 
 type GetMembersByBusinessRootIDsRow struct {
-	BusinessRootID  uuid.UUID            `json:"business_root_id"`
+	BusinessRootID  int64                `json:"business_root_id"`
 	Status          BusinessMemberStatus `json:"status"`
 	Role            BusinessMemberRole   `json:"role"`
 	ProfileID       uuid.UUID            `json:"profile_id"`
@@ -182,7 +182,7 @@ type GetMembersByBusinessRootIDsRow struct {
 	ProfileEmail    string               `json:"profile_email"`
 }
 
-func (q *Queries) GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []uuid.UUID) ([]GetMembersByBusinessRootIDsRow, error) {
+func (q *Queries) GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []int64) ([]GetMembersByBusinessRootIDsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getMembersByBusinessRootIDs, pq.Array(businessRootIds))
 	if err != nil {
 		return nil, err
@@ -220,9 +220,9 @@ WHERE business_root_id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessMemberByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessMemberByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessMemberByBusinessRootID, businessRootID)
-	var id uuid.UUID
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }

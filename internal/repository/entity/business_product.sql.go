@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -45,7 +44,7 @@ WHERE
 `
 
 type CountBusinessProductsByBusinessRootIdParams struct {
-	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	BusinessRootID int64          `json:"business_root_id"`
 	Search         interface{}    `json:"search"`
 	Category       sql.NullString `json:"category"`
 	DateStart      sql.NullTime   `json:"date_start"`
@@ -94,7 +93,7 @@ type CreateBusinessProductParams struct {
 	Currency       string         `json:"currency"`
 	Price          int64          `json:"price"`
 	ImageUrls      []string       `json:"image_urls"`
-	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	BusinessRootID int64          `json:"business_root_id"`
 }
 
 func (q *Queries) CreateBusinessProduct(ctx context.Context, arg CreateBusinessProductParams) (BusinessProduct, error) {
@@ -128,7 +127,7 @@ const getBusinessProductByBusinessProductId = `-- name: GetBusinessProductByBusi
 SELECT id, name, category, description, currency, price, image_urls, business_root_id, created_at, updated_at, deleted_at FROM business_products WHERE id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) GetBusinessProductByBusinessProductId(ctx context.Context, id uuid.UUID) (BusinessProduct, error) {
+func (q *Queries) GetBusinessProductByBusinessProductId(ctx context.Context, id int64) (BusinessProduct, error) {
 	row := q.db.QueryRowContext(ctx, getBusinessProductByBusinessProductId, id)
 	var i BusinessProduct
 	err := row.Scan(
@@ -200,8 +199,10 @@ ORDER BY
   CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'asc'  THEN bp.price END ASC,
   CASE WHEN p.sort_by = 'price' AND p.sort_dir = 'desc' THEN bp.price END DESC,
 
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'asc'  THEN bp.id END ASC,
+  CASE WHEN p.sort_by = 'id' AND p.sort_dir = 'desc' THEN bp.id END DESC,
+
   -- fallback stable order
-  bp.created_at DESC,
   bp.id DESC
 
 LIMIT $7
@@ -209,7 +210,7 @@ OFFSET $6
 `
 
 type GetBusinessProductsByBusinessRootIdParams struct {
-	BusinessRootID uuid.UUID      `json:"business_root_id"`
+	BusinessRootID int64          `json:"business_root_id"`
 	Search         interface{}    `json:"search"`
 	Category       sql.NullString `json:"category"`
 	DateStart      sql.NullTime   `json:"date_start"`
@@ -272,7 +273,7 @@ WHERE id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessProductByBusinessProductId(ctx context.Context, id uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessProductByBusinessProductId(ctx context.Context, id int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessProductByBusinessProductId, id)
 	err := row.Scan(&id)
 	return id, err
@@ -285,9 +286,9 @@ WHERE business_root_id = $1
 RETURNING id
 `
 
-func (q *Queries) SoftDeleteBusinessProductByBusinessRootID(ctx context.Context, businessRootID uuid.UUID) (uuid.UUID, error) {
+func (q *Queries) SoftDeleteBusinessProductByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, softDeleteBusinessProductByBusinessRootID, businessRootID)
-	var id uuid.UUID
+	var id int64
 	err := row.Scan(&id)
 	return id, err
 }
@@ -312,7 +313,7 @@ type UpdateBusinessProductParams struct {
 	Currency    string         `json:"currency"`
 	Price       int64          `json:"price"`
 	ImageUrls   []string       `json:"image_urls"`
-	ID          uuid.UUID      `json:"id"`
+	ID          int64          `json:"id"`
 }
 
 func (q *Queries) UpdateBusinessProduct(ctx context.Context, arg UpdateBusinessProductParams) (BusinessProduct, error) {

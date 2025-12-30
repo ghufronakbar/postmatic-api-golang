@@ -50,8 +50,11 @@ ORDER BY
   CASE WHEN $2 = 'updated_at' AND $3 = 'asc'  THEN c.updated_at END ASC,
   CASE WHEN $2 = 'updated_at' AND $3 = 'desc' THEN c.updated_at END DESC,
 
+  -- id
+  CASE WHEN $2 = 'id' AND $3 = 'asc'  THEN c.id END ASC,
+  CASE WHEN $2 = 'id' AND $3 = 'desc' THEN c.id END DESC,
+
   -- fallback stable order
-  c.created_at DESC,
   c.id DESC
 LIMIT $5
 OFFSET $4

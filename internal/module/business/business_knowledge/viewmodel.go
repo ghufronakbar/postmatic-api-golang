@@ -11,7 +11,7 @@ type BusinessKnowledgeResponse struct {
 	WebsiteUrl         *string   `json:"websiteUrl"`
 	VisionMission      string    `json:"visionMission"`
 	Location           string    `json:"location"`
-	RootBusinessId     string    `json:"rootBusinessId"`
+	RootBusinessId     int64     `json:"rootBusinessId"`
 	CreatedAt          time.Time `json:"createdAt"`
 	UpdatedAt          time.Time `json:"updatedAt"`
 	ColorTone          string    `json:"colorTone"`

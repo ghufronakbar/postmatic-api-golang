@@ -3,7 +3,7 @@ package business_role
 import "time"
 
 type BusinessRoleResponse struct {
-	BusinessRootId  string    `json:"businessRootId"`
+	BusinessRootId  int64     `json:"businessRootId"`
 	AudiencePersona string    `json:"audiencePersona"`
 	CallToAction    string    `json:"callToAction"`
 	Goals           string    `json:"goals"`

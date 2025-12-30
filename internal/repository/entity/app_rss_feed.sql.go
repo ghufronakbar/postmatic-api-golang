@@ -7,8 +7,7 @@ package entity
 
 import (
 	"context"
-
-	"github.com/google/uuid"
+	"database/sql"
 )
 
 const countAllRSSFeed = `-- name: CountAllRSSFeed :one
@@ -23,14 +22,14 @@ WHERE
     OR f.url ILIKE ('%' || $1 || '%')
   )
   AND (
-    $2::uuid IS NULL
-    OR f.app_rss_category_id = $2::uuid
+    $2::bigint IS NULL
+    OR f.app_rss_category_id = $2::bigint
   )
 `
 
 type CountAllRSSFeedParams struct {
 	Search   interface{}   `json:"search"`
-	Category uuid.NullUUID `json:"category"`
+	Category sql.NullInt64 `json:"category"`
 }
 
 func (q *Queries) CountAllRSSFeed(ctx context.Context, arg CountAllRSSFeedParams) (int64, error) {
@@ -53,8 +52,8 @@ WHERE
     OR f.url ILIKE ('%' || $1 || '%')
   )
   AND (
-    $2::uuid IS NULL
-    OR f.app_rss_category_id = $2::uuid
+    $2::bigint IS NULL
+    OR f.app_rss_category_id = $2::bigint
   )
 ORDER BY
   -- title
@@ -69,8 +68,11 @@ ORDER BY
   CASE WHEN $3 = 'updated_at' AND $4 = 'asc'  THEN f.updated_at END ASC,
   CASE WHEN $3 = 'updated_at' AND $4 = 'desc' THEN f.updated_at END DESC,
 
+  -- id
+  CASE WHEN $3 = 'id' AND $4 = 'asc'  THEN f.id END ASC,
+  CASE WHEN $3 = 'id' AND $4 = 'desc' THEN f.id END DESC,
+
   -- fallback stable order
-  f.created_at DESC,
   f.id DESC
 LIMIT $6
 OFFSET $5
@@ -78,7 +80,7 @@ OFFSET $5
 
 type GetAllRSSFeedParams struct {
 	Search     interface{}   `json:"search"`
-	Category   uuid.NullUUID `json:"category"`
+	Category   sql.NullInt64 `json:"category"`
 	SortBy     interface{}   `json:"sort_by"`
 	SortDir    interface{}   `json:"sort_dir"`
 	PageOffset int32         `json:"page_offset"`
@@ -129,7 +131,7 @@ SELECT id, title, url, publisher, app_rss_category_id, deleted_at, created_at, u
 WHERE id = $1 AND deleted_at IS NULL
 `
 
-func (q *Queries) GetRssFeedById(ctx context.Context, id uuid.UUID) (AppRssFeed, error) {
+func (q *Queries) GetRssFeedById(ctx context.Context, id int64) (AppRssFeed, error) {
 	row := q.db.QueryRowContext(ctx, getRssFeedById, id)
 	var i AppRssFeed
 	err := row.Scan(

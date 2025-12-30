@@ -50,9 +50,12 @@ ORDER BY
   CASE WHEN sqlc.arg(sort_by) = 'updated_at' AND sqlc.arg(sort_dir) = 'asc'  THEN br.updated_at END ASC,
   CASE WHEN sqlc.arg(sort_by) = 'updated_at' AND sqlc.arg(sort_dir) = 'desc' THEN br.updated_at END DESC,
 
+  -- id
+  CASE WHEN sqlc.arg(sort_by) = 'id' AND sqlc.arg(sort_dir) = 'asc'  THEN bm.id END ASC,
+  CASE WHEN sqlc.arg(sort_by) = 'id' AND sqlc.arg(sort_dir) = 'desc' THEN bm.id END DESC,
+
   -- fallback stable order
-  br.created_at DESC,
-  br.id DESC
+  bm.id DESC
 
 LIMIT sqlc.arg(page_limit)
 OFFSET sqlc.arg(page_offset);

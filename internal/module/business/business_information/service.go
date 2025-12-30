@@ -58,7 +58,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 		return nil, nil, errs.NewInternalServerError(err)
 	}
 
-	var businessRootIds []uuid.UUID
+	var businessRootIds []int64
 	for _, v := range res {
 		businessRootIds = append(businessRootIds, v.BusinessRootID)
 	}
@@ -86,7 +86,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 			}
 		}
 		result = append(result, GetJoinedBusinessesByProfileIDResponse{
-			ID:          v.BusinessRootID.String(),
+			ID:          v.BusinessRootID,
 			Name:        v.BusinessName,
 			Description: v.BusinessDescription.String,
 			CreatedAt:   v.BusinessRootCreatedAt,
@@ -133,20 +133,18 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(err)
 	}
 
-	var businessRootId string
-	var memberID string
+	var businessRootId int64
+	var memberID int64
 
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
-		businessRoot, err := tx.CreateBusinessRoot(ctx)
+		businessRootId, err = tx.CreateBusinessRoot(ctx)
 		if err != nil {
 			return err
 		}
 
-		businessRootId = businessRoot.String()
-
 		_, err = tx.CreateBusinessKnowledge(ctx, entity.CreateBusinessKnowledgeParams{
-			BusinessRootID:     businessRoot,
+			BusinessRootID:     businessRootId,
 			Name:               input.BusinessKnowledge.Name,
 			PrimaryLogoUrl:     sql.NullString{String: input.BusinessKnowledge.PrimaryLogoUrl, Valid: input.BusinessKnowledge.PrimaryLogoUrl != ""},
 			Category:           input.BusinessKnowledge.Category,
@@ -162,7 +160,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		_, err = tx.CreateBusinessProduct(ctx, entity.CreateBusinessProductParams{
-			BusinessRootID: businessRoot,
+			BusinessRootID: businessRootId,
 			Name:           input.ProductKnowledge.Name,
 			Price:          input.ProductKnowledge.Price,
 			Description:    sql.NullString{String: input.ProductKnowledge.Description, Valid: input.ProductKnowledge.Description != ""},
@@ -176,7 +174,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		_, err = tx.CreateBusinessRole(ctx, entity.CreateBusinessRoleParams{
-			BusinessRootID:  businessRoot,
+			BusinessRootID:  businessRootId,
 			TargetAudience:  input.RoleKnowledge.TargetAudience,
 			Tone:            input.RoleKnowledge.Tone,
 			AudiencePersona: input.RoleKnowledge.AudiencePersona,
@@ -190,7 +188,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		member, err := tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
-			BusinessRootID: businessRoot,
+			BusinessRootID: businessRootId,
 			ProfileID:      profileUUID,
 			Role:           entity.BusinessMemberRoleOwner,
 			AnsweredAt:     sql.NullTime{Time: time.Now(), Valid: true},
@@ -201,7 +199,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 			return err
 		}
 
-		memberID = member.ID.String()
+		memberID = member.ID
 
 		// TODO: send email notification to owner
 
@@ -212,7 +210,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(e)
 	}
 
-	if memberID == "" {
+	if memberID == 0 {
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(errors.New("MEMBER_ID_IS_EMPTY"))
 	}
 
@@ -234,13 +232,9 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	return res, nil
 }
 
-func (s *BusinessInformationService) GetBusinessById(ctx context.Context, businessId string, profileId string) (GetBusinessByIdResponse, error) {
-	businessUUID, err := uuid.Parse(businessId)
-	if err != nil {
-		return GetBusinessByIdResponse{}, errs.NewBadRequest("INVALID_BUSINESS_ID")
-	}
+func (s *BusinessInformationService) GetBusinessById(ctx context.Context, businessId int64, profileId string) (GetBusinessByIdResponse, error) {
 
-	business, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessUUID)
+	business, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessId)
 
 	if err == sql.ErrNoRows {
 		return GetBusinessByIdResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
@@ -249,7 +243,7 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 		return GetBusinessByIdResponse{}, err
 	}
 
-	members, err := s.store.GetMembersByBusinessRootID(ctx, businessUUID)
+	members, err := s.store.GetMembersByBusinessRootID(ctx, businessId)
 	if err != nil {
 		return GetBusinessByIdResponse{}, err
 	}
@@ -286,7 +280,7 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 	}
 
 	res := GetBusinessByIdResponse{
-		ID:             business.BusinessRootID.String(),
+		ID:             business.BusinessRootID,
 		Name:           business.Name,
 		PrimaryLogoUrl: utils.NullStringToString(business.PrimaryLogoUrl),
 		Category:       business.Category,
@@ -300,11 +294,7 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 	return res, nil
 }
 
-func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, businessId string, profileId string) (DeleteBusinessByIdResponse, error) {
-	businessUUID, err := uuid.Parse(businessId)
-	if err != nil {
-		return DeleteBusinessByIdResponse{}, errs.NewBadRequest("INVALID_BUSINESS_ID")
-	}
+func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, businessId int64, profileId string) (DeleteBusinessByIdResponse, error) {
 	profileUUID, err := uuid.Parse(profileId)
 	if err != nil {
 		return DeleteBusinessByIdResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
@@ -312,7 +302,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 
 	member, err := s.store.GetMemberByProfileIdAndBusinessRootId(ctx, entity.GetMemberByProfileIdAndBusinessRootIdParams{
 		ProfileID:      profileUUID,
-		BusinessRootID: businessUUID,
+		BusinessRootID: businessId,
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -323,7 +313,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 		return DeleteBusinessByIdResponse{}, errs.NewForbidden("USER_NOT_OWNER")
 	}
 
-	root, err := s.store.GetBusinessRootById(ctx, businessUUID)
+	root, err := s.store.GetBusinessRootById(ctx, businessId)
 
 	if err == sql.ErrNoRows || root.DeletedAt.Valid {
 		return DeleteBusinessByIdResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
@@ -333,13 +323,13 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 		return DeleteBusinessByIdResponse{}, err
 	}
 
-	members, err := s.store.GetMembersByBusinessRootID(ctx, businessUUID)
+	members, err := s.store.GetMembersByBusinessRootID(ctx, businessId)
 	if err != nil {
 		return DeleteBusinessByIdResponse{}, err
 	}
 
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
-		rootId, err := tx.SoftDeleteBusinessRoot(ctx, businessUUID)
+		rootId, err := tx.SoftDeleteBusinessRoot(ctx, businessId)
 		if err != nil {
 			return err
 		}
@@ -372,7 +362,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 	}
 
 	// REDIS: delete cache to verify owned business to all members
-	go func(members []entity.GetMembersByBusinessRootIDRow, businessID string) {
+	go func(members []entity.GetMembersByBusinessRootIDRow, businessID int64) {
 		ctxBg, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 
@@ -381,7 +371,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 				fmt.Println("redis delete cache failed:", err)
 			}
 		}
-	}(members, businessUUID.String())
+	}(members, businessId)
 
 	return DeleteBusinessByIdResponse{
 		ID: businessId,

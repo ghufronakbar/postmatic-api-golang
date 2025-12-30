@@ -53,7 +53,12 @@ func (h *BusinessTimezonePrefHandler) GetBusinessTimezonePrefByBusinessRootId(w 
 }
 
 func (h *BusinessTimezonePrefHandler) UpsertBusinessTimezonePrefByBusinessRootID(w http.ResponseWriter, r *http.Request) {
-	businessId := chi.URLParam(r, "businessId")
+	business, err := middleware.OwnedBusinessFromContext(r.Context())
+
+	if err != nil {
+		response.Error(w, r, err, nil)
+		return
+	}
 
 	var req business_timezone_pref.UpsertBusinessTimezonePrefInput
 
@@ -62,7 +67,7 @@ func (h *BusinessTimezonePrefHandler) UpsertBusinessTimezonePrefByBusinessRootID
 		return
 	}
 
-	res, err := h.tzSvc.UpsertBusinessTimezonePrefByBusinessRootID(r.Context(), businessId, req)
+	res, err := h.tzSvc.UpsertBusinessTimezonePrefByBusinessRootID(r.Context(), business.BusinessRootID, req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE app_rss_categories (
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id BIGSERIAL PRIMARY KEY,
 	name VARCHAR(255) NOT NULL,
 	deleted_at TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,11 +14,11 @@ FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE app_rss_feeds (
-	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	id BIGSERIAL PRIMARY KEY,
 	title VARCHAR(255) NOT NULL,
 	url VARCHAR(255) NOT NULL,
 	publisher VARCHAR(255) NOT NULL,
-	app_rss_category_id UUID NOT NULL,
+	app_rss_category_id BIGINT NOT NULL,
 	FOREIGN KEY (app_rss_category_id) REFERENCES app_rss_categories(id),
 	deleted_at TIMESTAMPTZ,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,

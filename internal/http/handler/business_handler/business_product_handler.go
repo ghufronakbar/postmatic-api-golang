@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/business/business_product"
+	"strconv"
 
+	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
 
@@ -91,7 +93,15 @@ func (h *BusinessProductHandler) UpdateBusinessProductByBusinessRootID(w http.Re
 
 	businessProductId := chi.URLParam(r, "businessProductId")
 
-	res, err := h.busInSvc.UpdateBusinessProduct(r.Context(), businessProductId, req)
+	intBusinessProductId, err := strconv.ParseInt(businessProductId, 10, 64)
+	if err != nil {
+		response.Error(w, r, errs.NewValidationFailed(map[string]string{
+			"businessProductId": "businessProductId must be an integer64",
+		}), nil)
+		return
+	}
+
+	res, err := h.busInSvc.UpdateBusinessProduct(r.Context(), intBusinessProductId, req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -103,11 +113,19 @@ func (h *BusinessProductHandler) UpdateBusinessProductByBusinessRootID(w http.Re
 func (h *BusinessProductHandler) SoftDeleteBusinessProductByBusinessRootID(w http.ResponseWriter, r *http.Request) {
 	businessProductId := chi.URLParam(r, "businessProductId")
 
-	res, err := h.busInSvc.SoftDeleteBusinessProductByBusinessRootID(r.Context(), businessProductId)
+	intBusinessProductId, err := strconv.ParseInt(businessProductId, 10, 64)
+	if err != nil {
+		response.Error(w, r, errs.NewValidationFailed(map[string]string{
+			"businessProductId": "businessProductId must be an integer64",
+		}), nil)
+		return
+	}
+
+	res, err := h.busInSvc.SoftDeleteBusinessProductByBusinessRootID(r.Context(), intBusinessProductId)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
 	}
 
-	response.OK(w, r, "SUCCESS_SOFT_DELETE_BUSINESS_PRODUCT", res)
+	response.OK(w, r, "SUCCESS_DELETE_BUSINESS_PRODUCT", res)
 }
