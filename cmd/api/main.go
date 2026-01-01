@@ -15,6 +15,7 @@ import (
 	"postmatic-api/internal/http/middleware"
 	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/queue"
+	"postmatic-api/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 	chiMw "github.com/go-chi/chi/v5/middleware"
@@ -54,6 +55,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(chiMw.RequestID)
 	r.Use(middleware.RequestLogger)
+	r.Use(chiMw.StripSlashes)
 	r.Use(chiMw.Recoverer)
 
 	// inject cfg + asynqClient
@@ -70,6 +72,11 @@ func main() {
 
 	go func() {
 		log.Println("Server running on port", cfg.PORT)
+		chi.Walk(r, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+			logger.L().Info("route", "method", method, "route", route)
+			return nil
+		})
+
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}

@@ -95,7 +95,7 @@ func (p *Producer) EnqueueAnnounceRole(ctx context.Context, payload mailer.Membe
 	if err != nil {
 		return err
 	}
-	task := asynq.NewTask(taskMailerInvitation, b)
+	task := asynq.NewTask(taskMailerAnnounceRole, b)
 
 	return p.enqueue(
 		ctx,
@@ -111,7 +111,7 @@ func (p *Producer) EnqueueAnnounceKick(ctx context.Context, payload mailer.Membe
 	if err != nil {
 		return err
 	}
-	task := asynq.NewTask(taskMailerInvitation, b)
+	task := asynq.NewTask(taskMailerAnnounceKick, b)
 
 	return p.enqueue(
 		ctx,

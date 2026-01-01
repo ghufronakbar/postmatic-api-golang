@@ -36,10 +36,13 @@ func (h *BusinessMemberHandler) BusinessMemberRoutes() chi.Router {
 			r.Post("/", h.InviteBusinessMember)
 			r.Post("/resend-invitation", h.ResendMemberInvitation)
 			r.Put("/", h.EditMember)
-			r.Delete("/", h.RemoveMember)
 		})
 
-		r.Route("/{memberInvitationToken}", func(r chi.Router) {
+		r.Route("/{memberInvitationTokenOrMemberId}", func(r chi.Router) {
+			r.Route("/", func(r chi.Router) {
+				r.Use(h.middleware.OwnedBusinessMiddleware)
+				r.Delete("/", h.RemoveMember)
+			})
 			r.Get("/verify", h.VerifyMemberInvitation)
 			r.Post("/answer", h.AnswerMemberInvitation)
 		})
@@ -132,7 +135,7 @@ func (h *BusinessMemberHandler) EditMember(w http.ResponseWriter, r *http.Reques
 func (h *BusinessMemberHandler) VerifyMemberInvitation(w http.ResponseWriter, r *http.Request) {
 	var req business_member.VerifyMemberInvitationInput
 
-	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationToken")
+	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
@@ -151,7 +154,7 @@ func (h *BusinessMemberHandler) VerifyMemberInvitation(w http.ResponseWriter, r 
 func (h *BusinessMemberHandler) AnswerMemberInvitation(w http.ResponseWriter, r *http.Request) {
 	var req business_member.AnswerMemberInvitationInput
 
-	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationToken")
+	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
@@ -202,7 +205,7 @@ func (h *BusinessMemberHandler) RemoveMember(w http.ResponseWriter, r *http.Requ
 	req.ProfileID = prof.ID
 	req.BusinessRootID = buss.BusinessRootID
 
-	intMemberID, err := strconv.ParseInt(chi.URLParam(r, "memberId"), 10, 64)
+	intMemberID, err := strconv.ParseInt(chi.URLParam(r, "memberInvitationTokenOrMemberId"), 10, 64)
 	if err != nil {
 		response.Error(w, r, errs.NewValidationFailed(map[string]string{
 			"memberId": "memberId must be an integer64",
@@ -213,11 +216,6 @@ func (h *BusinessMemberHandler) RemoveMember(w http.ResponseWriter, r *http.Requ
 
 	if buss.Role != entity.BusinessMemberRoleOwner {
 		response.Error(w, r, errs.NewForbidden("ONLY_OWNER_CAN_ACCESS"), nil)
-		return
-	}
-
-	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
