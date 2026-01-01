@@ -338,7 +338,7 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 	}
 
 	if utils.StringInSlice(string(checkMember.MemberStatus), disallowStatus) {
-		return InviteMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + string(checkMember.MemberStatus))
+		return InviteMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + strings.ToUpper(string(checkMember.MemberStatus)))
 	}
 
 	remaining, err := s.checkEmailLimit(ctx, invitation_limiter_repository.LimiterInvitationInput{
@@ -418,7 +418,7 @@ func (s *BusinessMemberService) EditMember(ctx context.Context, input EditMember
 	}
 
 	if checkMember.MemberStatus != entity.BusinessMemberStatusAccepted {
-		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + string(checkMember.MemberStatus))
+		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + strings.ToUpper(string(checkMember.MemberStatus)))
 	}
 
 	checkBusiness, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, input.BusinessRootID)
@@ -535,7 +535,7 @@ func (s *BusinessMemberService) RemoveBusinessMember(ctx context.Context, input 
 	}
 
 	if utils.StringInSlice(string(checkMember.MemberStatus), disallowStatus) {
-		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + string(checkMember.MemberStatus))
+		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + strings.ToUpper(string(checkMember.MemberStatus)))
 	}
 
 	var res GeneralMemberResponse

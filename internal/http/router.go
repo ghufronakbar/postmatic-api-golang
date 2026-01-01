@@ -81,7 +81,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
 	busImageContentSvc := business_image_content.NewService(store)
-	busMemberSvc := business_member.NewService(store, *cfg, queueProducer, tokenSvc, invitationLimiterRepo)
+	busMemberSvc := business_member.NewService(store, *cfg, queueProducer, tokenSvc, invitationLimiterRepo, ownedRepo)
 	// APP
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, s3Svc, store)
 	rssSvc := rss.NewRSSService(store)
