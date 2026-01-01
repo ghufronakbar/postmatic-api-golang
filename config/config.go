@@ -27,7 +27,8 @@ type Config struct {
 	AUTH_URL      string
 
 	// ROUTE
-	VERIFY_EMAIL_ROUTE string
+	VERIFY_EMAIL_ROUTE  string
+	INVITE_MEMBER_ROUTE string
 
 	// DATABASE
 	DATABASE_URL string
@@ -42,12 +43,14 @@ type Config struct {
 	JWT_ACCESS_TOKEN_SECRET         string
 	JWT_REFRESH_TOKEN_SECRET        string
 	JWT_CREATE_ACCOUNT_TOKEN_SECRET string
+	JWT_INVITATION_TOKEN_SECRET     string
 
 	// TIME
 	JWT_ACCESS_TOKEN_EXPIRED         time.Duration // minutes
 	JWT_REFRESH_TOKEN_EXPIRED        time.Duration // days
 	JWT_REFRESH_TOKEN_RENEWAL        time.Duration // days
 	JWT_CREATE_ACCOUNT_TOKEN_EXPIRED time.Duration // minutes
+	JWT_INVITATION_TOKEN_EXPIRED     time.Duration // days
 	CAN_RESEND_EMAIL_AFTER           int64         // minutes
 
 	// SMTP
@@ -98,12 +101,14 @@ func Load() *Config {
 	jwtRefreshTokenRenewal, _ := strconv.Atoi(getEnv("JWT_REFRESH_TOKEN_RENEWAL"))
 	jwtCreateAccountTokenExpired, _ := strconv.Atoi(getEnv("JWT_CREATE_ACCOUNT_TOKEN_EXPIRED"))
 	canResendEmailAfter, _ := strconv.Atoi(getEnv("CAN_RESEND_EMAIL_AFTER"))
+	jwtInvitationTokenExpired, _ := strconv.Atoi(getEnv("JWT_INVITATION_TOKEN_EXPIRED"))
 
 	jwtAccessTokenExpiredDuration := time.Duration(jwtAccessTokenExpired) * time.Minute
 	jwtRefreshTokenExpiredDuration := time.Duration(jwtRefreshTokenExpired) * time.Hour * 24
 	jwtRefreshTokenRenewalDuration := time.Duration(jwtRefreshTokenRenewal) * time.Hour * 24
 	jwtCreateAccountTokenExpiredDuration := time.Duration(jwtCreateAccountTokenExpired) * time.Minute
 	canResendEmailAfterDuration := int64(canResendEmailAfter * 60)
+	jwtInvitationTokenExpiredDuration := time.Duration(jwtInvitationTokenExpired) * time.Hour * 24
 
 	s3PresignExpiresInt, err := strconv.Atoi(getEnv("S3_PRESIGN_EXPIRES_SECONDS"))
 	if err != nil {
@@ -127,7 +132,8 @@ func Load() *Config {
 		AUTH_URL:      getEnv("AUTH_URL"),
 
 		// ROUTE
-		VERIFY_EMAIL_ROUTE: getEnv("VERIFY_EMAIL_ROUTE"),
+		VERIFY_EMAIL_ROUTE:  getEnv("VERIFY_EMAIL_ROUTE"),
+		INVITE_MEMBER_ROUTE: getEnv("INVITE_MEMBER_ROUTE"),
 
 		// DATABASE
 		DATABASE_URL: getEnv("DATABASE_URL"),
@@ -142,6 +148,7 @@ func Load() *Config {
 		JWT_ACCESS_TOKEN_SECRET:         getEnv("JWT_ACCESS_TOKEN_SECRET"),
 		JWT_REFRESH_TOKEN_SECRET:        getEnv("JWT_REFRESH_TOKEN_SECRET"),
 		JWT_CREATE_ACCOUNT_TOKEN_SECRET: getEnv("JWT_CREATE_ACCOUNT_TOKEN_SECRET"),
+		JWT_INVITATION_TOKEN_SECRET:     getEnv("JWT_INVITATION_TOKEN_SECRET"),
 
 		// TIME
 		JWT_ACCESS_TOKEN_EXPIRED:         jwtAccessTokenExpiredDuration,
@@ -149,6 +156,7 @@ func Load() *Config {
 		JWT_REFRESH_TOKEN_RENEWAL:        jwtRefreshTokenRenewalDuration,
 		JWT_CREATE_ACCOUNT_TOKEN_EXPIRED: jwtCreateAccountTokenExpiredDuration,
 		CAN_RESEND_EMAIL_AFTER:           canResendEmailAfterDuration,
+		JWT_INVITATION_TOKEN_EXPIRED:     jwtInvitationTokenExpiredDuration,
 
 		// SMTP
 		SMTP_HOST:        getEnv("SMTP_HOST"),

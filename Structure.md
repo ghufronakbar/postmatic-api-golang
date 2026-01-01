@@ -1,6 +1,6 @@
 # Project Structure
 
-_Generated: 2025-12-27 21:16:58_
+_Generated: 2026-01-02 00:53:16_
 
 Root: `.`
 
@@ -33,8 +33,10 @@ Root: `.`
       - rss/
       - timezone/
     - business/
+      - business_image_content/
       - business_information/
       - business_knowledge/
+      - business_member/
       - business_product/
       - business_role/
       - business_rss_subscription/
@@ -45,12 +47,15 @@ Root: `.`
       - cloudinary_uploader/
       - mailer/
         - templates/
+      - queue/
       - s3_uploader/
+      - token/
   - repository/
     - entity/
     - queries/
     - redis/
       - email_limiter_repository/
+      - invitation_limiter_repository/
       - owned_business_repository/
       - session_repository/
 - migrations/
@@ -58,6 +63,7 @@ Root: `.`
   - errs/
   - filter/
   - hash/
+  - logger/
   - pagination/
   - response/
   - token/

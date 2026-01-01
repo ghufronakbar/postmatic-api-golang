@@ -21,6 +21,7 @@ import (
 	"postmatic-api/internal/module/business/business_image_content"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
+	"postmatic-api/internal/module/business/business_member"
 	"postmatic-api/internal/module/business/business_product"
 	"postmatic-api/internal/module/business/business_role"
 	"postmatic-api/internal/module/business/business_rss_subscription"
@@ -32,6 +33,7 @@ import (
 	"postmatic-api/internal/module/headless/token"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
+	"postmatic-api/internal/repository/redis/invitation_limiter_repository"
 	ownedBusinessRepo "postmatic-api/internal/repository/redis/owned_business_repository"
 	sessionRepo "postmatic-api/internal/repository/redis/session_repository"
 
@@ -50,6 +52,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	sessionRepo := sessionRepo.NewSessionRepository(rdb)
 	emailLimiterRepo := emailLimiterRepo.NewLimiterEmailRepository(rdb)
 	ownedRepo := ownedBusinessRepo.NewOwnedBusinessRepository(rdb)
+	invitationLimiterRepo := invitation_limiter_repository.NewLimiterInvitationRepository(rdb)
 
 	ownedMw := middleware.NewOwnedBusiness(store, ownedRepo)
 
@@ -78,6 +81,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
 	busImageContentSvc := business_image_content.NewService(store)
+	busMemberSvc := business_member.NewService(store, *cfg, queueProducer, tokenSvc, invitationLimiterRepo)
 	// APP
 	imageUploaderSvc := image_uploader.NewImageUploaderService(cldSvc, s3Svc, store)
 	rssSvc := rss.NewRSSService(store)
@@ -102,6 +106,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busRssSubscriptionHandler := business_handler.NewBusinessRssSubscriptionHandler(rssSubscriptionSvc, ownedMw)
 	busTimezonePrefHandler := business_handler.NewBusinessTimezonePrefHandler(busTimezonePrefSvc, ownedMw)
 	busImageContentHandler := business_handler.NewBusinessImageContentHandler(busImageContentSvc, ownedMw)
+	busMemberHandler := business_handler.NewBusinessMemberHandler(busMemberSvc, ownedMw)
 	// APP
 	imageUploaderHandler := app_handler.NewImageUploaderHandler(imageUploaderSvc)
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
@@ -128,6 +133,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 		r.Mount("/rss-subscription", busRssSubscriptionHandler.BusinessRssSubscriptionRoutes())
 		r.Mount("/timezone-pref", busTimezonePrefHandler.BusinessTimezonePrefRoutes())
 		r.Mount("/image-content", busImageContentHandler.BusinessImageContentRoutes())
+		r.Mount("/member", busMemberHandler.BusinessMemberRoutes())
 	})
 
 	r.Route("/account", func(r chi.Router) {

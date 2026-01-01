@@ -60,7 +60,7 @@ func (s *SessionService) LogoutAll(ctx context.Context, input LogoutAllInput) er
 	return nil
 }
 
-func (s *SessionService) GetSession(ctx context.Context, claims *token.Claims, refreshToken string) (*SessionResponse, error) {
+func (s *SessionService) GetSession(ctx context.Context, claims *token.AccessTokenClaims, refreshToken string) (*SessionResponse, error) {
 
 	profileId := claims.ID
 	sess, err := s.sessionRepo.GetSessionByRefreshToken(ctx, profileId, refreshToken)

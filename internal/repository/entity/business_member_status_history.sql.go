@@ -7,6 +7,10 @@ package entity
 
 import (
 	"context"
+	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 const createBusinessMemberStatusHistory = `-- name: CreateBusinessMemberStatusHistory :one
@@ -40,6 +44,118 @@ func (q *Queries) CreateBusinessMemberStatusHistory(ctx context.Context, arg Cre
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getBusinessMemberStatusHistoryByMemberID = `-- name: GetBusinessMemberStatusHistoryByMemberID :one
+WITH latest_history AS (
+  SELECT
+    h.id,
+    h.status,
+    h.role,
+    h.member_id,
+    h.created_at,
+    h.updated_at,
+    h.deleted_at
+  FROM business_member_status_histories AS h
+  WHERE
+    h.member_id = $1
+    AND h.deleted_at IS NULL
+  ORDER BY h.id DESC
+  LIMIT 1
+)
+SELECT
+  -- business_member_status_histories (latest row)
+  h.id         AS history_id,
+  h.status     AS history_status,
+  h.role       AS history_role,
+  h.member_id  AS history_member_id,
+  h.created_at AS history_created_at,
+  h.updated_at AS history_updated_at,
+  h.deleted_at AS history_deleted_at,
+
+  -- business_members
+  m.id               AS member_id,
+  m.status           AS member_status,
+  m.role             AS member_role,
+  m.answered_at      AS member_answered_at,
+  m.business_root_id AS member_business_root_id,
+  m.profile_id       AS member_profile_id,
+  m.created_at       AS member_created_at,
+  m.updated_at       AS member_updated_at,
+  m.deleted_at       AS member_deleted_at,
+
+  -- profiles
+  p.name      AS profile_name,
+  p.image_url AS profile_image_url,
+  p.email     AS profile_email,
+
+  -- business_root
+  bk.name AS business_root_name,
+  br.id AS business_root_id
+FROM latest_history AS h
+JOIN business_members AS m
+  ON m.id = h.member_id
+JOIN profiles AS p
+  ON p.id = m.profile_id
+JOIN business_roots AS br
+  ON br.id = m.business_root_id
+JOIN business_knowledges AS bk
+  ON bk.business_root_id = br.id
+WHERE
+  m.deleted_at IS NULL
+`
+
+type GetBusinessMemberStatusHistoryByMemberIDRow struct {
+	HistoryID            int64                `json:"history_id"`
+	HistoryStatus        BusinessMemberStatus `json:"history_status"`
+	HistoryRole          BusinessMemberRole   `json:"history_role"`
+	HistoryMemberID      int64                `json:"history_member_id"`
+	HistoryCreatedAt     time.Time            `json:"history_created_at"`
+	HistoryUpdatedAt     time.Time            `json:"history_updated_at"`
+	HistoryDeletedAt     sql.NullTime         `json:"history_deleted_at"`
+	MemberID             int64                `json:"member_id"`
+	MemberStatus         BusinessMemberStatus `json:"member_status"`
+	MemberRole           BusinessMemberRole   `json:"member_role"`
+	MemberAnsweredAt     sql.NullTime         `json:"member_answered_at"`
+	MemberBusinessRootID int64                `json:"member_business_root_id"`
+	MemberProfileID      uuid.UUID            `json:"member_profile_id"`
+	MemberCreatedAt      time.Time            `json:"member_created_at"`
+	MemberUpdatedAt      time.Time            `json:"member_updated_at"`
+	MemberDeletedAt      sql.NullTime         `json:"member_deleted_at"`
+	ProfileName          string               `json:"profile_name"`
+	ProfileImageUrl      sql.NullString       `json:"profile_image_url"`
+	ProfileEmail         string               `json:"profile_email"`
+	BusinessRootName     string               `json:"business_root_name"`
+	BusinessRootID       int64                `json:"business_root_id"`
+}
+
+func (q *Queries) GetBusinessMemberStatusHistoryByMemberID(ctx context.Context, memberID int64) (GetBusinessMemberStatusHistoryByMemberIDRow, error) {
+	row := q.db.QueryRowContext(ctx, getBusinessMemberStatusHistoryByMemberID, memberID)
+	var i GetBusinessMemberStatusHistoryByMemberIDRow
+	err := row.Scan(
+		&i.HistoryID,
+		&i.HistoryStatus,
+		&i.HistoryRole,
+		&i.HistoryMemberID,
+		&i.HistoryCreatedAt,
+		&i.HistoryUpdatedAt,
+		&i.HistoryDeletedAt,
+		&i.MemberID,
+		&i.MemberStatus,
+		&i.MemberRole,
+		&i.MemberAnsweredAt,
+		&i.MemberBusinessRootID,
+		&i.MemberProfileID,
+		&i.MemberCreatedAt,
+		&i.MemberUpdatedAt,
+		&i.MemberDeletedAt,
+		&i.ProfileName,
+		&i.ProfileImageUrl,
+		&i.ProfileEmail,
+		&i.BusinessRootName,
+		&i.BusinessRootID,
 	)
 	return i, err
 }

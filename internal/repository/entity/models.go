@@ -148,6 +148,7 @@ const (
 	BusinessMemberStatusRejected BusinessMemberStatus = "rejected"
 	BusinessMemberStatusLeft     BusinessMemberStatus = "left"
 	BusinessMemberStatusKicked   BusinessMemberStatus = "kicked"
+	BusinessMemberStatusExpired  BusinessMemberStatus = "expired"
 )
 
 func (e *BusinessMemberStatus) Scan(src interface{}) error {

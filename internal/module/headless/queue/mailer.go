@@ -17,6 +17,7 @@ import (
 type MailerProducer interface {
 	EnqueueWelcomeEmail(ctx context.Context, payload mailer.WelcomeInputDTO) error
 	EnqueueUserVerification(ctx context.Context, payload mailer.VerificationInputDTO) error
+	EnqueueInvitation(ctx context.Context, payload mailer.InvitationInputDTO) error
 }
 
 // MailerService adalah kontrak yang dipakai oleh worker (consumer) untuk MENGEKSEKUSI job.
@@ -28,6 +29,7 @@ type MailerService = mailer.Mailer
 const (
 	taskMailerWelcome      = "queue:mailer:welcome"
 	taskMailerVerification = "queue:mailer:verification"
+	taskMailerInvitation   = "queue:mailer:invitation"
 )
 
 // EnqueueWelcomeEmail adalah API producer untuk mengantrikan email welcome.
@@ -66,6 +68,22 @@ func (p *Producer) EnqueueUserVerification(ctx context.Context, payload mailer.V
 	)
 }
 
+func (p *Producer) EnqueueInvitation(ctx context.Context, payload mailer.InvitationInputDTO) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	task := asynq.NewTask(taskMailerInvitation, b)
+
+	return p.enqueue(
+		ctx,
+		task,
+		asynq.Queue("default"),
+		asynq.MaxRetry(3),
+		asynq.Timeout(10*time.Second),
+	)
+}
+
 // registerMailerHandlers mendaftarkan consumer handler ke Asynq mux.
 // Ini dipanggil dari Worker.RegisterMailer(...).
 // Handler akan:
@@ -87,5 +105,13 @@ func registerMailerHandlers(mux *asynq.ServeMux, mailerSvc MailerService) {
 			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
 		}
 		return mailerSvc.SendVerificationEmail(ctx, p)
+	})
+
+	mux.HandleFunc(taskMailerInvitation, func(ctx context.Context, t *asynq.Task) error {
+		var p mailer.InvitationInputDTO
+		if err := json.Unmarshal(t.Payload(), &p); err != nil {
+			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
+		}
+		return mailerSvc.SendInvitationEmail(ctx, p)
 	})
 }

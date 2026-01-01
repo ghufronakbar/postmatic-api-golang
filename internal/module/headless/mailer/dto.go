@@ -39,3 +39,10 @@ type WelcomeInputDTO struct {
 	Email string `json:"Email"`
 	From  string `json:"From"`
 }
+
+// INVITATION EMAIL
+type InvitationInputDTO struct {
+	Email        string `json:"Email"`
+	ConfirmUrl   string `json:"ConfirmUrl"`
+	BusinessName string `json:"BusinessName"`
+}

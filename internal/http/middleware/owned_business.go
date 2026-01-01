@@ -34,7 +34,7 @@ func NewOwnedBusiness(store entity.Store, repo *ownedBusinessRepo.OwnedBusinessR
 func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		businessId := chi.URLParam(r, "businessId")
-		if businessId == "" {
+		if businessId == "" || businessId == "~" {
 			next.ServeHTTP(w, r)
 			return
 		}

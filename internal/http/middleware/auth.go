@@ -51,8 +51,8 @@ func extractToken(r *http.Request) string {
 	return ""
 }
 
-func GetUserFromContext(ctx context.Context) (*token.Claims, error) {
-	claims, ok := ctx.Value(UserContextKey).(*token.Claims)
+func GetUserFromContext(ctx context.Context) (*token.AccessTokenClaims, error) {
+	claims, ok := ctx.Value(UserContextKey).(*token.AccessTokenClaims)
 	if !ok || claims == nil {
 		// lebih cocok 401/forbidden daripada internal error
 		return nil, errs.NewUnauthorized("MISSING_AUTH_CONTEXT")

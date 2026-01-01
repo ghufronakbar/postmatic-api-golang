@@ -56,3 +56,17 @@ func (s *MailerService) SendVerificationEmail(ctx context.Context, input Verific
 	}
 	return nil
 }
+
+func (s *MailerService) SendInvitationEmail(ctx context.Context, input InvitationInputDTO) error {
+	fmt.Println("SendInvitationEmail", input)
+	err := s.sendEmail(ctx, SendEmailInput{
+		To:           input.Email,
+		Subject:      "Undangan Bergabung",
+		TemplateName: InvitationTemplate,
+		Data:         input,
+	})
+	if err != nil {
+		return errs.NewInternalServerError(err)
+	}
+	return nil
+}

@@ -5,10 +5,10 @@
 
   <div class="email-body">
     <h1>Halo {{ .Email }}!</h1>
-    <p>Anda telah diundang untuk bergabung dengan tim <strong>{{ .BusinessName }}</strong> di <strong>{{ .AppName }}</strong>.</p>
+    <p>Anda telah diundang untuk bergabung dengan tim <strong>{{ .BusinessName }}</strong> di <strong>Postmatic</strong>.</p>
     <p>Silakan klik tombol di bawah ini untuk menerima undangan dan bergabung dengan tim:</p>
 
-    {{ template "button" dict "Url" .ConfirmUrl "Label" "Terima Undangan" }}
+    {{ template "button" dict "Url" .ConfirmUrl "Label" "Lihat Undangan" }}
 
     <div class="divider"></div>
     <p class="muted">Jika Anda merasa tidak mengenal {{ .BusinessName }}, Anda bisa mengabaikan email ini.</p>
