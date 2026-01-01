@@ -77,6 +77,7 @@ type Querier interface {
 	SoftDeleteBusinessRoot(ctx context.Context, id int64) (int64, error)
 	SoftDeleteCreatorImage(ctx context.Context, id int64) error
 	UpdateBusinessImageContent(ctx context.Context, arg UpdateBusinessImageContentParams) (BusinessImageContent, error)
+	UpdateBusinessMemberRole(ctx context.Context, arg UpdateBusinessMemberRoleParams) (BusinessMember, error)
 	UpdateBusinessMemberStatus(ctx context.Context, arg UpdateBusinessMemberStatusParams) (BusinessMember, error)
 	UpdateBusinessProduct(ctx context.Context, arg UpdateBusinessProductParams) (BusinessProduct, error)
 	UpdateCreatorImage(ctx context.Context, arg UpdateCreatorImageParams) (UpdateCreatorImageRow, error)

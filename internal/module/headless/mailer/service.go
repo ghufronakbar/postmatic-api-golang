@@ -27,9 +27,13 @@ type MailerService struct {
 }
 
 type Mailer interface {
+	// AUTH / WELCOME
 	SendWelcomeEmail(ctx context.Context, input WelcomeInputDTO) error
 	SendVerificationEmail(ctx context.Context, input VerificationInputDTO) error
-	SendInvitationEmail(ctx context.Context, input InvitationInputDTO) error
+	// MEMBER
+	SendInvitationEmail(ctx context.Context, input MemberInvitationInputDTO) error
+	SendAnnounceRoleEmail(ctx context.Context, input MemberAnnounceRoleInputDTO) error
+	SendAnnounceKickEmail(ctx context.Context, input MemberAnnounceKickInputDTO) error
 }
 
 func NewService(cfg *config.Config) Mailer {

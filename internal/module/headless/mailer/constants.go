@@ -5,10 +5,14 @@ type EmailTemplate string
 
 const (
 	// Template Names
-	InvitationTemplate    EmailTemplate = "invitation.html"
 	ResetPasswordTemplate EmailTemplate = "reset_password.html"
 	VerificationTemplate  EmailTemplate = "verification.html"
 	WelcomeTemplate       EmailTemplate = "welcome.html"
+
+	// Member
+	MemberInvitationTemplate   EmailTemplate = "member_invitation.html"
+	MemberAnnounceKickTemplate EmailTemplate = "member_announce_kick.html"
+	MemberAnnounceRoleTemplate EmailTemplate = "member_announce_role.html"
 
 	// Layout
 	LayoutTemplate EmailTemplate = "layout.html"
@@ -17,7 +21,7 @@ const (
 // Validasi Helper
 func (e EmailTemplate) IsValid() bool {
 	switch e {
-	case InvitationTemplate, ResetPasswordTemplate, VerificationTemplate, WelcomeTemplate:
+	case MemberInvitationTemplate, MemberAnnounceKickTemplate, MemberAnnounceRoleTemplate, ResetPasswordTemplate, VerificationTemplate, WelcomeTemplate:
 		return true
 	}
 	return false

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/logger"
 )
 
 func (s *MailerService) SendWelcomeEmail(ctx context.Context, input WelcomeInputDTO) error {
@@ -57,12 +58,40 @@ func (s *MailerService) SendVerificationEmail(ctx context.Context, input Verific
 	return nil
 }
 
-func (s *MailerService) SendInvitationEmail(ctx context.Context, input InvitationInputDTO) error {
-	fmt.Println("SendInvitationEmail", input)
+func (s *MailerService) SendInvitationEmail(ctx context.Context, input MemberInvitationInputDTO) error {
+	logger.From(ctx).Info("SendInvitationEmail", "input", input)
 	err := s.sendEmail(ctx, SendEmailInput{
 		To:           input.Email,
 		Subject:      "Undangan Bergabung",
-		TemplateName: InvitationTemplate,
+		TemplateName: MemberInvitationTemplate,
+		Data:         input,
+	})
+	if err != nil {
+		return errs.NewInternalServerError(err)
+	}
+	return nil
+}
+
+func (s *MailerService) SendAnnounceRoleEmail(ctx context.Context, input MemberAnnounceRoleInputDTO) error {
+	logger.From(ctx).Info("SendAnnounceRoleEmail", "input", input)
+	err := s.sendEmail(ctx, SendEmailInput{
+		To:           input.Email,
+		Subject:      "Perubahan Role",
+		TemplateName: MemberAnnounceRoleTemplate,
+		Data:         input,
+	})
+	if err != nil {
+		return errs.NewInternalServerError(err)
+	}
+	return nil
+}
+
+func (s *MailerService) SendAnnounceKickEmail(ctx context.Context, input MemberAnnounceKickInputDTO) error {
+	logger.From(ctx).Info("SendAnnounceKickEmail", "input", input)
+	err := s.sendEmail(ctx, SendEmailInput{
+		To:           input.Email,
+		Subject:      "Akses Dicabut",
+		TemplateName: MemberAnnounceKickTemplate,
 		Data:         input,
 	})
 	if err != nil {

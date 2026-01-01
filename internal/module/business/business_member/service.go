@@ -14,6 +14,7 @@ import (
 	"postmatic-api/internal/module/headless/token"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/internal/repository/redis/invitation_limiter_repository"
+	"postmatic-api/internal/repository/redis/owned_business_repository"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
 	"postmatic-api/pkg/pagination"
@@ -28,15 +29,17 @@ type BusinessMemberService struct {
 	queue   queue.MailerProducer
 	token   *token.TokenMaker
 	limiter *invitation_limiter_repository.LimiterInvitationRepo
+	owned   *owned_business_repository.OwnedBusinessRepository
 }
 
-func NewService(store entity.Store, cfg config.Config, queue queue.MailerProducer, token *token.TokenMaker, limiter *invitation_limiter_repository.LimiterInvitationRepo) *BusinessMemberService {
+func NewService(store entity.Store, cfg config.Config, queue queue.MailerProducer, token *token.TokenMaker, limiter *invitation_limiter_repository.LimiterInvitationRepo, owned *owned_business_repository.OwnedBusinessRepository) *BusinessMemberService {
 	return &BusinessMemberService{
 		store:   store,
 		cfg:     cfg,
 		queue:   queue,
 		token:   token,
 		limiter: limiter,
+		owned:   owned,
 	}
 }
 
@@ -305,7 +308,7 @@ func (s *BusinessMemberService) InviteBusinessMember(ctx context.Context, input 
 		}
 	}
 
-	_ = s.addEmailToQueue(mailer.InvitationInputDTO{
+	_ = s.addEmailToQueue(mailer.MemberInvitationInputDTO{
 		Email:        input.Email,
 		ConfirmUrl:   invMemRes.InvitationLink,
 		BusinessName: checkBusinessRoot.Name,
@@ -380,7 +383,7 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 	if err != nil {
 		return InviteMemberResponse{}, err
 	}
-	_ = s.addEmailToQueue(mailer.InvitationInputDTO{
+	_ = s.addEmailToQueue(mailer.MemberInvitationInputDTO{
 		Email:        checkMember.ProfileEmail,
 		ConfirmUrl:   link,
 		BusinessName: checkMember.BusinessRootName,
@@ -399,9 +402,199 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 	}, nil
 }
 
+func (s *BusinessMemberService) EditMember(ctx context.Context, input EditMemberInput) (GeneralMemberResponse, error) {
+	checkMember, err := s.store.GetBusinessMemberStatusHistoryByMemberID(ctx, input.MemberID)
+	if err != nil {
+		return GeneralMemberResponse{}, err
+	}
+	if checkMember.MemberID == 0 {
+		return GeneralMemberResponse{}, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+	if checkMember.MemberBusinessRootID != input.BusinessRootID {
+		return GeneralMemberResponse{}, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+	if checkMember.MemberRole == entity.BusinessMemberRoleOwner {
+		return GeneralMemberResponse{}, errs.NewBadRequest("OWNER_CANNOT_EDITED")
+	}
+
+	if checkMember.MemberStatus != entity.BusinessMemberStatusAccepted {
+		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + string(checkMember.MemberStatus))
+	}
+
+	checkBusiness, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, input.BusinessRootID)
+	if err != nil && err != sql.ErrNoRows {
+		return GeneralMemberResponse{}, err
+	}
+	if checkBusiness.BusinessRootID == 0 {
+		return GeneralMemberResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+
+	var memberRole entity.BusinessMemberRole
+	if utils.StringInSlice(input.Role, []string{
+		string(entity.BusinessMemberRoleOwner),
+		string(entity.BusinessMemberRoleMember),
+	}) {
+		memberRole = entity.BusinessMemberRole(input.Role)
+	} else {
+		return GeneralMemberResponse{}, errs.NewBadRequest("INVALID_ROLE")
+	}
+
+	var res GeneralMemberResponse
+
+	e := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+		upMem, err := q.UpdateBusinessMemberRole(ctx, entity.UpdateBusinessMemberRoleParams{
+			Role: entity.BusinessMemberRole(memberRole),
+			ID:   input.MemberID,
+		})
+		if err != nil {
+			return err
+		}
+		res = GeneralMemberResponse{
+			ID:             input.MemberID,
+			BusinessRootID: checkMember.MemberBusinessRootID,
+			Role:           string(upMem.Role),
+			Status:         string(upMem.Status),
+			CreatedAt:      upMem.CreatedAt,
+			UpdatedAt:      upMem.UpdatedAt,
+			ProfileID:      upMem.ProfileID,
+		}
+		_, err = q.CreateBusinessMemberStatusHistory(ctx, entity.CreateBusinessMemberStatusHistoryParams{
+			MemberID: input.MemberID,
+			Status:   entity.BusinessMemberStatusAccepted,
+			Role:     entity.BusinessMemberRole(memberRole),
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if e != nil {
+		return GeneralMemberResponse{}, e
+	}
+
+	// enqueue announce role email
+	go func(email, businessName, newRole string) {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := s.queue.EnqueueAnnounceRole(ctxBg, mailer.MemberAnnounceRoleInputDTO{
+			Email:        email,
+			BusinessName: businessName,
+			NewRole:      newRole,
+		}); err != nil {
+			logger.From(ctxBg).Error("failed to enqueue announce role email", "error", err)
+		}
+	}(checkMember.ProfileEmail, checkBusiness.Name, string(memberRole))
+
+	// enqueue delete owned business
+	go func(profileID uuid.UUID, businessRootID int64) {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := s.owned.DeleteOneBusiness(ctxBg, profileID, businessRootID, 5*time.Minute); err != nil {
+			logger.From(ctxBg).Error("failed to delete owned business cache", "error", err)
+		}
+	}(checkMember.MemberProfileID, checkMember.BusinessRootID)
+
+	return res, nil
+}
+
 func (s *BusinessMemberService) RemoveBusinessMember(ctx context.Context, input RemoveBusinessMemberInput) (GeneralMemberResponse, error) {
-	// TODO: check memberid valid or not
-	return GeneralMemberResponse{}, nil
+	checkMember, err := s.store.GetBusinessMemberStatusHistoryByMemberID(ctx, input.MemberID)
+	if err != nil {
+		return GeneralMemberResponse{}, err
+	}
+	if checkMember.MemberID == 0 {
+		return GeneralMemberResponse{}, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+
+	checkBusiness, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, input.BusinessRootID)
+	if err == sql.ErrNoRows {
+		return GeneralMemberResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+	if err != nil {
+		return GeneralMemberResponse{}, err
+	}
+	if checkBusiness.BusinessRootID == 0 {
+		return GeneralMemberResponse{}, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+
+	if checkMember.MemberBusinessRootID != input.BusinessRootID {
+		return GeneralMemberResponse{}, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+
+	if checkMember.MemberRole == entity.BusinessMemberRoleOwner {
+		return GeneralMemberResponse{}, errs.NewBadRequest("OWNER_CANNOT_REMOVE_ITSELF")
+	}
+
+	disallowStatus := []string{
+		string(entity.BusinessMemberStatusRejected),
+		string(entity.BusinessMemberStatusLeft),
+		string(entity.BusinessMemberStatusKicked),
+		string(entity.BusinessMemberStatusExpired),
+	}
+
+	if utils.StringInSlice(string(checkMember.MemberStatus), disallowStatus) {
+		return GeneralMemberResponse{}, errs.NewBadRequest("MEMBER_ALREADY_" + string(checkMember.MemberStatus))
+	}
+
+	var res GeneralMemberResponse
+
+	e := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+		upMem, err := q.UpdateBusinessMemberStatus(ctx, entity.UpdateBusinessMemberStatusParams{
+			Status: entity.BusinessMemberStatusKicked,
+			ID:     input.MemberID,
+		})
+		if err != nil {
+			return err
+		}
+		res = GeneralMemberResponse{
+			ID:             input.MemberID,
+			BusinessRootID: checkMember.MemberBusinessRootID,
+			Role:           string(upMem.Role),
+			Status:         string(upMem.Status),
+			CreatedAt:      upMem.CreatedAt,
+			UpdatedAt:      upMem.UpdatedAt,
+			ProfileID:      upMem.ProfileID,
+		}
+		_, err = q.CreateBusinessMemberStatusHistory(ctx, entity.CreateBusinessMemberStatusHistoryParams{
+			MemberID: input.MemberID,
+			Status:   entity.BusinessMemberStatusKicked,
+			Role:     checkMember.MemberRole,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if e != nil {
+		return GeneralMemberResponse{}, e
+	}
+	// enqueue announce kick email
+	go func(email, businessName string) {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := s.queue.EnqueueAnnounceKick(ctxBg, mailer.MemberAnnounceKickInputDTO{
+			Email:        email,
+			BusinessName: businessName,
+		}); err != nil {
+			logger.From(ctxBg).Error("failed to enqueue announce kick email", "error", err)
+		}
+	}(checkMember.ProfileEmail, checkBusiness.Name)
+
+	// enqueue delete owned business
+	go func(profileID uuid.UUID, businessRootID int64) {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := s.owned.DeleteOneBusiness(ctxBg, profileID, businessRootID, 5*time.Minute); err != nil {
+			logger.From(ctxBg).Error("failed to delete owned business cache", "error", err)
+		}
+	}(checkMember.MemberProfileID, checkMember.BusinessRootID)
+
+	return res, nil
 }
 
 // ================= INVITATION =================
@@ -416,11 +609,6 @@ func (s *BusinessMemberService) AnswerMemberInvitation(ctx context.Context, inpu
 	// TODO: check link valid or not with VerifyMemberInvitation
 	// TODO: decoded
 	// TODO: update database
-	return GeneralMemberResponse{}, nil
-}
-
-func (s *BusinessMemberService) EditMember(ctx context.Context, input EditMemberInput) (GeneralMemberResponse, error) {
-	// TODO: check memberid valid or not
 	return GeneralMemberResponse{}, nil
 }
 
@@ -462,7 +650,7 @@ func (s *BusinessMemberService) checkEmailLimit(ctx context.Context, input invit
 	return check.RetryAfterSeconds, nil
 }
 
-func (s *BusinessMemberService) addEmailToQueue(input mailer.InvitationInputDTO, businessRootID int64) error {
+func (s *BusinessMemberService) addEmailToQueue(input mailer.MemberInvitationInputDTO, businessRootID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err := s.limiter.SaveLimiterInvitation(ctx, invitation_limiter_repository.LimiterInvitationInput{

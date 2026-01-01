@@ -1,0 +1,14 @@
+{{ template "layout" . }}
+
+{{ define "content" }}
+  <div class="eyebrow">Akses Dicabut</div>
+
+  <div class="email-body">
+    <h1>Halo {{ .Email }}!</h1>
+    <p>Akses Anda ke tim <strong>{{ .BusinessName }}</strong> pada <strong>Postmatic</strong> telah dicabut.</p>
+    <p>Mulai saat ini, Anda tidak lagi memiliki akses ke tim tersebut.</p>
+
+    <div class="divider"></div>
+    <p class="muted">Jika Anda merasa ini terjadi karena kesalahan, silakan hubungi admin tim {{ .BusinessName }}.</p>
+  </div>
+{{ end }}

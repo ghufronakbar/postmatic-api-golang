@@ -117,3 +117,9 @@ UPDATE business_members
 SET status = sqlc.arg(status)
 WHERE id = sqlc.arg(id)
 RETURNING *;
+
+-- name: UpdateBusinessMemberRole :one
+UPDATE business_members
+SET role = sqlc.arg(role)
+WHERE id = sqlc.arg(id)
+RETURNING *;

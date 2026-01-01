@@ -15,9 +15,13 @@ import (
 // MailerProducer adalah kontrak yang dipakai oleh service lain (mis. AuthService)
 // untuk MENAMBAHKAN job mailer ke queue (enqueue), bukan untuk mengirim email langsung.
 type MailerProducer interface {
+	// AUTH
 	EnqueueWelcomeEmail(ctx context.Context, payload mailer.WelcomeInputDTO) error
 	EnqueueUserVerification(ctx context.Context, payload mailer.VerificationInputDTO) error
-	EnqueueInvitation(ctx context.Context, payload mailer.InvitationInputDTO) error
+	// MEMBER
+	EnqueueInvitation(ctx context.Context, payload mailer.MemberInvitationInputDTO) error
+	EnqueueAnnounceRole(ctx context.Context, payload mailer.MemberAnnounceRoleInputDTO) error
+	EnqueueAnnounceKick(ctx context.Context, payload mailer.MemberAnnounceKickInputDTO) error
 }
 
 // MailerService adalah kontrak yang dipakai oleh worker (consumer) untuk MENGEKSEKUSI job.
@@ -30,6 +34,8 @@ const (
 	taskMailerWelcome      = "queue:mailer:welcome"
 	taskMailerVerification = "queue:mailer:verification"
 	taskMailerInvitation   = "queue:mailer:invitation"
+	taskMailerAnnounceRole = "queue:mailer:announce:role"
+	taskMailerAnnounceKick = "queue:mailer:announce:kick"
 )
 
 // EnqueueWelcomeEmail adalah API producer untuk mengantrikan email welcome.
@@ -68,7 +74,39 @@ func (p *Producer) EnqueueUserVerification(ctx context.Context, payload mailer.V
 	)
 }
 
-func (p *Producer) EnqueueInvitation(ctx context.Context, payload mailer.InvitationInputDTO) error {
+func (p *Producer) EnqueueInvitation(ctx context.Context, payload mailer.MemberInvitationInputDTO) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	task := asynq.NewTask(taskMailerInvitation, b)
+
+	return p.enqueue(
+		ctx,
+		task,
+		asynq.Queue("default"),
+		asynq.MaxRetry(3),
+		asynq.Timeout(10*time.Second),
+	)
+}
+
+func (p *Producer) EnqueueAnnounceRole(ctx context.Context, payload mailer.MemberAnnounceRoleInputDTO) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	task := asynq.NewTask(taskMailerInvitation, b)
+
+	return p.enqueue(
+		ctx,
+		task,
+		asynq.Queue("default"),
+		asynq.MaxRetry(3),
+		asynq.Timeout(10*time.Second),
+	)
+}
+
+func (p *Producer) EnqueueAnnounceKick(ctx context.Context, payload mailer.MemberAnnounceKickInputDTO) error {
 	b, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -108,10 +146,26 @@ func registerMailerHandlers(mux *asynq.ServeMux, mailerSvc MailerService) {
 	})
 
 	mux.HandleFunc(taskMailerInvitation, func(ctx context.Context, t *asynq.Task) error {
-		var p mailer.InvitationInputDTO
+		var p mailer.MemberInvitationInputDTO
 		if err := json.Unmarshal(t.Payload(), &p); err != nil {
 			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
 		}
 		return mailerSvc.SendInvitationEmail(ctx, p)
+	})
+
+	mux.HandleFunc(taskMailerAnnounceRole, func(ctx context.Context, t *asynq.Task) error {
+		var p mailer.MemberAnnounceRoleInputDTO
+		if err := json.Unmarshal(t.Payload(), &p); err != nil {
+			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
+		}
+		return mailerSvc.SendAnnounceRoleEmail(ctx, p)
+	})
+
+	mux.HandleFunc(taskMailerAnnounceKick, func(ctx context.Context, t *asynq.Task) error {
+		var p mailer.MemberAnnounceKickInputDTO
+		if err := json.Unmarshal(t.Payload(), &p); err != nil {
+			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
+		}
+		return mailerSvc.SendAnnounceKickEmail(ctx, p)
 	})
 }

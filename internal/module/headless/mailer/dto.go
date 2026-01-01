@@ -40,9 +40,23 @@ type WelcomeInputDTO struct {
 	From  string `json:"From"`
 }
 
-// INVITATION EMAIL
-type InvitationInputDTO struct {
+// MEMBER
+// MEMBER INVITATION EMAIL
+type MemberInvitationInputDTO struct {
 	Email        string `json:"Email"`
 	ConfirmUrl   string `json:"ConfirmUrl"`
+	BusinessName string `json:"BusinessName"`
+}
+
+// MEMBER ANNOUNCE ROLE EMAIL
+type MemberAnnounceRoleInputDTO struct {
+	Email        string `json:"Email"`
+	BusinessName string `json:"BusinessName"`
+	NewRole      string `json:"NewRole"`
+}
+
+// MEMBER ANNOUNCE KICK EMAIL
+type MemberAnnounceKickInputDTO struct {
+	Email        string `json:"Email"`
 	BusinessName string `json:"BusinessName"`
 }

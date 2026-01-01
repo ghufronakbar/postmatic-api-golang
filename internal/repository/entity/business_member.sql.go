@@ -387,6 +387,35 @@ func (q *Queries) SoftDeleteBusinessMemberByBusinessRootID(ctx context.Context, 
 	return id, err
 }
 
+const updateBusinessMemberRole = `-- name: UpdateBusinessMemberRole :one
+UPDATE business_members
+SET role = $1
+WHERE id = $2
+RETURNING id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at, deleted_at
+`
+
+type UpdateBusinessMemberRoleParams struct {
+	Role BusinessMemberRole `json:"role"`
+	ID   int64              `json:"id"`
+}
+
+func (q *Queries) UpdateBusinessMemberRole(ctx context.Context, arg UpdateBusinessMemberRoleParams) (BusinessMember, error) {
+	row := q.db.QueryRowContext(ctx, updateBusinessMemberRole, arg.Role, arg.ID)
+	var i BusinessMember
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Role,
+		&i.AnsweredAt,
+		&i.BusinessRootID,
+		&i.ProfileID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const updateBusinessMemberStatus = `-- name: UpdateBusinessMemberStatus :one
 UPDATE business_members
 SET status = $1

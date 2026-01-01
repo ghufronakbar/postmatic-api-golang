@@ -1,0 +1,15 @@
+{{ template "layout" . }}
+
+{{ define "content" }}
+  <div class="eyebrow">Perubahan Peran</div>
+
+  <div class="email-body">
+    <h1>Halo {{ .Email }}!</h1>
+    <p>Peran Anda di tim <strong>{{ .BusinessName }}</strong> pada <strong>Postmatic</strong> telah diperbarui.</p>
+
+    <p>Peran baru Anda: <strong>{{ .NewRole }}</strong></p>
+
+    <div class="divider"></div>
+    <p class="muted">Jika Anda merasa perubahan ini tidak sesuai, silakan hubungi admin tim {{ .BusinessName }}.</p>
+  </div>
+{{ end }}
