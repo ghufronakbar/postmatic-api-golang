@@ -66,13 +66,12 @@ func unmarshalJSONAny(v any, dst any) error {
 
 func (s *CreatorImageService) GetCreatorImageByProfileId(
 	ctx context.Context,
-	profileId string,
 	filter GetCreatorImageFilter,
 ) ([]CreatorImageResponse, *pagination.Pagination, error) {
 
 	var profileUUID uuid.UUID
-	if profileId != "" {
-		pUUID, _ := uuid.Parse(profileId)
+	if filter.ProfileID != "" {
+		pUUID, _ := uuid.Parse(filter.ProfileID)
 		profileUUID = pUUID
 	}
 
@@ -159,11 +158,15 @@ func (s *CreatorImageService) GetCreatorImageByProfileId(
 	return res, &pag, nil
 }
 
-func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input CreateUpdateCreatorImageInput, profileId string) (CreatorImageCreateUpdateDeleteResponse, error) {
+func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input CreateCreatorImageInput) (CreatorImageCreateUpdateDeleteResponse, error) {
+
 	var profileUUID uuid.UUID
-	var profileIdResponse *string
-	if profileId != "" {
-		profileIdResponse = &profileId
+	if input.ProfileID != "" {
+		pUUID, err := uuid.Parse(input.ProfileID)
+		if err != nil {
+			return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
+		}
+		profileUUID = pUUID
 	}
 
 	checkTypeCategoryIds, err := s.cat.GetCategoryCreatorImageTypeByIds(ctx, input.TypeCategoryIds)
@@ -184,13 +187,6 @@ func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input Crea
 		return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("SOME_PRODUCT_CATEGORY_IDS_NOT_FOUND")
 	}
 
-	if profileId != "" {
-		profileUUID, err = uuid.Parse(profileId)
-		if err != nil {
-			return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
-		}
-	}
-
 	creatorImageDb, err := s.store.CreateCreatorImage(ctx, entity.CreateCreatorImageParams{
 		Name:               input.Name,
 		ImageUrl:           input.ImageURL,
@@ -205,12 +201,17 @@ func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input Crea
 		return CreatorImageCreateUpdateDeleteResponse{}, errs.NewInternalServerError(err)
 	}
 
+	var profileIdResponse string
+	if profileUUID != uuid.Nil {
+		profileIdResponse = profileUUID.String()
+	}
+
 	return CreatorImageCreateUpdateDeleteResponse{
 		ID:          creatorImageDb.ID,
 		Name:        creatorImageDb.Name,
 		ImageURL:    creatorImageDb.ImageUrl,
 		IsPublished: creatorImageDb.IsPublished,
-		ProfileId:   profileIdResponse,
+		ProfileId:   &profileIdResponse,
 		Price:       creatorImageDb.Price,
 		CreatedAt:   creatorImageDb.CreatedAt.Time,
 		UpdatedAt:   creatorImageDb.UpdatedAt.Time,
@@ -218,19 +219,19 @@ func (s *CreatorImageService) CreateCreatorImage(ctx context.Context, input Crea
 
 }
 
-func (s *CreatorImageService) UpdateCreatorImage(ctx context.Context, input CreateUpdateCreatorImageInput, creatorImageId int64, profileId string) (CreatorImageCreateUpdateDeleteResponse, error) {
+func (s *CreatorImageService) UpdateCreatorImage(ctx context.Context, input UpdateCreatorImageInput) (CreatorImageCreateUpdateDeleteResponse, error) {
 	var profileUUID uuid.UUID
 	var profileIdResponse *string
-	if profileId != "" {
-		pUUID, err := uuid.Parse(profileId)
+	if input.ProfileID != "" {
+		pUUID, err := uuid.Parse(input.ProfileID)
 		if err != nil {
 			return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
 		}
 		profileUUID = pUUID
-		profileIdResponse = &profileId
+		profileIdResponse = &input.ProfileID
 	}
 
-	checkCreatorImage, err := s.store.GetCreatorImageById(ctx, creatorImageId)
+	checkCreatorImage, err := s.store.GetCreatorImageById(ctx, input.CreatorImageId)
 	if err != nil && err != sql.ErrNoRows {
 		return CreatorImageCreateUpdateDeleteResponse{}, errs.NewInternalServerError(err)
 	}
@@ -261,15 +262,15 @@ func (s *CreatorImageService) UpdateCreatorImage(ctx context.Context, input Crea
 		return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("SOME_PRODUCT_CATEGORY_IDS_NOT_FOUND")
 	}
 
-	if profileId != "" {
-		profileUUID, err = uuid.Parse(profileId)
+	if input.ProfileID != "" {
+		profileUUID, err = uuid.Parse(input.ProfileID)
 		if err != nil {
 			return CreatorImageCreateUpdateDeleteResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
 		}
 	}
 
 	creatorImageDb, err := s.store.UpdateCreatorImage(ctx, entity.UpdateCreatorImageParams{
-		ID:                 creatorImageId,
+		ID:                 input.CreatorImageId,
 		Name:               input.Name,
 		ImageUrl:           input.ImageURL,
 		IsPublished:        input.IsPublished,

@@ -1,11 +1,15 @@
 // internal/module/account/profile/viewmodel.go
 package profile
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type GetProfileResponse struct {
 	// Profile ID
-	ID          string         `json:"id"`
+	ID          uuid.UUID      `json:"id"`
 	Name        string         `json:"name"`
 	Email       string         `json:"email"`
 	ImageUrl    *string        `json:"imageUrl"`

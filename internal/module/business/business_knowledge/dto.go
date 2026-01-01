@@ -10,4 +10,5 @@ type UpsertBusinessKnowledgeInput struct {
 	VisionMission      string  `json:"visionMission" validate:"required"`
 	Location           string  `json:"location" validate:"required"`
 	ColorTone          string  `json:"colorTone" validate:"required,min=6,max=6"`
+	BusinessRootID     int64   `json:"businessRootId" validate:"required"`
 }

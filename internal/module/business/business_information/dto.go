@@ -1,10 +1,13 @@
 // internal/module/business/business_information/dto.go
 package business_information
 
+import "github.com/google/uuid"
+
 type BusinessSetupInput struct {
 	BusinessKnowledge BusinessKnowledgeSub `json:"businessKnowledge" validate:"required"`
 	ProductKnowledge  ProductKnowledgeSub  `json:"productKnowledge" validate:"required"`
 	RoleKnowledge     RoleKnowledgeSub     `json:"roleKnowledge" validate:"required"`
+	ProfileID         uuid.UUID            `json:"profileId" validate:"required"`
 }
 
 type BusinessKnowledgeSub struct {

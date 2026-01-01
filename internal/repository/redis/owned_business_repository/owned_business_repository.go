@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -21,7 +22,7 @@ func NewOwnedBusinessRepository(rdb *redis.Client) *OwnedBusinessRepository {
 // key memiliki banyak RedisOwnedBusinessResponse[]
 
 // 1) Save all (overwrite)
-func (r *OwnedBusinessRepository) SaveOwnedBusiness(ctx context.Context, profileID string, businessSubs []RedisBusinessSub, ttl time.Duration) error {
+func (r *OwnedBusinessRepository) SaveOwnedBusiness(ctx context.Context, profileID uuid.UUID, businessSubs []RedisBusinessSub, ttl time.Duration) error {
 	key := r.constructKey(profileID)
 
 	data, err := json.Marshal(businessSubs)
@@ -33,7 +34,7 @@ func (r *OwnedBusinessRepository) SaveOwnedBusiness(ctx context.Context, profile
 }
 
 // 2) Get all
-func (r *OwnedBusinessRepository) GetOwnedBusinessByProfileID(ctx context.Context, profileID string) ([]RedisOwnedBusinessResponse, error) {
+func (r *OwnedBusinessRepository) GetOwnedBusinessByProfileID(ctx context.Context, profileID uuid.UUID) ([]RedisOwnedBusinessResponse, error) {
 	key := r.constructKey(profileID)
 
 	res, err := r.rdb.Get(ctx, key).Result()
@@ -58,7 +59,7 @@ func (r *OwnedBusinessRepository) GetOwnedBusinessByProfileID(ctx context.Contex
 
 // 3) Append / Upsert 1 business (update kalau sudah ada, append kalau belum)
 // - Tidak replace seluruh list secara “semantik”, tapi tetap SET seluruh JSON (karena value string JSON).
-func (r *OwnedBusinessRepository) UpsertOneBusiness(ctx context.Context, profileID string, b RedisBusinessSub, defaultTTL time.Duration) error {
+func (r *OwnedBusinessRepository) UpsertOneBusiness(ctx context.Context, profileID uuid.UUID, b RedisBusinessSub, defaultTTL time.Duration) error {
 	key := r.constructKey(profileID)
 
 	list, err := r.GetOwnedBusinessByProfileID(ctx, profileID)
@@ -91,7 +92,7 @@ func (r *OwnedBusinessRepository) UpsertOneBusiness(ctx context.Context, profile
 }
 
 // 4) Delete 1 business tertentu dari list cache
-func (r *OwnedBusinessRepository) DeleteOneBusiness(ctx context.Context, profileID string, businessRootID int64, defaultTTL time.Duration) error {
+func (r *OwnedBusinessRepository) DeleteOneBusiness(ctx context.Context, profileID uuid.UUID, businessRootID int64, defaultTTL time.Duration) error {
 	key := r.constructKey(profileID)
 
 	list, err := r.GetOwnedBusinessByProfileID(ctx, profileID)
@@ -132,8 +133,8 @@ func (r *OwnedBusinessRepository) DeleteOneBusiness(ctx context.Context, profile
 }
 
 // Helper: construct key
-func (r *OwnedBusinessRepository) constructKey(profileID string) string {
-	return fmt.Sprintf("owned_business:%s", profileID)
+func (r *OwnedBusinessRepository) constructKey(profileID uuid.UUID) string {
+	return fmt.Sprintf("owned_business:%s", profileID.String())
 }
 
 // Helper: preserve TTL.

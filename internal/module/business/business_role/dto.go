@@ -7,4 +7,5 @@ type UpsertBusinessRoleInput struct {
 	Hashtags        []string `json:"hashtags" validate:"required"`
 	TargetAudience  string   `json:"targetAudience" validate:"required"`
 	Tone            string   `json:"tone" validate:"required"`
+	BusinessRootID  int64    `json:"businessRootId" validate:"required"`
 }

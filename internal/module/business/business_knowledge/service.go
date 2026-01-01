@@ -52,14 +52,14 @@ func (s *BusinessKnowledgeService) GetBusinessKnowledgeByBusinessRootID(ctx cont
 	return result, nil
 }
 
-func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootId int64, input UpsertBusinessKnowledgeInput) (BusinessKnowledgeResponse, error) {
+func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, input UpsertBusinessKnowledgeInput) (BusinessKnowledgeResponse, error) {
 	var websiteUrl string
 	if input.WebsiteUrl != nil {
 		websiteUrl = *input.WebsiteUrl
 	}
 
 	bk, err := s.store.UpsertBusinessKnowledgeByBusinessRootID(ctx, entity.UpsertBusinessKnowledgeByBusinessRootIDParams{
-		BusinessRootID:     businessRootId,
+		BusinessRootID:     input.BusinessRootID,
 		Name:               input.Name,
 		PrimaryLogoUrl:     sql.NullString{String: input.PrimaryLogoUrl, Valid: input.PrimaryLogoUrl != ""},
 		Category:           input.Category,
@@ -75,7 +75,7 @@ func (s *BusinessKnowledgeService) UpsertBusinessKnowledgeByBusinessRootID(ctx c
 	}
 
 	res := BusinessKnowledgeResponse{
-		RootBusinessId:     businessRootId,
+		RootBusinessId:     input.BusinessRootID,
 		Name:               bk.Name,
 		PrimaryLogoUrl:     bk.PrimaryLogoUrl.String,
 		Description:        bk.Description.String,

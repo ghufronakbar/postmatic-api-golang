@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -34,12 +35,12 @@ func (r *SessionRepository) SaveSession(ctx context.Context, session RedisSessio
 }
 
 // 2. GET ALL SESSIONS BY PROFILE ID
-func (r *SessionRepository) GetSessionsByProfileID(ctx context.Context, profileID string) ([]RedisSession, error) {
+func (r *SessionRepository) GetSessionsByProfileID(ctx context.Context, profileID uuid.UUID) ([]RedisSession, error) {
 	var sessions []RedisSession
 
 	// Gunakan pattern matching untuk mencari semua key milik profile ini
 	// session:profile_id:*
-	pattern := fmt.Sprintf("session:%s:*", profileID)
+	pattern := fmt.Sprintf("session:%s:*", profileID.String())
 
 	// Gunakan SCAN bukan KEYS agar tidak memblokir server Redis jika data jutaan
 	iter := r.rdb.Scan(ctx, 0, pattern, 0).Iterator()
@@ -84,13 +85,13 @@ func (r *SessionRepository) GetSessionsByProfileID(ctx context.Context, profileI
 }
 
 // 3. DELETE SESSION BY ID
-func (r *SessionRepository) DeleteSessionByID(ctx context.Context, profileID, sessionID string) error {
+func (r *SessionRepository) DeleteSessionByID(ctx context.Context, profileID uuid.UUID, sessionID uuid.UUID) error {
 	key := r.constructKey(profileID, sessionID)
 	return r.rdb.Del(ctx, key).Err()
 }
 
 // 4. DELETE ALL SESSIONS BY PROFILE ID (Logout All Devices)
-func (r *SessionRepository) DeleteAllSessions(ctx context.Context, profileID string) error {
+func (r *SessionRepository) DeleteAllSessions(ctx context.Context, profileID uuid.UUID) error {
 	pattern := fmt.Sprintf("session:%s:*", profileID)
 
 	// Cari semua key
@@ -111,7 +112,7 @@ func (r *SessionRepository) DeleteAllSessions(ctx context.Context, profileID str
 // 5. DELETE BY REFRESH TOKEN (Logic: Search -> Delete)
 // Kita butuh profileID karena JWT Refresh Token mengandung profileID.
 // Tanpa profileID, kita harus scan SELURUH Redis (sangat berat).
-func (r *SessionRepository) DeleteByRefreshToken(ctx context.Context, profileID, refreshToken string) error {
+func (r *SessionRepository) DeleteByRefreshToken(ctx context.Context, profileID uuid.UUID, refreshToken string) error {
 	// 1. Ambil semua session user ini
 	sessions, err := r.GetSessionsByProfileID(ctx, profileID)
 	if err != nil {
@@ -119,7 +120,7 @@ func (r *SessionRepository) DeleteByRefreshToken(ctx context.Context, profileID,
 	}
 
 	// 2. Cari session yang refresh token-nya cocok
-	var targetSessionID string
+	var targetSessionID uuid.UUID
 	for _, sess := range sessions {
 		if sess.RefreshToken == refreshToken {
 			targetSessionID = sess.ID
@@ -128,7 +129,7 @@ func (r *SessionRepository) DeleteByRefreshToken(ctx context.Context, profileID,
 	}
 
 	// 3. Jika ketemu, hapus by ID
-	if targetSessionID != "" {
+	if targetSessionID != uuid.Nil {
 		return r.DeleteSessionByID(ctx, profileID, targetSessionID)
 	}
 
@@ -138,7 +139,7 @@ func (r *SessionRepository) DeleteByRefreshToken(ctx context.Context, profileID,
 
 // 6. GET SESSION BY REFRESH TOKEN
 // Kita WAJIB meminta profileID agar pencarian efisien (hanya scan milik user tsb).
-func (r *SessionRepository) GetSessionByRefreshToken(ctx context.Context, profileID, refreshToken string) (*RedisSession, error) {
+func (r *SessionRepository) GetSessionByRefreshToken(ctx context.Context, profileID uuid.UUID, refreshToken string) (*RedisSession, error) {
 	// 1. Ambil semua session milik user ini (Reuse function yg sudah ada)
 	sessions, err := r.GetSessionsByProfileID(ctx, profileID)
 	if err != nil {
@@ -158,6 +159,6 @@ func (r *SessionRepository) GetSessionByRefreshToken(ctx context.Context, profil
 }
 
 // Helper Private
-func (r *SessionRepository) constructKey(profileID, sessionID string) string {
-	return fmt.Sprintf("session:%s:%s", profileID, sessionID)
+func (r *SessionRepository) constructKey(profileID uuid.UUID, sessionID uuid.UUID) string {
+	return fmt.Sprintf("session:%s:%s", profileID.String(), sessionID.String())
 }

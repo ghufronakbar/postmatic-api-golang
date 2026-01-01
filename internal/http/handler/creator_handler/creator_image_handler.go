@@ -80,9 +80,10 @@ func (h *CreatorImageHandler) GetCreatorImageByProfileId(w http.ResponseWriter, 
 		TypeCategoryID:    typeCategoryId,
 		ProductCategoryID: productCategoryId,
 		Published:         published,
+		ProfileID:         prof.ID.String(),
 	}
 
-	res, pag, err := h.creatorImageSvc.GetCreatorImageByProfileId(r.Context(), prof.ID, filterData)
+	res, pag, err := h.creatorImageSvc.GetCreatorImageByProfileId(r.Context(), filterData)
 	if err != nil {
 		response.Error(w, r, err, res)
 		return
@@ -92,15 +93,16 @@ func (h *CreatorImageHandler) GetCreatorImageByProfileId(w http.ResponseWriter, 
 }
 
 func (h *CreatorImageHandler) CreateCreatorImage(w http.ResponseWriter, r *http.Request) {
-	var req creator_image.CreateUpdateCreatorImageInput
+	prof, _ := middleware.GetUserFromContext(r.Context())
+	var req creator_image.CreateCreatorImageInput
+	req.ProfileID = prof.ID.String()
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
-	prof, _ := middleware.GetUserFromContext(r.Context())
 
-	res, err := h.creatorImageSvc.CreateCreatorImage(r.Context(), req, prof.ID)
+	res, err := h.creatorImageSvc.CreateCreatorImage(r.Context(), req)
 
 	if err != nil {
 		fmt.Println(err)
@@ -112,22 +114,23 @@ func (h *CreatorImageHandler) CreateCreatorImage(w http.ResponseWriter, r *http.
 }
 
 func (h *CreatorImageHandler) UpdateCreatorImage(w http.ResponseWriter, r *http.Request) {
-	var req creator_image.CreateUpdateCreatorImageInput
+	creatorImageId := chi.URLParam(r, "creatorImageId")
+	intCreatorImageId, err := strconv.ParseInt(creatorImageId, 10, 64)
+	if err != nil {
+		response.ValidationFailed(w, r, map[string]string{"creatorImageId": "CREATOR_IMAGE_MUST_BE_INTEGER_64"})
+		return
+	}
+	prof, _ := middleware.GetUserFromContext(r.Context())
+	var req creator_image.UpdateCreatorImageInput
+	req.ProfileID = prof.ID.String()
+	req.CreatorImageId = intCreatorImageId
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
-	prof, _ := middleware.GetUserFromContext(r.Context())
 
-	creatorImageId := chi.URLParam(r, "creatorImageId")
-	intCreatorImageId, err := strconv.Atoi(creatorImageId)
-	if err != nil {
-		response.ValidationFailed(w, r, map[string]string{"creatorImageId": "CREATOR_IMAGE_MUST_BE_INTEGER"})
-		return
-	}
-
-	res, err := h.creatorImageSvc.UpdateCreatorImage(r.Context(), req, int64(intCreatorImageId), prof.ID)
+	res, err := h.creatorImageSvc.UpdateCreatorImage(r.Context(), req)
 
 	if err != nil {
 		response.Error(w, r, err, res)
@@ -148,7 +151,7 @@ func (h *CreatorImageHandler) SoftDeleteCreatorImage(w http.ResponseWriter, r *h
 
 	prof, _ := middleware.GetUserFromContext(r.Context())
 
-	res, err := h.creatorImageSvc.SoftDeleteCreatorImage(r.Context(), int64(intCreatorImageId), prof.ID)
+	res, err := h.creatorImageSvc.SoftDeleteCreatorImage(r.Context(), int64(intCreatorImageId), prof.ID.String())
 
 	if err != nil {
 		response.Error(w, r, err, res)

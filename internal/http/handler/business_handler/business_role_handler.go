@@ -62,13 +62,14 @@ func (h *BusinessRoleHandler) UpsertBusinessRoleByBusinessRootID(w http.Response
 	}
 
 	var req business_role.UpsertBusinessRoleInput
+	req.BusinessRootID = business.BusinessRootID
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
-	res, err := h.busInSvc.UpsertBusinessRoleByBusinessRootID(r.Context(), business.BusinessRootID, req)
+	res, err := h.busInSvc.UpsertBusinessRoleByBusinessRootID(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

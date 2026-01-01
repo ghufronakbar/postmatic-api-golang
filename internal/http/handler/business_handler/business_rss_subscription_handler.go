@@ -44,15 +44,16 @@ func (h *BusinessRssSubscriptionHandler) GetAllRssSubscriptionBusinessRootId(w h
 	filter := middleware.GetFilterFromContext(r.Context())
 
 	filterQuery := business_rss_subscription.GetBusinessRssSubscriptionByBusinessRootIdFilter{
-		Search:     filter.Search,
-		SortBy:     filter.SortByDB(),
-		PageOffset: filter.Offset(),
-		PageLimit:  filter.Limit,
-		SortDir:    filter.Sort,
-		Page:       filter.Page,
+		Search:         filter.Search,
+		SortBy:         filter.SortByDB(),
+		PageOffset:     filter.Offset(),
+		PageLimit:      filter.Limit,
+		SortDir:        filter.Sort,
+		Page:           filter.Page,
+		BusinessRootID: business.BusinessRootID,
 	}
 
-	res, pagination, err := h.rssSvc.GetBusinessRssSubscriptionByBusinessRootID(r.Context(), business.BusinessRootID, filterQuery)
+	res, pagination, err := h.rssSvc.GetBusinessRssSubscriptionByBusinessRootID(r.Context(), filterQuery)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -62,16 +63,18 @@ func (h *BusinessRssSubscriptionHandler) GetAllRssSubscriptionBusinessRootId(w h
 }
 
 func (h *BusinessRssSubscriptionHandler) CreateBusinessRssSubscriptionByBusinessRootID(w http.ResponseWriter, r *http.Request) {
-	var req business_rss_subscription.CreateUpdateBusinessRSSSubscriptionInput
+	var req business_rss_subscription.CreateBusinessRSSSubscriptionInput
 
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
+
+	req.BusinessRootID = business.BusinessRootID
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
-	res, err := h.rssSvc.CreateBusinessRssSubscription(r.Context(), business.BusinessRootID, req)
+	res, err := h.rssSvc.CreateBusinessRssSubscription(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -81,12 +84,7 @@ func (h *BusinessRssSubscriptionHandler) CreateBusinessRssSubscriptionByBusiness
 }
 
 func (h *BusinessRssSubscriptionHandler) UpdateBusinessRssSubscriptionByBusinessRootID(w http.ResponseWriter, r *http.Request) {
-	var req business_rss_subscription.CreateUpdateBusinessRSSSubscriptionInput
-
-	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, r, appErr.ValidationErrors)
-		return
-	}
+	var req business_rss_subscription.UpdateBusinessRSSSubscriptionInput
 
 	businessRssSubscriptionId := chi.URLParam(r, "businessRssSubscriptionId")
 
@@ -99,8 +97,15 @@ func (h *BusinessRssSubscriptionHandler) UpdateBusinessRssSubscriptionByBusiness
 	}
 
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
+	req.BusinessRootID = business.BusinessRootID
+	req.ID = intBusinessRssSubscriptionId
 
-	res, err := h.rssSvc.UpdateBusinessRssSubscription(r.Context(), business.BusinessRootID, intBusinessRssSubscriptionId, req)
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
+		return
+	}
+
+	res, err := h.rssSvc.UpdateBusinessRssSubscription(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

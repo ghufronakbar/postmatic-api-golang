@@ -31,19 +31,15 @@ func NewService(store entity.Store, obRepo *owned_business_repository.OwnedBusin
 	}
 }
 
-func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.Context, profileId string, filterData GetJoinedBusinessesByProfileIDFilter) ([]GetJoinedBusinessesByProfileIDResponse, *pagination.Pagination, error) {
-	profileUUID, err := uuid.Parse(profileId)
-	if err != nil {
-		return nil, nil, errs.NewInternalServerError(err)
-	}
+func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.Context, filterData GetJoinedBusinessesByProfileIDFilter) ([]GetJoinedBusinessesByProfileIDResponse, *pagination.Pagination, error) {
 
-	profile, err := s.store.GetProfileById(ctx, profileUUID)
+	profile, err := s.store.GetProfileById(ctx, filterData.ProfileID)
 	if err != nil {
 		return nil, nil, errs.NewInternalServerError(err)
 	}
 
 	filterQuery := entity.GetJoinedBusinessesByProfileIDParams{
-		ProfileID:  profileUUID,
+		ProfileID:  profile.ID,
 		Search:     filterData.Search,
 		SortBy:     string(filterData.SortBy),
 		PageOffset: int32(filterData.PageOffset),
@@ -97,7 +93,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 				Status: string(v.MemberStatus),
 				Role:   string(v.MemberRole),
 				Profile: ProfileSub{
-					ID:       profileId,
+					ID:       filterData.ProfileID.String(),
 					Name:     profile.Name,
 					ImageUrl: utils.NullStringToString(profile.ImageUrl),
 					Email:    profile.Email,
@@ -107,7 +103,7 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 	}
 
 	filterCount := entity.CountJoinedBusinessesByProfileIDParams{
-		ProfileID: profileUUID,
+		ProfileID: filterData.ProfileID,
 		Search:    filterData.Search,
 	}
 
@@ -127,18 +123,14 @@ func (s *BusinessInformationService) GetJoinedBusinessesByProfileID(ctx context.
 	return result, &pagination, nil
 }
 
-func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Context, profileId string, input BusinessSetupInput) (SetupBusinessRootFirstTimeResponse, error) {
-	profileUUID, err := uuid.Parse(profileId)
-	if err != nil {
-		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(err)
-	}
+func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Context, input BusinessSetupInput) (SetupBusinessRootFirstTimeResponse, error) {
 
 	var businessRootId int64
 	var memberID int64
 
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
-		businessRootId, err = tx.CreateBusinessRoot(ctx)
+		businessRootId, err := tx.CreateBusinessRoot(ctx)
 		if err != nil {
 			return err
 		}
@@ -189,7 +181,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 
 		member, err := tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
 			BusinessRootID: businessRootId,
-			ProfileID:      profileUUID,
+			ProfileID:      input.ProfileID,
 			Role:           entity.BusinessMemberRoleOwner,
 			AnsweredAt:     sql.NullTime{Time: time.Now(), Valid: true},
 			Status:         entity.BusinessMemberStatusAccepted,
@@ -202,6 +194,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		memberID = member.ID
 
 		// TODO: send email notification to owner
+		// TODO: log invitation to db
 
 		return nil
 	})
@@ -215,7 +208,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	}
 
 	// REDIS: upsert one business into profile owned business cache
-	err = s.obRepo.UpsertOneBusiness(ctx, profileId, owned_business_repository.RedisBusinessSub{
+	err := s.obRepo.UpsertOneBusiness(ctx, input.ProfileID, owned_business_repository.RedisBusinessSub{
 		BusinessRootID: businessRootId,
 		Role:           entity.BusinessMemberRoleOwner,
 		MemberID:       memberID,
@@ -232,7 +225,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	return res, nil
 }
 
-func (s *BusinessInformationService) GetBusinessById(ctx context.Context, businessId int64, profileId string) (GetBusinessByIdResponse, error) {
+func (s *BusinessInformationService) GetBusinessById(ctx context.Context, businessId int64, profileId uuid.UUID) (GetBusinessByIdResponse, error) {
 
 	business, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, businessId)
 
@@ -251,7 +244,7 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 	var memberBusiness []BusinessMemberSub
 	var userProfile *BusinessMemberSub
 	for _, m := range members {
-		if m.ProfileID.String() == profileId {
+		if m.ProfileID == profileId {
 			userProfile = &BusinessMemberSub{
 				Status: string(m.Status),
 				Role:   string(m.Role),
@@ -294,14 +287,10 @@ func (s *BusinessInformationService) GetBusinessById(ctx context.Context, busine
 	return res, nil
 }
 
-func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, businessId int64, profileId string) (DeleteBusinessByIdResponse, error) {
-	profileUUID, err := uuid.Parse(profileId)
-	if err != nil {
-		return DeleteBusinessByIdResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
-	}
+func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, businessId int64, profileId uuid.UUID) (DeleteBusinessByIdResponse, error) {
 
 	member, err := s.store.GetMemberByProfileIdAndBusinessRootId(ctx, entity.GetMemberByProfileIdAndBusinessRootIdParams{
-		ProfileID:      profileUUID,
+		ProfileID:      profileId,
 		BusinessRootID: businessId,
 	})
 	if err != nil {
@@ -367,7 +356,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 		defer cancel()
 
 		for _, m := range members {
-			if err := s.obRepo.DeleteOneBusiness(ctxBg, m.ProfileID.String(), businessID, time.Hour); err != nil {
+			if err := s.obRepo.DeleteOneBusiness(ctxBg, m.ProfileID, businessID, time.Hour); err != nil {
 				fmt.Println("redis delete cache failed:", err)
 			}
 		}

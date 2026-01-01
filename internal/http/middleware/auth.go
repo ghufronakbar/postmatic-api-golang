@@ -1,5 +1,4 @@
 // internal/http/middleware/auth.go
-// internal/http/middleware/auth.go
 package middleware
 
 import (

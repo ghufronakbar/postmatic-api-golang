@@ -7,6 +7,8 @@ import (
 	"postmatic-api/internal/module/headless/token"
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"postmatic-api/pkg/errs"
+
+	"github.com/google/uuid"
 )
 
 type SessionService struct {
@@ -21,7 +23,7 @@ func NewService(sessionRepo *sessRepo.SessionRepository, tm token.TokenMaker) *S
 	}
 }
 
-func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId string) (*sessRepo.RedisSession, error) {
+func (s *SessionService) Logout(ctx context.Context, input LogoutInput, profileId uuid.UUID) (*sessRepo.RedisSession, error) {
 	sessionId := input.SessionID
 	sess, err := s.sessionRepo.GetSessionsByProfileID(ctx, profileId)
 	if err != nil {
@@ -106,7 +108,7 @@ func (s *SessionService) GetSession(ctx context.Context, claims *token.Claims, r
 	}, nil
 }
 
-func (s *SessionService) GetAllSession(ctx context.Context, profileId string) ([]*SessionListResponse, error) {
+func (s *SessionService) GetAllSession(ctx context.Context, profileId uuid.UUID) ([]*SessionListResponse, error) {
 	sess, err := s.sessionRepo.GetSessionsByProfileID(ctx, profileId)
 	if err != nil {
 		return nil, errs.NewInternalServerError(errors.New("FAILED_TO_GET_SESSION_LIST"))

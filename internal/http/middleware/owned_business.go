@@ -15,7 +15,6 @@ import (
 	"postmatic-api/pkg/response"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 )
 
 type contextOwnedBusinessKey string
@@ -47,12 +46,6 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 			return
 		}
 
-		// parse UUID
-		profUUID, err := uuid.Parse(prof.ID)
-		if err != nil {
-			response.Error(w, r, errs.NewBadRequest("INVALID_PROFILE_ID"), nil)
-			return
-		}
 		intBusinessId, err := strconv.ParseInt(businessId, 10, 64)
 		if err != nil {
 			response.Error(w, r, errs.NewValidationFailed(map[string]string{
@@ -84,7 +77,7 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 		// 2) kalau redis kosong / tidak ada businessId tsb => cek DB
 		dbMember, err := o.store.GetMemberByProfileIdAndBusinessRootId(r.Context(),
 			entity.GetMemberByProfileIdAndBusinessRootIdParams{
-				ProfileID:      profUUID,
+				ProfileID:      prof.ID,
 				BusinessRootID: intBusinessId,
 			},
 		)

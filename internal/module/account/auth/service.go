@@ -100,7 +100,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 		}
 
 		createAccountToken, e = s.tm.GenerateCreateAccountToken(token.GenerateCreateAccountTokenInput{
-			ID:       profile.ID.String(),
+			ID:       profile.ID,
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: nil,
@@ -144,7 +144,7 @@ func (s *AuthService) Register(ctx context.Context, input RegisterInput) (Regist
 	}
 
 	return RegisterResponse{
-		ID:         finalProfile.ID.String(),
+		ID:         finalProfile.ID,
 		Name:       finalProfile.Name,
 		Email:      finalProfile.Email,
 		ImageUrl:   nil,
@@ -213,7 +213,7 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 			return LoginResponse{
 				Email:      input.Email,
 				RetryAfter: checkLimiter.RetryAfterSeconds,
-				ID:         profile.ID.String(),
+				ID:         profile.ID,
 				Name:       profile.Name,
 				ImageUrl:   nil,
 			}, errs.NewBadRequest("PLEASE_WAIT")
@@ -222,7 +222,7 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		// Jika belum kena limit, baru kirim email
 		createAccountToken, err := s.tm.GenerateCreateAccountToken(
 			token.GenerateCreateAccountTokenInput{
-				ID:       profile.ID.String(),
+				ID:       profile.ID,
 				Email:    profile.Email,
 				Name:     profile.Name,
 				ImageUrl: nil,
@@ -252,15 +252,14 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		return LoginResponse{
 			Email:      input.Email,
 			RetryAfter: retryAfter,
-			ID:         profile.ID.String(),
+			ID:         profile.ID,
 			Name:       profile.Name,
 			ImageUrl:   nil,
 		}, errs.NewUnauthorized("EMAIL_NOT_VERIFIED")
 	}
 
 	// 3. Generate Tokens
-	// Convert UUID ke String
-	pID := profile.ID.String()
+	pID := profile.ID
 
 	var imageUrl *string
 	if profile.ImageUrl.Valid {
@@ -289,7 +288,7 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 		return LoginResponse{}, errs.NewInternalServerError(err)
 	}
 
-	sessionID := uuid.New().String()
+	sessionID := uuid.New()
 
 	newSession := sessRepo.RedisSession{
 		ID:           sessionID,
@@ -338,10 +337,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 		return LoginResponse{}, errs.NewUnauthorized("SESSION_EXPIRED_OR_REVOKED")
 	}
 
-	profUUID, err := uuid.Parse(valid.ID)
-	if err != nil {
-		return LoginResponse{}, errs.NewUnauthorized("SESSION_EXPIRED_OR_REVOKED")
-	}
+	profUUID := valid.ID
 
 	profile, err := s.store.GetProfileById(ctx, profUUID)
 	if err != nil {
@@ -436,7 +432,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 		}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
 
-	if decoded.ID == "" {
+	if decoded.ID == uuid.Nil {
 		// Token Invalid
 		return VerifyCreateAccountTokenResponse{
 			ID:    nil,
@@ -446,9 +442,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 		}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
 
-	profileId, err := uuid.Parse(decoded.ID)
-
-	if err != nil || profileId == uuid.Nil {
+	if decoded.ID == uuid.Nil {
 		// Token Invalid
 		return VerifyCreateAccountTokenResponse{
 			ID:    nil,
@@ -458,7 +452,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 		}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
 
-	users, err := s.store.ListUsersByProfileId(ctx, profileId)
+	users, err := s.store.ListUsersByProfileId(ctx, decoded.ID)
 	if err != nil {
 		return VerifyCreateAccountTokenResponse{
 			ID:    nil,
@@ -513,10 +507,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		return VerifyCreateAccountResponse{}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
 
-	profileId, err := uuid.Parse(*valid.ID)
-	if err != nil {
-		return VerifyCreateAccountResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
-	}
+	profileId := *valid.ID
 
 	users, err := s.store.ListUsersByProfileId(ctx, profileId)
 	if err != nil {
@@ -553,7 +544,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 
 	accessToken, err := s.tm.GenerateAccessToken(
 		token.GenerateAccessTokenInput{
-			ID:       profileId.String(),
+			ID:       profileId,
 			Email:    *valid.Email,
 			Name:     *valid.Name,
 			ImageUrl: imageUrl,
@@ -565,7 +556,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 
 	refreshToken, err := s.tm.GenerateRefreshToken(
 		token.GenerateRefreshTokenInput{
-			ID:    profileId.String(),
+			ID:    profileId,
 			Email: *valid.Email,
 		},
 	)
@@ -573,7 +564,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		return VerifyCreateAccountResponse{}, errs.NewInternalServerError(err)
 	}
 
-	sessionID := uuid.New().String()
+	sessionID := uuid.New()
 
 	newSession := sessRepo.RedisSession{
 		ID:           sessionID,
@@ -582,7 +573,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 		Platform:     session.DeviceInfo.Platform, // OS
 		Device:       session.DeviceInfo.Device,
 		ClientIP:     session.DeviceInfo.ClientIP,
-		ProfileID:    profileId.String(),
+		ProfileID:    profileId,
 		CreatedAt:    time.Now(),
 		ExpiredAt:    time.Now().Add(s.cfg.JWT_REFRESH_TOKEN_EXPIRED),
 	}
@@ -679,7 +670,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 
 	token, err := s.tm.GenerateCreateAccountToken(
 		token.GenerateCreateAccountTokenInput{
-			ID:       profile.ID.String(),
+			ID:       profile.ID,
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: imageUrl,
@@ -714,7 +705,7 @@ func (s *AuthService) ResendEmailVerification(ctx context.Context, input ResendE
 	}
 
 	return ResendEmailVerificationResponse{
-		ID:         profile.ID.String(),
+		ID:         profile.ID,
 		Name:       profile.Name,
 		Email:      profile.Email,
 		ImageUrl:   imageUrl,

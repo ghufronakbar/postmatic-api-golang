@@ -61,13 +61,14 @@ func (h *BusinessTimezonePrefHandler) UpsertBusinessTimezonePrefByBusinessRootID
 	}
 
 	var req business_timezone_pref.UpsertBusinessTimezonePrefInput
+	req.BusinessRootID = business.BusinessRootID
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
-	res, err := h.tzSvc.UpsertBusinessTimezonePrefByBusinessRootID(r.Context(), business.BusinessRootID, req)
+	res, err := h.tzSvc.UpsertBusinessTimezonePrefByBusinessRootID(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

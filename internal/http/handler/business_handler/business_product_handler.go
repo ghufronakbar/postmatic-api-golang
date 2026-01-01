@@ -44,18 +44,19 @@ func (h *BusinessProductHandler) GetProductsByBusinessID(w http.ResponseWriter, 
 	filter := middleware.GetFilterFromContext(r.Context())
 
 	filterQuery := business_product.GetBusinessProductsByBusinessRootIDFilter{
-		Search:     filter.Search,
-		SortBy:     filter.SortByDB(),
-		PageOffset: filter.Offset(),
-		PageLimit:  filter.Limit,
-		SortDir:    filter.Sort,
-		Page:       filter.Page,
-		DateStart:  filter.DateStart,
-		DateEnd:    filter.DateEnd,
-		Category:   filter.Category,
+		Search:         filter.Search,
+		SortBy:         filter.SortByDB(),
+		PageOffset:     filter.Offset(),
+		PageLimit:      filter.Limit,
+		SortDir:        filter.Sort,
+		Page:           filter.Page,
+		DateStart:      filter.DateStart,
+		DateEnd:        filter.DateEnd,
+		Category:       filter.Category,
+		BusinessRootID: business.BusinessRootID,
 	}
 
-	res, pagination, err := h.busInSvc.GetBusinessProductsByBusinessRootID(r.Context(), business.BusinessRootID, filterQuery)
+	res, pagination, err := h.busInSvc.GetBusinessProductsByBusinessRootID(r.Context(), filterQuery)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -65,16 +66,17 @@ func (h *BusinessProductHandler) GetProductsByBusinessID(w http.ResponseWriter, 
 }
 
 func (h *BusinessProductHandler) CreateBusinessProductByBusinessRootID(w http.ResponseWriter, r *http.Request) {
-	var req business_product.CreateUpdateBusinessProductInput
+	var req business_product.CreateBusinessProductInput
 
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
+	req.BusinessRootID = business.BusinessRootID
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
-	res, err := h.busInSvc.CreateBusinessProduct(r.Context(), business.BusinessRootID, req)
+	res, err := h.busInSvc.CreateBusinessProduct(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -84,12 +86,6 @@ func (h *BusinessProductHandler) CreateBusinessProductByBusinessRootID(w http.Re
 }
 
 func (h *BusinessProductHandler) UpdateBusinessProductByBusinessRootID(w http.ResponseWriter, r *http.Request) {
-	var req business_product.CreateUpdateBusinessProductInput
-
-	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, r, appErr.ValidationErrors)
-		return
-	}
 
 	businessProductId := chi.URLParam(r, "businessProductId")
 
@@ -101,7 +97,14 @@ func (h *BusinessProductHandler) UpdateBusinessProductByBusinessRootID(w http.Re
 		return
 	}
 
-	res, err := h.busInSvc.UpdateBusinessProduct(r.Context(), intBusinessProductId, req)
+	var req business_product.UpdateBusinessProductInput
+
+	req.ID = intBusinessProductId
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
+		return
+	}
+	res, err := h.busInSvc.UpdateBusinessProduct(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

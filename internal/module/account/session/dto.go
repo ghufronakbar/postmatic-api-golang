@@ -1,9 +1,11 @@
 package session
 
+import "github.com/google/uuid"
+
 type LogoutInput struct {
-	SessionID string `json:"sessionId" validate:"required"`
+	SessionID uuid.UUID `json:"sessionId" validate:"required"`
 }
 
 type LogoutAllInput struct {
-	ProfileID string `json:"profileId" validate:"required"`
+	ProfileID uuid.UUID `json:"profileId" validate:"required"`
 }

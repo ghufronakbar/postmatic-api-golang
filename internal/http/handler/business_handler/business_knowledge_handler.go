@@ -67,12 +67,14 @@ func (h *BusinessKnowledgeHandler) UpsertBusinessKnowledgeByBusinessRootID(w htt
 
 	var req business_knowledge.UpsertBusinessKnowledgeInput
 
+	req.BusinessRootID = intBusinessId
+
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
 
-	res, err := h.busInSvc.UpsertBusinessKnowledgeByBusinessRootID(r.Context(), intBusinessId, req)
+	res, err := h.busInSvc.UpsertBusinessKnowledgeByBusinessRootID(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

@@ -53,9 +53,10 @@ func (h *BusinessInformationHandler) GetJoinedBusinessesByProfileID(w http.Respo
 		Page:       filter.Page,
 		DateStart:  filter.DateStart,
 		DateEnd:    filter.DateEnd,
+		ProfileID:  prof.ID,
 	}
 
-	res, pagination, err := h.busInSvc.GetJoinedBusinessesByProfileID(r.Context(), prof.ID, filterQuery)
+	res, pagination, err := h.busInSvc.GetJoinedBusinessesByProfileID(r.Context(), filterQuery)
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -66,6 +67,9 @@ func (h *BusinessInformationHandler) GetJoinedBusinessesByProfileID(w http.Respo
 
 func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseWriter, r *http.Request) {
 	var req business_information.BusinessSetupInput
+	prof, _ := middleware.GetUserFromContext(r.Context())
+
+	req.ProfileID = prof.ID
 
 	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
@@ -73,10 +77,9 @@ func (h *BusinessInformationHandler) SetupBusinessRootFirstTime(w http.ResponseW
 	}
 
 	// 1) Ambil user dari context
-	prof, _ := middleware.GetUserFromContext(r.Context())
 
 	//  Jalankan service
-	res, err := h.busInSvc.SetupBusinessRootFirstTime(r.Context(), prof.ID, req)
+	res, err := h.busInSvc.SetupBusinessRootFirstTime(r.Context(), req)
 	if err != nil {
 		response.Error(w, r, err, res)
 		return

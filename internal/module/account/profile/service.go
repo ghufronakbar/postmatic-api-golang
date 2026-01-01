@@ -40,12 +40,8 @@ func NewService(store entity.Store, queue queue.MailerProducer, cfg config.Confi
 	}
 }
 
-func (s *ProfileService) GetProfile(ctx context.Context, profileId string) (GetProfileResponse, error) {
-	profileUUID, err := uuid.Parse(profileId)
-	if err != nil {
-		return GetProfileResponse{}, err
-	}
-	profile, err := s.store.GetProfileById(ctx, profileUUID)
+func (s *ProfileService) GetProfile(ctx context.Context, profileId uuid.UUID) (GetProfileResponse, error) {
+	profile, err := s.store.GetProfileById(ctx, profileId)
 
 	if err == sql.ErrNoRows {
 		return GetProfileResponse{}, errs.NewUnauthorized("PROFILE_NOT_FOUND")
@@ -99,7 +95,7 @@ func (s *ProfileService) GetProfile(ctx context.Context, profileId string) (GetP
 	}
 
 	profileResponse := GetProfileResponse{
-		ID:          profile.ID.String(),
+		ID:          profile.ID,
 		Name:        profile.Name,
 		Email:       profile.Email,
 		ImageUrl:    utils.NullStringToString(profile.ImageUrl),
@@ -112,13 +108,8 @@ func (s *ProfileService) GetProfile(ctx context.Context, profileId string) (GetP
 	return profileResponse, nil
 }
 
-func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, input UpdateProfileInput) (UpdateProfileResponse, error) {
+func (s *ProfileService) UpdateProfile(ctx context.Context, profileId uuid.UUID, input UpdateProfileInput) (UpdateProfileResponse, error) {
 	profile, err := s.GetProfile(ctx, profileId)
-	if err != nil {
-		return UpdateProfileResponse{}, err
-	}
-
-	profileUUID, err := uuid.Parse(profileId)
 	if err != nil {
 		return UpdateProfileResponse{}, err
 	}
@@ -129,7 +120,7 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, in
 	}
 
 	profileUpdated, err := s.store.UpdateProfile(ctx, entity.UpdateProfileParams{
-		ID:          profileUUID,
+		ID:          profileId,
 		Name:        input.Name,
 		ImageUrl:    sql.NullString{String: imageUrl, Valid: imageUrl != ""},
 		CountryCode: sql.NullString{String: input.CountryCode, Valid: input.CountryCode != ""},
@@ -142,7 +133,7 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, in
 	}
 
 	profileResponse := GetProfileResponse{
-		ID:          profileUpdated.ID.String(),
+		ID:          profileUpdated.ID,
 		Name:        profileUpdated.Name,
 		Email:       profileUpdated.Email,
 		Credential:  profile.Credential,
@@ -157,7 +148,7 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, in
 
 	accessToken, err := s.tm.GenerateAccessToken(
 		token.GenerateAccessTokenInput{
-			ID:       profileUpdated.ID.String(),
+			ID:       profileUpdated.ID,
 			Email:    profileUpdated.Email,
 			Name:     profileUpdated.Name,
 			ImageUrl: &imageUrl,
@@ -176,7 +167,7 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId string, in
 }
 
 // untuk pengguna yang login credential  (udah setup credential account)
-func (s *ProfileService) UpdatePassword(ctx context.Context, profileId string, input UpdatePasswordInput) error {
+func (s *ProfileService) UpdatePassword(ctx context.Context, profileId uuid.UUID, input UpdatePasswordInput) error {
 	profile, err := s.GetProfile(ctx, profileId)
 	if err != nil {
 		return err
@@ -233,7 +224,7 @@ func (s *ProfileService) UpdatePassword(ctx context.Context, profileId string, i
 
 // untuk pengguna yang login oauth, lalu ingin setup password credential account
 // PERBAIKAN LOGIC SETUP PASSWORD
-func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, input SetupPasswordInput) (SetupPasswordResponse, error) {
+func (s *ProfileService) SetupPassword(ctx context.Context, profileId uuid.UUID, input SetupPasswordInput) (SetupPasswordResponse, error) {
 
 	profile, err := s.GetProfile(ctx, profileId)
 	if err != nil {
@@ -258,18 +249,13 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 		return SetupPasswordResponse{}, err
 	}
 
-	profileUUID, err := uuid.Parse(profileId)
-	if err != nil {
-		return SetupPasswordResponse{}, err
-	}
-
 	retryAfter := s.cfg.CAN_RESEND_EMAIL_AFTER
 	retryAfterDuration := time.Duration(retryAfter) * time.Second
 
 	// Siapkan Data User Baru
 	inputUser := entity.CreateUserParams{
 		Password:  sql.NullString{String: newHashPassword, Valid: true},
-		ProfileID: profileUUID,
+		ProfileID: profileId,
 		Provider:  entity.AuthProviderCredential, // Pastikan pakai ENUM atau Const
 	}
 
@@ -283,7 +269,7 @@ func (s *ProfileService) SetupPassword(ctx context.Context, profileId string, in
 		// Kita butuh token untuk verifikasi email, sama seperti saat register
 		createAccountToken, err := s.tm.GenerateCreateAccountToken(
 			token.GenerateCreateAccountTokenInput{
-				ID:       profile.ID, // ID Profile string
+				ID:       profile.ID, // ID Profile UUID
 				Email:    profile.Email,
 				Name:     profile.Name,
 				ImageUrl: profile.ImageUrl,

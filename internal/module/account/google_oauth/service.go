@@ -32,6 +32,7 @@ import (
 // - key: "dashboard"
 // - key + path/query: "dashboard/xxx?foo=bar"
 // - full url: "https://dashboard.postmatic.id/xxx"
+// TODO: pindahkan ke config dari env separated by , to map[string]string
 var allowedFromBase = map[string]string{
 	"postmatic.id":      "https://postmatic.id",
 	"dashboard":         "https://dashboard.postmatic.id",
@@ -276,7 +277,7 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 	// 9) issue token app kamu
 	accessToken, err := s.tm.GenerateAccessToken(
 		token.GenerateAccessTokenInput{
-			ID:       targetUser.ID.String(),
+			ID:       targetUser.ID,
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: imageUrl,
@@ -287,7 +288,7 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 	}
 	refreshToken, err := s.tm.GenerateRefreshToken(
 		token.GenerateRefreshTokenInput{
-			ID:    targetUser.ID.String(),
+			ID:    targetUser.ID,
 			Email: profile.Email,
 		},
 	)
@@ -296,7 +297,7 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 	}
 
 	// 10) save session
-	sessionID := uuid.New().String()
+	sessionID := uuid.New()
 	newSession := sessRepo.RedisSession{
 		ID:           sessionID,
 		RefreshToken: refreshToken,
@@ -304,7 +305,7 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 		Platform:     session.DeviceInfo.Platform,
 		Device:       session.DeviceInfo.Device,
 		ClientIP:     session.DeviceInfo.ClientIP,
-		ProfileID:    profile.ID.String(),
+		ProfileID:    profile.ID,
 		CreatedAt:    time.Now(),
 		ExpiredAt:    time.Now().Add(s.cfg.JWT_REFRESH_TOKEN_EXPIRED),
 	}

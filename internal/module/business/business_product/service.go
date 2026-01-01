@@ -22,9 +22,9 @@ func NewService(store entity.Store) *BusinessProductService {
 	}
 }
 
-func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context.Context, businessRootId int64, filter GetBusinessProductsByBusinessRootIDFilter) ([]BusinessProductResponse, pagination.Pagination, error) {
+func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context.Context, filter GetBusinessProductsByBusinessRootIDFilter) ([]BusinessProductResponse, pagination.Pagination, error) {
 	inputFilter := entity.GetBusinessProductsByBusinessRootIdParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: filter.BusinessRootID,
 		Search:         filter.Search,
 		SortBy:         string(filter.SortBy),
 		PageOffset:     int32(filter.PageOffset),
@@ -47,7 +47,7 @@ func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context
 	var result []BusinessProductResponse
 	for _, v := range bk {
 		result = append(result, BusinessProductResponse{
-			BusinessRootID: businessRootId,
+			BusinessRootID: filter.BusinessRootID,
 			Name:           v.Name,
 			Category:       v.Category,
 			Description:    v.Description.String,
@@ -61,7 +61,7 @@ func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context
 	}
 
 	countParam := entity.CountBusinessProductsByBusinessRootIdParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: filter.BusinessRootID,
 		Search:         filter.Search,
 		Category:       sql.NullString{String: filter.Category, Valid: filter.Category != ""},
 		DateStart:      utils.NullStringToNullTime(filter.DateStart),
@@ -84,10 +84,10 @@ func (s *BusinessProductService) GetBusinessProductsByBusinessRootID(ctx context
 	return result, pagination, nil
 }
 
-func (s *BusinessProductService) CreateBusinessProduct(ctx context.Context, businessRootId int64, input CreateUpdateBusinessProductInput) (BusinessProductResponse, error) {
+func (s *BusinessProductService) CreateBusinessProduct(ctx context.Context, input CreateBusinessProductInput) (BusinessProductResponse, error) {
 
 	inputFilter := entity.CreateBusinessProductParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: input.BusinessRootID,
 		Name:           input.Name,
 		Category:       input.Category,
 		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -102,7 +102,7 @@ func (s *BusinessProductService) CreateBusinessProduct(ctx context.Context, busi
 	}
 
 	return BusinessProductResponse{
-		BusinessRootID: businessRootId,
+		BusinessRootID: input.BusinessRootID,
 		Name:           bk.Name,
 		Category:       bk.Category,
 		Description:    bk.Description.String,
@@ -115,7 +115,7 @@ func (s *BusinessProductService) CreateBusinessProduct(ctx context.Context, busi
 	}, nil
 }
 
-func (s *BusinessProductService) UpdateBusinessProduct(ctx context.Context, businessProductId int64, input CreateUpdateBusinessProductInput) (BusinessProductResponse, error) {
+func (s *BusinessProductService) UpdateBusinessProduct(ctx context.Context, input UpdateBusinessProductInput) (BusinessProductResponse, error) {
 
 	inputFilter := entity.UpdateBusinessProductParams{
 		Name:        input.Name,
@@ -124,7 +124,7 @@ func (s *BusinessProductService) UpdateBusinessProduct(ctx context.Context, busi
 		Price:       input.Price,
 		Currency:    input.Currency,
 		ImageUrls:   input.ImageUrls,
-		ID:          businessProductId,
+		ID:          input.ID,
 	}
 
 	bk, err := s.store.UpdateBusinessProduct(ctx, inputFilter)

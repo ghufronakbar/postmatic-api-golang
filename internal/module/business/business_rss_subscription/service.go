@@ -23,10 +23,10 @@ func NewService(store entity.Store, rssService *rss.RSSService) *BusinessRssSubs
 	}
 }
 
-func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRootID(ctx context.Context, businessRootId int64, filter GetBusinessRssSubscriptionByBusinessRootIdFilter) ([]BusinessRSSSubscriptionResponse, pagination.Pagination, error) {
+func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRootID(ctx context.Context, filter GetBusinessRssSubscriptionByBusinessRootIdFilter) ([]BusinessRSSSubscriptionResponse, pagination.Pagination, error) {
 
 	inputFilter := entity.GetBusinessRssSubscriptionsByBusinessRootIDParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: filter.BusinessRootID,
 		Search:         filter.Search,
 		SortBy:         string(filter.SortBy),
 		PageOffset:     int32(filter.PageOffset),
@@ -63,7 +63,7 @@ func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRoo
 			AppRssCategory: rssCat,
 		}
 		result = append(result, BusinessRSSSubscriptionResponse{
-			BusinessRootID: businessRootId,
+			BusinessRootID: filter.BusinessRootID,
 			CreatedAt:      v.SubscriptionCreatedAt,
 			UpdatedAt:      v.SubscriptionUpdatedAt,
 			ID:             v.SubscriptionID,
@@ -75,7 +75,7 @@ func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRoo
 	}
 
 	countParam := entity.CountBusinessRssSubscriptionsByBusinessRootIDParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: filter.BusinessRootID,
 		Search:         filter.Search,
 	}
 
@@ -95,7 +95,7 @@ func (s *BusinessRssSubscriptionService) GetBusinessRssSubscriptionByBusinessRoo
 	return result, pagination, nil
 }
 
-func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx context.Context, businessRootId int64, input CreateUpdateBusinessRSSSubscriptionInput) (CreateUpdateDeleteResponse, error) {
+func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx context.Context, input CreateBusinessRSSSubscriptionInput) (CreateUpdateDeleteResponse, error) {
 	appRssFeedId := input.AppRssFeedId
 
 	_, err := s.rssService.GetRSSFeedById(ctx, appRssFeedId)
@@ -105,7 +105,7 @@ func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx conte
 
 	exist, err := s.store.GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedId(ctx,
 		entity.GetBusinessRssSubscriptionByBusinessRootIdAndAppRssFeedIdParams{
-			BusinessRootID: businessRootId,
+			BusinessRootID: input.BusinessRootID,
 			AppRssFeedID:   appRssFeedId,
 		})
 
@@ -118,7 +118,7 @@ func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx conte
 	}
 
 	inputParam := entity.CreateBusinessRssSubscriptionParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: input.BusinessRootID,
 		Title:          input.Title,
 		IsActive:       input.IsActive,
 		AppRssFeedID:   appRssFeedId,
@@ -136,8 +136,7 @@ func (s *BusinessRssSubscriptionService) CreateBusinessRssSubscription(ctx conte
 
 func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 	ctx context.Context,
-	businessRootId, subscriptionId int64,
-	input CreateUpdateBusinessRSSSubscriptionInput,
+	input UpdateBusinessRSSSubscriptionInput,
 ) (CreateUpdateDeleteResponse, error) {
 
 	// Validasi feed exists
@@ -149,8 +148,8 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 	checkSubscription, err := s.store.GetBusinessRssSubscriptionByIDAndBusinessRootID(
 		ctx,
 		entity.GetBusinessRssSubscriptionByIDAndBusinessRootIDParams{
-			ID:             subscriptionId,
-			BusinessRootID: businessRootId,
+			ID:             input.ID,
+			BusinessRootID: input.BusinessRootID,
 		},
 	)
 	if err != nil {
@@ -168,9 +167,9 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 		exist, err := s.store.ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(
 			ctx,
 			entity.ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams{
-				BusinessRootID: businessRootId,
+				BusinessRootID: input.BusinessRootID,
 				AppRssFeedID:   input.AppRssFeedId,
-				ID:             subscriptionId,
+				ID:             input.ID,
 			},
 		)
 		if err != nil {
@@ -186,13 +185,13 @@ func (s *BusinessRssSubscriptionService) UpdateBusinessRssSubscription(
 		Title:        input.Title,
 		IsActive:     input.IsActive,
 		AppRssFeedID: input.AppRssFeedId,
-		ID:           subscriptionId,
+		ID:           input.ID,
 	})
 	if err != nil {
 		return CreateUpdateDeleteResponse{}, errs.NewInternalServerError(err)
 	}
 
-	return CreateUpdateDeleteResponse{ID: subscriptionId}, nil
+	return CreateUpdateDeleteResponse{ID: input.ID}, nil
 }
 
 func (s *BusinessRssSubscriptionService) DeleteBusinessRssSubscription(ctx context.Context, subscriptionId int64) (CreateUpdateDeleteResponse, error) {

@@ -4,10 +4,12 @@ package session
 import (
 	sessRepo "postmatic-api/internal/repository/redis/session_repository"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type SessionResponse struct {
-	ID       string                `json:"id"`
+	ID       uuid.UUID             `json:"id"`
 	Email    string                `json:"email"`
 	Name     string                `json:"name"`
 	ImageUrl *string               `json:"imageUrl"`
@@ -16,12 +18,12 @@ type SessionResponse struct {
 }
 
 type SessionListResponse struct {
-	ID        string    `json:"id"`
+	ID        uuid.UUID `json:"id"`
 	Browser   string    `json:"browser"`
 	Platform  string    `json:"platform"` // OS
 	Device    string    `json:"device"`   // Mobile/Desktop
 	ClientIP  string    `json:"clientIp"` // IP Address
-	ProfileID string    `json:"profileId"`
+	ProfileID uuid.UUID `json:"profileId"`
 	CreatedAt time.Time `json:"createdAt"`
 	ExpiredAt time.Time `json:"expiredAt"`
 }

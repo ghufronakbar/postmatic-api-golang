@@ -13,6 +13,7 @@ type GetCreatorImageFilter struct {
 	TypeCategoryID    *int64  `json:"typeCategoryId"`
 	ProductCategoryID *int64  `json:"productCategoryId"`
 	Published         *bool   `json:"published"`
+	ProfileID         string  `json:"profileId"`
 }
 
 var SORT_BY = []string{"name", "created_at", "updated_at", "id"}

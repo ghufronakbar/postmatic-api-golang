@@ -52,9 +52,9 @@ func (s *BusinessTimezonePrefService) GetBusinessTimezonePrefByBusinessRootID(ct
 	}, nil
 }
 
-func (s *BusinessTimezonePrefService) UpsertBusinessTimezonePrefByBusinessRootID(ctx context.Context, businessRootId int64, input UpsertBusinessTimezonePrefInput) (BusinessTimezonePrefResponse, error) {
+func (s *BusinessTimezonePrefService) UpsertBusinessTimezonePrefByBusinessRootID(ctx context.Context, input UpsertBusinessTimezonePrefInput) (BusinessTimezonePrefResponse, error) {
 	tzDb, err := s.store.UpsertBusinessTimezonePref(ctx, entity.UpsertBusinessTimezonePrefParams{
-		BusinessRootID: businessRootId,
+		BusinessRootID: input.BusinessRootID,
 		Timezone:       input.Timezone,
 	})
 	if err != nil {

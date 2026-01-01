@@ -1,5 +1,6 @@
 package business_timezone_pref
 
 type UpsertBusinessTimezonePrefInput struct {
-	Timezone string `json:"timezone" validate:"required"`
+	BusinessRootID int64  `json:"businessRootId" validate:"required"`
+	Timezone       string `json:"timezone" validate:"required"`
 }

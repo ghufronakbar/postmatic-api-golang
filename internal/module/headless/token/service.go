@@ -7,20 +7,21 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type Claims struct {
 	// Profile ID
-	ID       string  `json:"id"`
-	Email    string  `json:"email"`
-	Name     string  `json:"name"`
-	ImageUrl *string `json:"imageUrl"`
+	ID       uuid.UUID `json:"id"`
+	Email    string    `json:"email"`
+	Name     string    `json:"name"`
+	ImageUrl *string   `json:"imageUrl"`
 	jwt.RegisteredClaims
 }
 
 type RefreshTokenClaims struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID    uuid.UUID `json:"id"`
+	Email string    `json:"email"`
 	jwt.RegisteredClaims
 }
 

@@ -53,9 +53,9 @@ func (s *BusinessRoleService) GetBusinessRoleByBusinessRootID(ctx context.Contex
 	return result, nil
 }
 
-func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Context, businessRootId int64, input UpsertBusinessRoleInput) (BusinessRoleResponse, error) {
+func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Context, input UpsertBusinessRoleInput) (BusinessRoleResponse, error) {
 	bk, err := s.store.UpsertBusinessRoleByBusinessRootID(ctx, entity.UpsertBusinessRoleByBusinessRootIDParams{
-		BusinessRootID:  businessRootId,
+		BusinessRootID:  input.BusinessRootID,
 		AudiencePersona: input.AudiencePersona,
 		CallToAction:    input.CallToAction,
 		Goals:           sql.NullString{String: input.Goals, Valid: input.Goals != ""},
@@ -68,7 +68,7 @@ func (s *BusinessRoleService) UpsertBusinessRoleByBusinessRootID(ctx context.Con
 	}
 
 	res := BusinessRoleResponse{
-		BusinessRootId:  businessRootId,
+		BusinessRootId:  input.BusinessRootID,
 		AudiencePersona: bk.AudiencePersona,
 		CallToAction:    bk.CallToAction,
 		Goals:           bk.Goals.String,
