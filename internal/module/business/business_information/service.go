@@ -130,13 +130,15 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
-		businessRootId, err := tx.CreateBusinessRoot(ctx)
+		bId, err := tx.CreateBusinessRoot(ctx)
 		if err != nil {
 			return err
 		}
 
+		businessRootId = bId
+
 		_, err = tx.CreateBusinessKnowledge(ctx, entity.CreateBusinessKnowledgeParams{
-			BusinessRootID:     businessRootId,
+			BusinessRootID:     bId,
 			Name:               input.BusinessKnowledge.Name,
 			PrimaryLogoUrl:     sql.NullString{String: input.BusinessKnowledge.PrimaryLogoUrl, Valid: input.BusinessKnowledge.PrimaryLogoUrl != ""},
 			Category:           input.BusinessKnowledge.Category,
@@ -152,7 +154,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		_, err = tx.CreateBusinessProduct(ctx, entity.CreateBusinessProductParams{
-			BusinessRootID: businessRootId,
+			BusinessRootID: bId,
 			Name:           input.ProductKnowledge.Name,
 			Price:          input.ProductKnowledge.Price,
 			Description:    sql.NullString{String: input.ProductKnowledge.Description, Valid: input.ProductKnowledge.Description != ""},
@@ -166,7 +168,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		_, err = tx.CreateBusinessRole(ctx, entity.CreateBusinessRoleParams{
-			BusinessRootID:  businessRootId,
+			BusinessRootID:  bId,
 			TargetAudience:  input.RoleKnowledge.TargetAudience,
 			Tone:            input.RoleKnowledge.Tone,
 			AudiencePersona: input.RoleKnowledge.AudiencePersona,
@@ -180,7 +182,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		}
 
 		member, err := tx.CreateBusinessMember(ctx, entity.CreateBusinessMemberParams{
-			BusinessRootID: businessRootId,
+			BusinessRootID: bId,
 			ProfileID:      input.ProfileID,
 			Role:           entity.BusinessMemberRoleOwner,
 			AnsweredAt:     sql.NullTime{Time: time.Now(), Valid: true},
@@ -193,8 +195,15 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 
 		memberID = member.ID
 
-		// TODO: send email notification to owner
-		// TODO: log invitation to db
+		_, err = tx.CreateBusinessMemberStatusHistory(ctx, entity.CreateBusinessMemberStatusHistoryParams{
+			MemberID: memberID,
+			Status:   entity.BusinessMemberStatusAccepted,
+			Role:     entity.BusinessMemberRoleOwner,
+		})
+
+		if err != nil {
+			return err
+		}
 
 		return nil
 	})
@@ -202,6 +211,7 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	if e != nil {
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(e)
 	}
+	// TODO: send email notification to owner
 
 	if memberID == 0 {
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(errors.New("MEMBER_ID_IS_EMPTY"))

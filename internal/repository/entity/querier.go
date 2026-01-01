@@ -23,6 +23,7 @@ type Querier interface {
 	CreateBusinessImageContent(ctx context.Context, arg CreateBusinessImageContentParams) (BusinessImageContent, error)
 	CreateBusinessKnowledge(ctx context.Context, arg CreateBusinessKnowledgeParams) (BusinessKnowledge, error)
 	CreateBusinessMember(ctx context.Context, arg CreateBusinessMemberParams) (BusinessMember, error)
+	CreateBusinessMemberStatusHistory(ctx context.Context, arg CreateBusinessMemberStatusHistoryParams) (BusinessMemberStatusHistory, error)
 	CreateBusinessProduct(ctx context.Context, arg CreateBusinessProductParams) (BusinessProduct, error)
 	CreateBusinessRole(ctx context.Context, arg CreateBusinessRoleParams) (BusinessRole, error)
 	CreateBusinessRoot(ctx context.Context) (int64, error)

@@ -304,6 +304,16 @@ type BusinessMember struct {
 	DeletedAt      sql.NullTime         `json:"deleted_at"`
 }
 
+type BusinessMemberStatusHistory struct {
+	ID        int64                `json:"id"`
+	Status    BusinessMemberStatus `json:"status"`
+	Role      BusinessMemberRole   `json:"role"`
+	MemberID  int64                `json:"member_id"`
+	CreatedAt time.Time            `json:"created_at"`
+	UpdatedAt time.Time            `json:"updated_at"`
+	DeletedAt sql.NullTime         `json:"deleted_at"`
+}
+
 type BusinessProduct struct {
 	ID             int64          `json:"id"`
 	Name           string         `json:"name"`
