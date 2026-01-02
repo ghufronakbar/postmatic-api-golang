@@ -51,6 +51,9 @@ func NewNotFound(message string) *AppError {
 }
 
 func NewUnauthorized(message string) *AppError {
+	if message == "" {
+		message = "UNAUTHORIZED"
+	}
 	return &AppError{
 		Code:    http.StatusUnauthorized,
 		Message: message,
@@ -58,6 +61,9 @@ func NewUnauthorized(message string) *AppError {
 }
 
 func NewForbidden(message string) *AppError {
+	if message == "" {
+		message = "FORBIDDEN"
+	}
 	return &AppError{
 		Code:    http.StatusForbidden,
 		Message: message,
