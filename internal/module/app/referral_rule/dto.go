@@ -1,5 +1,5 @@
-// internal/module/app/referral/dto.go
-package referral
+// internal/module/app/referral_rule/dto.go
+package referral_rule
 
 import "github.com/google/uuid"
 

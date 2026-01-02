@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"postmatic-api/config"
 	"postmatic-api/internal/http/handler/account_handler"
+	"postmatic-api/internal/http/handler/affiliator_handler"
 	"postmatic-api/internal/http/handler/app_handler"
 	"postmatic-api/internal/http/handler/business_handler"
 	"postmatic-api/internal/http/handler/creator_handler"
@@ -14,9 +15,10 @@ import (
 	"postmatic-api/internal/module/account/google_oauth"
 	"postmatic-api/internal/module/account/profile"
 	"postmatic-api/internal/module/account/session"
+	"postmatic-api/internal/module/affiliator/referral_basic"
 	"postmatic-api/internal/module/app/category_creator_image"
 	"postmatic-api/internal/module/app/image_uploader"
-	"postmatic-api/internal/module/app/referral"
+	"postmatic-api/internal/module/app/referral_rule"
 	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/app/timezone"
 	"postmatic-api/internal/module/business/business_image_content"
@@ -91,7 +93,9 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	timezoneSvc := timezone.NewTimezoneService()
 	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
 	catCreatorImageSvc := category_creator_image.NewCategoryCreatorImageService(store)
-	referralSvc := referral.NewReferralService(store)
+	referralRuleSvc := referral_rule.NewReferralService(store)
+	// AFFILIATOR
+	referralBasicSvc := referral_basic.NewService(store, referralRuleSvc)
 	// CREATOR
 	creatorImageSvc := creator_image.NewService(store, catCreatorImageSvc)
 
@@ -115,9 +119,11 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
 	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
 	catCreatorImageHandler := app_handler.NewCategoryCreatorImageHandler(catCreatorImageSvc)
-	ruleRefferralHandler := app_handler.NewReferralRuleHandler(referralSvc)
+	ruleRefferralHandler := app_handler.NewReferralRuleHandler(referralRuleSvc)
 	// CREATOR
 	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
+	// AFFILIATOR
+	referralBasicHandler := affiliator_handler.NewReferralBasicHandler(referralBasicSvc)
 
 	// 4. =========== INITIAL MIDDLEWARE ===========
 	allAllowed := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin, entity.AppRoleUser})
@@ -189,6 +195,11 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 			return middleware.ReqFilterMiddleware(next, creator_image.SORT_BY)
 		})
 		r.Mount("/image", creatorImageHandler.CreatorImageRoutes())
+	})
+
+	r.Route("/affiliator", func(r chi.Router) {
+		r.Use(allAllowed)
+		r.Mount("/referral-basic", referralBasicHandler.ReferralBasicRoutes())
 	})
 
 	return r

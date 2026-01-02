@@ -3,8 +3,11 @@ package utils
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // StringToNullString mengonversi string biasa/pointer ke sql.NullString
@@ -69,4 +72,12 @@ func NullBoolPtrToNullBool(b *bool) sql.NullBool {
 		return sql.NullBool{}
 	}
 	return sql.NullBool{Bool: *b, Valid: true}
+}
+
+func IsUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+	return false
 }

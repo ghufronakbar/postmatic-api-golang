@@ -312,6 +312,48 @@ func (ns NullImageProvider) Value() (driver.Value, error) {
 	return string(ns.ImageProvider), nil
 }
 
+type ReferralType string
+
+const (
+	ReferralTypeBasic   ReferralType = "basic"
+	ReferralTypeSpecial ReferralType = "special"
+)
+
+func (e *ReferralType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReferralType(s)
+	case string:
+		*e = ReferralType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReferralType: %T", src)
+	}
+	return nil
+}
+
+type NullReferralType struct {
+	ReferralType ReferralType `json:"referral_type"`
+	Valid        bool         `json:"valid"` // Valid is true if ReferralType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReferralType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReferralType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReferralType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReferralType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReferralType), nil
+}
+
 type AppCreatorImageProductCategory struct {
 	ID             int64        `json:"id"`
 	IndonesianName string       `json:"indonesian_name"`
@@ -515,6 +557,23 @@ type Profile struct {
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 	Role        AppRole        `json:"role"`
+}
+
+type ProfileReferralCode struct {
+	ID                int64         `json:"id"`
+	ProfileID         uuid.UUID     `json:"profile_id"`
+	Code              string        `json:"code"`
+	Type              ReferralType  `json:"type"`
+	IsActive          bool          `json:"is_active"`
+	TotalDiscount     int64         `json:"total_discount"`
+	DiscountType      DiscountType  `json:"discount_type"`
+	ExpiredDays       sql.NullInt32 `json:"expired_days"`
+	MaxDiscount       int64         `json:"max_discount"`
+	MaxUsage          sql.NullInt32 `json:"max_usage"`
+	RewardPerReferral int64         `json:"reward_per_referral"`
+	CreatedAt         time.Time     `json:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at"`
+	DeletedAt         sql.NullTime  `json:"deleted_at"`
 }
 
 type UploadedImage struct {

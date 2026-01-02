@@ -1,10 +1,11 @@
-// internal/module/app/referral/viewmodel.go
-package referral
+// internal/module/affiliator/referral_basic/viewmodel.go
+package referral_basic
 
 import "time"
 
-type RuleReferralResponse struct {
-	ID int16 `json:"id"`
+type ReferralBasicResponse struct {
+	ID   int64  `json:"id"`
+	Code string `json:"code"`
 	// CONSUMER
 	TotalDiscount int64  `json:"totalDiscount"`
 	DiscountType  string `json:"discountType"`

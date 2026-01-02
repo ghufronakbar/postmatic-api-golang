@@ -1,5 +1,5 @@
-// internal/module/app/referral/service.go
-package referral
+// internal/module/app/referral_rule/service.go
+package referral_rule
 
 import (
 	"context"

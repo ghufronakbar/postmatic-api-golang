@@ -4,7 +4,7 @@ package app_handler
 import (
 	"net/http"
 	"postmatic-api/internal/http/middleware"
-	"postmatic-api/internal/module/app/referral"
+	"postmatic-api/internal/module/app/referral_rule"
 
 	"postmatic-api/pkg/response"
 	"postmatic-api/pkg/utils"
@@ -13,10 +13,10 @@ import (
 )
 
 type ReferralRuleHandler struct {
-	referralSvc *referral.ReferralService
+	referralSvc *referral_rule.ReferralService
 }
 
-func NewReferralRuleHandler(referralSvc *referral.ReferralService) *ReferralRuleHandler {
+func NewReferralRuleHandler(referralSvc *referral_rule.ReferralService) *ReferralRuleHandler {
 	return &ReferralRuleHandler{referralSvc: referralSvc}
 }
 
@@ -40,7 +40,7 @@ func (h *ReferralRuleHandler) GetReferralRule(w http.ResponseWriter, r *http.Req
 
 func (h *ReferralRuleHandler) UpsertReferralRule(w http.ResponseWriter, r *http.Request) {
 
-	var req referral.UpsertAppProfileReferralRulesDTO
+	var req referral_rule.UpsertAppProfileReferralRulesDTO
 	prof, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
