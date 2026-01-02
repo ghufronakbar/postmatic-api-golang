@@ -5,12 +5,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
+	"postmatic-api/internal/module/headless/mailer"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/internal/repository/redis/owned_business_repository"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/logger"
 	"postmatic-api/pkg/pagination"
 
 	"postmatic-api/pkg/utils"
@@ -21,13 +23,15 @@ import (
 type BusinessInformationService struct {
 	store  entity.Store
 	obRepo *owned_business_repository.OwnedBusinessRepository
+	queue  queue.MailerProducer
 }
 
 // Update Constructor: Minta Token Maker dari main.go
-func NewService(store entity.Store, obRepo *owned_business_repository.OwnedBusinessRepository) *BusinessInformationService {
+func NewService(store entity.Store, obRepo *owned_business_repository.OwnedBusinessRepository, queue queue.MailerProducer) *BusinessInformationService {
 	return &BusinessInformationService{
 		store:  store,
 		obRepo: obRepo,
+		queue:  queue,
 	}
 }
 
@@ -128,6 +132,11 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 	var businessRootId int64
 	var memberID int64
 
+	profile, err := s.store.GetProfileById(ctx, input.ProfileID)
+	if err != nil {
+		return SetupBusinessRootFirstTimeResponse{}, err
+	}
+
 	e := s.store.ExecTx(ctx, func(tx *entity.Queries) error {
 
 		bId, err := tx.CreateBusinessRoot(ctx)
@@ -212,20 +221,36 @@ func (s *BusinessInformationService) SetupBusinessRootFirstTime(ctx context.Cont
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(e)
 	}
 	// TODO: send email notification to owner
+	var profImgUrl *string
+	if profile.ImageUrl.Valid {
+		profImgUrl = &profile.ImageUrl.String
+	}
+	nowStr := time.Now().Format("2006-01-02 15:04:05")
+	er := s.addEmailWelcomeBusinessToQueue(mailer.MemberWelcomeBusinessInputDTO{
+		Email:        profile.Email,
+		BusinessName: input.BusinessKnowledge.Name,
+		ProfileImage: profImgUrl,
+		BusinessLogo: &input.BusinessKnowledge.PrimaryLogoUrl,
+		Role:         string(entity.BusinessMemberRoleOwner),
+		JoinedAt:     &nowStr,
+	})
+	if er != nil {
+		logger.From(ctx).Error("Failed to add email welcome business to queue owner create new business", "error", er)
+	}
 
 	if memberID == 0 {
 		return SetupBusinessRootFirstTimeResponse{}, errs.NewInternalServerError(errors.New("MEMBER_ID_IS_EMPTY"))
 	}
 
 	// REDIS: upsert one business into profile owned business cache
-	err := s.obRepo.UpsertOneBusiness(ctx, input.ProfileID, owned_business_repository.RedisBusinessSub{
+	err = s.obRepo.UpsertOneBusiness(ctx, input.ProfileID, owned_business_repository.RedisBusinessSub{
 		BusinessRootID: businessRootId,
 		Role:           entity.BusinessMemberRoleOwner,
 		MemberID:       memberID,
 	}, time.Hour)
 
 	if err != nil {
-		fmt.Println("redis upsert owned business failed:", err)
+		logger.From(ctx).Error("Failed to upsert owned business into redis", "error", err)
 	}
 
 	res := SetupBusinessRootFirstTimeResponse{
@@ -304,7 +329,6 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 		BusinessRootID: businessId,
 	})
 	if err != nil {
-		fmt.Println(err)
 		return DeleteBusinessByIdResponse{}, err
 	}
 
@@ -367,7 +391,7 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 
 		for _, m := range members {
 			if err := s.obRepo.DeleteOneBusiness(ctxBg, m.ProfileID, businessID, time.Hour); err != nil {
-				fmt.Println("redis delete cache failed:", err)
+				logger.From(ctx).Error("Failed to delete owned business from redis", "error", err)
 			}
 		}
 	}(members, businessId)
@@ -375,4 +399,14 @@ func (s *BusinessInformationService) DeleteBusinessById(ctx context.Context, bus
 	return DeleteBusinessByIdResponse{
 		ID: businessId,
 	}, nil
+}
+
+func (s *BusinessInformationService) addEmailWelcomeBusinessToQueue(input mailer.MemberWelcomeBusinessInputDTO) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := s.queue.EnqueueWelcomeBusiness(ctx, input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
