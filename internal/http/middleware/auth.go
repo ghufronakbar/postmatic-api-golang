@@ -38,7 +38,7 @@ func AuthMiddleware(tm token.TokenMaker, allowedRoles []entity.AppRole) func(htt
 			}
 
 			if !utils.StringInSlice(string(claims.Role), strAllowedRoles) {
-				response.Error(w, r, errs.NewUnauthorized("FORBIDDEN"), nil)
+				response.Error(w, r, errs.NewForbidden(""), nil)
 				return
 			}
 
