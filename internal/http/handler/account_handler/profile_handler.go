@@ -34,7 +34,7 @@ func (h *ProfileHandler) ProfileRoutes() chi.Router {
 }
 
 func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 
 	if err != nil {
 		response.Error(w, r, err, nil)
@@ -66,7 +66,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 
 	if err != nil {
 		response.Error(w, r, err, nil)
@@ -96,7 +96,7 @@ func (h *ProfileHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) 
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 
 	if err != nil {
 		response.Error(w, r, err, nil)
@@ -126,7 +126,7 @@ func (h *ProfileHandler) SetupPassword(w http.ResponseWriter, r *http.Request) {
 		response.ValidationFailed(w, r, appErr.ValidationErrors)
 		return
 	}
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

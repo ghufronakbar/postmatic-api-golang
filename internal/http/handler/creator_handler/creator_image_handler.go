@@ -34,7 +34,7 @@ func (h *CreatorImageHandler) CreatorImageRoutes() chi.Router {
 }
 
 func (h *CreatorImageHandler) GetCreatorImageByProfileId(w http.ResponseWriter, r *http.Request) {
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 
 	filter := middleware.GetFilterFromContext(r.Context())
 
@@ -93,7 +93,7 @@ func (h *CreatorImageHandler) GetCreatorImageByProfileId(w http.ResponseWriter, 
 }
 
 func (h *CreatorImageHandler) CreateCreatorImage(w http.ResponseWriter, r *http.Request) {
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	var req creator_image.CreateCreatorImageInput
 	req.ProfileID = prof.ID.String()
 
@@ -120,7 +120,7 @@ func (h *CreatorImageHandler) UpdateCreatorImage(w http.ResponseWriter, r *http.
 		response.ValidationFailed(w, r, map[string]string{"creatorImageId": "CREATOR_IMAGE_MUST_BE_INTEGER_64"})
 		return
 	}
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	var req creator_image.UpdateCreatorImageInput
 	req.ProfileID = prof.ID.String()
 	req.CreatorImageId = intCreatorImageId
@@ -149,7 +149,7 @@ func (h *CreatorImageHandler) SoftDeleteCreatorImage(w http.ResponseWriter, r *h
 		return
 	}
 
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 
 	res, err := h.creatorImageSvc.SoftDeleteCreatorImage(r.Context(), int64(intCreatorImageId), prof.ID.String())
 

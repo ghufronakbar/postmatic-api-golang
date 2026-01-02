@@ -15,7 +15,7 @@ import (
 
 type contextKey string
 
-const UserContextKey contextKey = "userClaims"
+const ProfileContextKey contextKey = "profileClaims"
 
 func AuthMiddleware(tm token.TokenMaker, allowedRoles []entity.AppRole) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -42,7 +42,7 @@ func AuthMiddleware(tm token.TokenMaker, allowedRoles []entity.AppRole) func(htt
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserContextKey, claims)
+			ctx := context.WithValue(r.Context(), ProfileContextKey, claims)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
@@ -63,8 +63,8 @@ func extractToken(r *http.Request) string {
 	return ""
 }
 
-func GetUserFromContext(ctx context.Context) (*token.AccessTokenClaims, error) {
-	claims, ok := ctx.Value(UserContextKey).(*token.AccessTokenClaims)
+func GetProfileFromContext(ctx context.Context) (*token.AccessTokenClaims, error) {
+	claims, ok := ctx.Value(ProfileContextKey).(*token.AccessTokenClaims)
 	if !ok || claims == nil {
 		// lebih cocok 401/forbidden daripada internal error
 		return nil, errs.NewUnauthorized("MISSING_AUTH_CONTEXT")

@@ -40,7 +40,7 @@ func (o *OwnedBusiness) OwnedBusinessMiddleware(next http.Handler) http.Handler 
 		}
 
 		// pastikan auth middleware sudah jalan
-		prof, err := GetUserFromContext(r.Context())
+		prof, err := GetProfileFromContext(r.Context())
 		if err != nil || prof == nil {
 			response.Error(w, r, errs.NewUnauthorized("UNAUTHORIZED"), nil)
 			return

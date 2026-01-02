@@ -53,7 +53,7 @@ func (h *BusinessMemberHandler) BusinessMemberRoutes() chi.Router {
 }
 
 func (h *BusinessMemberHandler) GetMembersByBusinessID(w http.ResponseWriter, r *http.Request) {
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
 
 	filter := middleware.GetFilterFromContext(r.Context())
@@ -108,7 +108,7 @@ func (h *BusinessMemberHandler) InviteBusinessMember(w http.ResponseWriter, r *h
 func (h *BusinessMemberHandler) EditMember(w http.ResponseWriter, r *http.Request) {
 	var req business_member.EditMemberInput
 
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	business, _ := middleware.OwnedBusinessFromContext(r.Context())
 	req.BusinessRootID = business.BusinessRootID
 	req.ProfileID = prof.ID
@@ -135,7 +135,7 @@ func (h *BusinessMemberHandler) EditMember(w http.ResponseWriter, r *http.Reques
 func (h *BusinessMemberHandler) ResendMemberInvitation(w http.ResponseWriter, r *http.Request) {
 	var req business_member.ResendEmailInvitationInput
 
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	buss, _ := middleware.OwnedBusinessFromContext(r.Context())
 	req.ProfileID = prof.ID
 	req.BusinessRootID = buss.BusinessRootID
@@ -162,7 +162,7 @@ func (h *BusinessMemberHandler) ResendMemberInvitation(w http.ResponseWriter, r 
 func (h *BusinessMemberHandler) RemoveMember(w http.ResponseWriter, r *http.Request) {
 	var req business_member.RemoveBusinessMemberInput
 
-	prof, _ := middleware.GetUserFromContext(r.Context())
+	prof, _ := middleware.GetProfileFromContext(r.Context())
 	buss, _ := middleware.OwnedBusinessFromContext(r.Context())
 	req.ProfileID = prof.ID
 	req.BusinessRootID = buss.BusinessRootID

@@ -31,7 +31,7 @@ func (h *SessionHandler) SessionRoutes() chi.Router {
 }
 
 func (h *SessionHandler) LogoutAll(w http.ResponseWriter, r *http.Request) {
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -61,7 +61,7 @@ func (h *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	profile, err := middleware.GetUserFromContext(r.Context())
+	profile, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -82,7 +82,7 @@ func (h *SessionHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 func (h *SessionHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	// 1. Gunakan Struct dari DTO
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
@@ -105,7 +105,7 @@ func (h *SessionHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SessionHandler) GetAllSession(w http.ResponseWriter, r *http.Request) {
-	user, err := middleware.GetUserFromContext(r.Context())
+	user, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return

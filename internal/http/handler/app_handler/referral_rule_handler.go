@@ -41,7 +41,7 @@ func (h *ReferralRuleHandler) GetReferralRule(w http.ResponseWriter, r *http.Req
 func (h *ReferralRuleHandler) UpsertReferralRule(w http.ResponseWriter, r *http.Request) {
 
 	var req referral.UpsertAppProfileReferralRulesDTO
-	prof, err := middleware.GetUserFromContext(r.Context())
+	prof, err := middleware.GetProfileFromContext(r.Context())
 	if err != nil {
 		response.Error(w, r, err, nil)
 		return
