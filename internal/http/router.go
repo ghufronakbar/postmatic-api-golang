@@ -31,6 +31,7 @@ import (
 	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/s3_uploader"
 	"postmatic-api/internal/module/headless/token"
+	"postmatic-api/internal/repository/entity"
 	repository "postmatic-api/internal/repository/entity"
 	emailLimiterRepo "postmatic-api/internal/repository/redis/email_limiter_repository"
 	"postmatic-api/internal/repository/redis/invitation_limiter_repository"
@@ -116,13 +117,14 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
 
 	// 4. =========== INITIAL MIDDLEWARE ===========
-	authMiddleware := middleware.AuthMiddleware(*tokenSvc)
+	allAllowed := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin, entity.AppRoleUser})
+	// adminOnly := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin}) // TODO: for app admin dashboard
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
 
 	r.Route("/business", func(r chi.Router) {
-		r.Use(authMiddleware)
+		r.Use(allAllowed)
 		r.Use(func(next http.Handler) http.Handler {
 			return middleware.ReqFilterMiddleware(next, business_information.SORT_BY)
 		})
@@ -144,17 +146,17 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 			r.Mount("/", googleOauthHandler.GoogleOAuthRoutes())
 		})
 		r.Route("/session", func(r chi.Router) {
-			r.Use(authMiddleware)
+			r.Use(allAllowed)
 			r.Mount("/", sessHandler.SessionRoutes())
 		})
 		r.Route("/profile", func(r chi.Router) {
-			r.Use(authMiddleware)
+			r.Use(allAllowed)
 			r.Mount("/", profileHandler.ProfileRoutes())
 		})
 	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(authMiddleware)
+		r.Use(allAllowed)
 		r.Mount("/image-uploader", imageUploaderHandler.ImageUploaderRoutes())
 		r.Route("/rss", func(r chi.Router) {
 			r.Use(func(next http.Handler) http.Handler {
@@ -174,7 +176,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	})
 
 	r.Route("/creator", func(r chi.Router) {
-		r.Use(authMiddleware)
+		r.Use(allAllowed)
 		r.Use(func(next http.Handler) http.Handler {
 			return middleware.ReqFilterMiddleware(next, creator_image.SORT_BY)
 		})

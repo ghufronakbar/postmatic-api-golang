@@ -64,7 +64,7 @@ func (q *Queries) CreateBusinessMember(ctx context.Context, arg CreateBusinessMe
 }
 
 const getMemberByEmailAndBusinessRootId = `-- name: GetMemberByEmailAndBusinessRootId :one
-SELECT bm.id, status, role, answered_at, business_root_id, profile_id, bm.created_at, bm.updated_at, deleted_at, p.id, name, email, image_url, country_code, phone, description, p.created_at, p.updated_at FROM business_members bm
+SELECT bm.id, status, bm.role, answered_at, business_root_id, profile_id, bm.created_at, bm.updated_at, deleted_at, p.id, name, email, image_url, country_code, phone, description, p.created_at, p.updated_at, p.role FROM business_members bm
 JOIN profiles p
   ON p.id = bm.profile_id
 WHERE p.email = $1
@@ -96,6 +96,7 @@ type GetMemberByEmailAndBusinessRootIdRow struct {
 	Description    sql.NullString       `json:"description"`
 	CreatedAt_2    sql.NullTime         `json:"created_at_2"`
 	UpdatedAt_2    sql.NullTime         `json:"updated_at_2"`
+	Role_2         AppRole              `json:"role_2"`
 }
 
 func (q *Queries) GetMemberByEmailAndBusinessRootId(ctx context.Context, arg GetMemberByEmailAndBusinessRootIdParams) (GetMemberByEmailAndBusinessRootIdRow, error) {
@@ -120,6 +121,7 @@ func (q *Queries) GetMemberByEmailAndBusinessRootId(ctx context.Context, arg Get
 		&i.Description,
 		&i.CreatedAt_2,
 		&i.UpdatedAt_2,
+		&i.Role_2,
 	)
 	return i, err
 }

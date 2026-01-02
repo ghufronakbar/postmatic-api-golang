@@ -7,15 +7,17 @@ import (
 	"strings"
 
 	"postmatic-api/internal/module/headless/token"
+	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/response"
+	"postmatic-api/pkg/utils"
 )
 
 type contextKey string
 
 const UserContextKey contextKey = "userClaims"
 
-func AuthMiddleware(tm token.TokenMaker) func(http.Handler) http.Handler {
+func AuthMiddleware(tm token.TokenMaker, allowedRoles []entity.AppRole) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			tokenStr := extractToken(r)
@@ -27,6 +29,16 @@ func AuthMiddleware(tm token.TokenMaker) func(http.Handler) http.Handler {
 			claims, err := tm.ValidateAccessToken(tokenStr)
 			if err != nil {
 				response.Error(w, r, errs.NewUnauthorized("INVALID_OR_EXPIRED_TOKEN"), nil)
+				return
+			}
+
+			strAllowedRoles := make([]string, len(allowedRoles))
+			for i, role := range allowedRoles {
+				strAllowedRoles[i] = string(role)
+			}
+
+			if !utils.StringInSlice(string(claims.Role), strAllowedRoles) {
+				response.Error(w, r, errs.NewUnauthorized("FORBIDDEN"), nil)
 				return
 			}
 

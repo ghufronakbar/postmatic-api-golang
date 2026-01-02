@@ -152,6 +152,7 @@ func (s *ProfileService) UpdateProfile(ctx context.Context, profileId uuid.UUID,
 			Email:    profileUpdated.Email,
 			Name:     profileUpdated.Name,
 			ImageUrl: &imageUrl,
+			Role:     profileUpdated.Role,
 		},
 	)
 	if err != nil {

@@ -272,6 +272,7 @@ func (s *AuthService) LoginCredential(ctx context.Context, input LoginCredential
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: imageUrl,
+			Role:     profile.Role,
 		},
 	)
 	if err != nil {
@@ -356,6 +357,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, input RefreshTokenInput)
 			Email:    valid.Email,
 			Name:     profile.Name,
 			ImageUrl: imageUrl,
+			Role:     profile.Role,
 		},
 	)
 	if err != nil {
@@ -548,6 +550,7 @@ func (s *AuthService) SubmitVerifyToken(ctx context.Context, input SubmitVerifyT
 			Email:    *valid.Email,
 			Name:     *valid.Name,
 			ImageUrl: imageUrl,
+			Role:     entity.AppRoleUser,
 		},
 	)
 	if err != nil {

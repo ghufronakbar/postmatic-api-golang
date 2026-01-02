@@ -13,6 +13,48 @@ import (
 	"github.com/google/uuid"
 )
 
+type AppRole string
+
+const (
+	AppRoleAdmin AppRole = "admin"
+	AppRoleUser  AppRole = "user"
+)
+
+func (e *AppRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppRole(s)
+	case string:
+		*e = AppRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppRole: %T", src)
+	}
+	return nil
+}
+
+type NullAppRole struct {
+	AppRole AppRole `json:"app_role"`
+	Valid   bool    `json:"valid"` // Valid is true if AppRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppRole), nil
+}
+
 type AuthProvider string
 
 const (
@@ -405,6 +447,7 @@ type Profile struct {
 	Description sql.NullString `json:"description"`
 	CreatedAt   sql.NullTime   `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	Role        AppRole        `json:"role"`
 }
 
 type UploadedImage struct {

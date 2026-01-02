@@ -40,7 +40,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByEmailProfile = `-- name: GetUserByEmailProfile :many
-SELECT users.id, password, provider, verified_at, profile_id, users.created_at, users.updated_at, profiles.id, name, email, image_url, country_code, phone, description, profiles.created_at, profiles.updated_at FROM users
+SELECT users.id, password, provider, verified_at, profile_id, users.created_at, users.updated_at, profiles.id, name, email, image_url, country_code, phone, description, profiles.created_at, profiles.updated_at, role FROM users
 INNER JOIN profiles ON users.profile_id = profiles.id
 WHERE profiles.email = $1
 `
@@ -62,6 +62,7 @@ type GetUserByEmailProfileRow struct {
 	Description sql.NullString `json:"description"`
 	CreatedAt_2 sql.NullTime   `json:"created_at_2"`
 	UpdatedAt_2 sql.NullTime   `json:"updated_at_2"`
+	Role        AppRole        `json:"role"`
 }
 
 func (q *Queries) GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error) {
@@ -90,6 +91,7 @@ func (q *Queries) GetUserByEmailProfile(ctx context.Context, email string) ([]Ge
 			&i.Description,
 			&i.CreatedAt_2,
 			&i.UpdatedAt_2,
+			&i.Role,
 		); err != nil {
 			return nil, err
 		}

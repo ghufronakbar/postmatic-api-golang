@@ -2,6 +2,7 @@
 package token
 
 import (
+	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 	"time"
 
@@ -14,14 +15,16 @@ type GenerateAccessTokenInput struct {
 	Email    string
 	Name     string
 	ImageUrl *string
+	Role     entity.AppRole
 }
 
 type AccessTokenClaims struct {
 	// Profile ID
-	ID       uuid.UUID `json:"id"`
-	Email    string    `json:"email"`
-	Name     string    `json:"name"`
-	ImageUrl *string   `json:"imageUrl"`
+	ID       uuid.UUID      `json:"id"`
+	Email    string         `json:"email"`
+	Name     string         `json:"name"`
+	ImageUrl *string        `json:"imageUrl"`
+	Role     entity.AppRole `json:"role"`
 	jwt.RegisteredClaims
 }
 

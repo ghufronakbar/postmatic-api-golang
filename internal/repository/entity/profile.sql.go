@@ -15,7 +15,7 @@ import (
 const createProfile = `-- name: CreateProfile :one
 INSERT INTO profiles (name, email, image_url, country_code, phone, description)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, name, email, image_url, country_code, phone, description, created_at, updated_at
+RETURNING id, name, email, image_url, country_code, phone, description, created_at, updated_at, role
 `
 
 type CreateProfileParams struct {
@@ -47,12 +47,13 @@ func (q *Queries) CreateProfile(ctx context.Context, arg CreateProfileParams) (P
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Role,
 	)
 	return i, err
 }
 
 const getProfileByEmail = `-- name: GetProfileByEmail :one
-SELECT id, name, email, image_url, country_code, phone, description, created_at, updated_at FROM profiles
+SELECT id, name, email, image_url, country_code, phone, description, created_at, updated_at, role FROM profiles
 WHERE email = $1 LIMIT 1
 `
 
@@ -69,12 +70,13 @@ func (q *Queries) GetProfileByEmail(ctx context.Context, email string) (Profile,
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Role,
 	)
 	return i, err
 }
 
 const getProfileById = `-- name: GetProfileById :one
-SELECT id, name, email, image_url, country_code, phone, description, created_at, updated_at FROM profiles
+SELECT id, name, email, image_url, country_code, phone, description, created_at, updated_at, role FROM profiles
 WHERE id = $1 LIMIT 1
 `
 
@@ -91,6 +93,7 @@ func (q *Queries) GetProfileById(ctx context.Context, id uuid.UUID) (Profile, er
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Role,
 	)
 	return i, err
 }
@@ -99,7 +102,7 @@ const updateProfile = `-- name: UpdateProfile :one
 UPDATE profiles
 SET name = $2, image_url = $3, country_code = $4, phone = $5, description = $6
 WHERE id = $1
-RETURNING id, name, email, image_url, country_code, phone, description, created_at, updated_at
+RETURNING id, name, email, image_url, country_code, phone, description, created_at, updated_at, role
 `
 
 type UpdateProfileParams struct {
@@ -131,6 +134,7 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (P
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Role,
 	)
 	return i, err
 }

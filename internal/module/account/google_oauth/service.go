@@ -281,6 +281,7 @@ func (s *GoogleOAuthService) LoginGoogleCallback(
 			Email:    profile.Email,
 			Name:     profile.Name,
 			ImageUrl: imageUrl,
+			Role:     profile.Role,
 		},
 	)
 	if err != nil {
