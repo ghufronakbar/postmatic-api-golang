@@ -76,7 +76,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	profSvc := profile.NewService(store, queueProducer, *cfg, emailLimiterRepo, *tokenSvc)
 	googleSvc := google_oauth.NewService(store, queueProducer, *cfg, sessionRepo, emailLimiterRepo, *tokenSvc)
 	// BUSINESS
-	busInSvc := business_information.NewService(store, ownedRepo)
+	busInSvc := business_information.NewService(store, ownedRepo, queueProducer)
 	busKnowledgeSvc := business_knowledge.NewService(store)
 	busRoleSvc := business_role.NewService(store)
 	busProductSvc := business_product.NewService(store)
