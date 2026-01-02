@@ -57,6 +57,13 @@ func NullInt64ToNullInt64(i *int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: *i, Valid: true}
 }
 
+func NullInt32ToNullInt32(i *int32) sql.NullInt32 {
+	if i == nil {
+		return sql.NullInt32{Valid: false}
+	}
+	return sql.NullInt32{Int32: *i, Valid: true}
+}
+
 func NullBoolPtrToNullBool(b *bool) sql.NullBool {
 	if b == nil {
 		return sql.NullBool{}

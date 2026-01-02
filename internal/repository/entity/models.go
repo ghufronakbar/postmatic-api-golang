@@ -228,6 +228,48 @@ func (ns NullBusinessMemberStatus) Value() (driver.Value, error) {
 	return string(ns.BusinessMemberStatus), nil
 }
 
+type DiscountType string
+
+const (
+	DiscountTypeFixed      DiscountType = "fixed"
+	DiscountTypePercentage DiscountType = "percentage"
+)
+
+func (e *DiscountType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DiscountType(s)
+	case string:
+		*e = DiscountType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DiscountType: %T", src)
+	}
+	return nil
+}
+
+type NullDiscountType struct {
+	DiscountType DiscountType `json:"discount_type"`
+	Valid        bool         `json:"valid"` // Valid is true if DiscountType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDiscountType) Scan(value interface{}) error {
+	if value == nil {
+		ns.DiscountType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DiscountType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDiscountType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DiscountType), nil
+}
+
 type ImageProvider string
 
 const (
@@ -283,6 +325,31 @@ type AppCreatorImageTypeCategory struct {
 	Name      string       `json:"name"`
 	CreatedAt sql.NullTime `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type AppProfileReferralChange struct {
+	ID                int64         `json:"id"`
+	ProfileID         uuid.UUID     `json:"profile_id"`
+	TotalDiscount     int64         `json:"total_discount"`
+	DiscountType      DiscountType  `json:"discount_type"`
+	ExpiredDays       sql.NullInt32 `json:"expired_days"`
+	MaxDiscount       int64         `json:"max_discount"`
+	MaxUsage          sql.NullInt32 `json:"max_usage"`
+	RewardPerReferral int64         `json:"reward_per_referral"`
+	CreatedAt         time.Time     `json:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at"`
+}
+
+type AppProfileReferralRule struct {
+	ID                int16         `json:"id"`
+	TotalDiscount     int64         `json:"total_discount"`
+	DiscountType      DiscountType  `json:"discount_type"`
+	ExpiredDays       sql.NullInt32 `json:"expired_days"`
+	MaxDiscount       int64         `json:"max_discount"`
+	MaxUsage          sql.NullInt32 `json:"max_usage"`
+	RewardPerReferral int64         `json:"reward_per_referral"`
+	CreatedAt         time.Time     `json:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at"`
 }
 
 type AppRssCategory struct {

@@ -16,6 +16,7 @@ import (
 	"postmatic-api/internal/module/account/session"
 	"postmatic-api/internal/module/app/category_creator_image"
 	"postmatic-api/internal/module/app/image_uploader"
+	"postmatic-api/internal/module/app/referral"
 	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/app/timezone"
 	"postmatic-api/internal/module/business/business_image_content"
@@ -90,6 +91,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	timezoneSvc := timezone.NewTimezoneService()
 	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
 	catCreatorImageSvc := category_creator_image.NewCategoryCreatorImageService(store)
+	referralSvc := referral.NewReferralService(store)
 	// CREATOR
 	creatorImageSvc := creator_image.NewService(store, catCreatorImageSvc)
 
@@ -113,12 +115,13 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	rssHandler := app_handler.NewRSSHandler(rssSvc)
 	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
 	catCreatorImageHandler := app_handler.NewCategoryCreatorImageHandler(catCreatorImageSvc)
+	ruleRefferralHandler := app_handler.NewReferralRuleHandler(referralSvc)
 	// CREATOR
 	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
 
 	// 4. =========== INITIAL MIDDLEWARE ===========
 	allAllowed := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin, entity.AppRoleUser})
-	// adminOnly := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin}) // TODO: for app admin dashboard
+	adminOnly := middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin})
 
 	// 4. =========== ROUTING ===========
 	r := chi.NewRouter()
@@ -172,6 +175,11 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 				return middleware.ReqFilterMiddleware(next, fil)
 			})
 			r.Mount("/", catCreatorImageHandler.CategoryCreatorImageRoutes())
+		})
+
+		r.Route("/referral-rule", func(r chi.Router) {
+			r.Use(adminOnly)
+			r.Mount("/", ruleRefferralHandler.ReferralRuleRoutes())
 		})
 	})
 

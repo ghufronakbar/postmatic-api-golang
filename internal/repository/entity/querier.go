@@ -40,6 +40,7 @@ type Querier interface {
 	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)
 	GetAppCreatorImageProductCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
 	GetAppCreatorImageTypeCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
+	GetAppProfileReferralRules(ctx context.Context) (AppProfileReferralRule, error)
 	GetBusinessImageContentsByBusinessRootId(ctx context.Context, arg GetBusinessImageContentsByBusinessRootIdParams) ([]BusinessImageContent, error)
 	GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID int64) (GetBusinessKnowledgeByBusinessRootIDRow, error)
 	GetBusinessMemberStatusHistoryByMemberID(ctx context.Context, memberID int64) (GetBusinessMemberStatusHistoryByMemberIDRow, error)
@@ -66,6 +67,7 @@ type Querier interface {
 	GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (User, error)
 	HardDeleteBusinessRssSubscriptionByID(ctx context.Context, id int64) error
+	InsertAppProfileReferralChange(ctx context.Context, arg InsertAppProfileReferralChangeParams) (AppProfileReferralChange, error)
 	InsertUploadedImage(ctx context.Context, arg InsertUploadedImageParams) (InsertUploadedImageRow, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)
 	SetBusinessMemberAnsweredAt(ctx context.Context, id int64) (BusinessMember, error)
@@ -85,6 +87,7 @@ type Querier interface {
 	UpdateManyBusinessMemberStatus(ctx context.Context, arg UpdateManyBusinessMemberStatusParams) error
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
+	UpsertAppProfileReferralRules(ctx context.Context, arg UpsertAppProfileReferralRulesParams) (AppProfileReferralRule, error)
 	UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error)
 	UpsertBusinessRoleByBusinessRootID(ctx context.Context, arg UpsertBusinessRoleByBusinessRootIDParams) (BusinessRole, error)
 	UpsertBusinessTimezonePref(ctx context.Context, arg UpsertBusinessTimezonePrefParams) (BusinessTimezonePref, error)
