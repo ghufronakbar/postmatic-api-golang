@@ -68,6 +68,7 @@ type Querier interface {
 	HardDeleteBusinessRssSubscriptionByID(ctx context.Context, id int64) error
 	InsertUploadedImage(ctx context.Context, arg InsertUploadedImageParams) (InsertUploadedImageRow, error)
 	ListUsersByProfileId(ctx context.Context, profileID uuid.UUID) ([]User, error)
+	SetBusinessMemberAnsweredAt(ctx context.Context, id int64) (BusinessMember, error)
 	SoftDeleteBusinessImageContentByBusinessImageContentId(ctx context.Context, id int64) (BusinessImageContent, error)
 	SoftDeleteBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error)
 	SoftDeleteBusinessMemberByBusinessRootID(ctx context.Context, businessRootID int64) (int64, error)

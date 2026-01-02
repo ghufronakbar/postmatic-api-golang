@@ -10,17 +10,18 @@ import (
 )
 
 type InvitationTokenClaims struct {
-	// Profile ID
-	ID             uuid.UUID `json:"id"`
-	MemberID       int64     `json:"memberId"`
-	BusinessRootID int64     `json:"businessRootId"`
-	MemberRole     string    `json:"memberRole"`
-	MemberStatusID int64     `json:"memberStatusId"`
+	// Profile ProfileID
+	ProfileID             uuid.UUID `json:"profileId"`
+	MemberID              int64     `json:"memberId"`
+	BusinessRootID        int64     `json:"businessRootId"`
+	MemberRole            string    `json:"memberRole"`
+	MemberHistoryStatusID int64     `json:"memberHistoryStatusId"`
 	jwt.RegisteredClaims
 }
 
 type GenerateInvitationTokenInput struct {
-	ID                    uuid.UUID
+	// Profile ProfileID
+	ProfileID             uuid.UUID
 	MemberID              int64
 	BusinessRootID        int64
 	MemberRole            string
@@ -30,11 +31,11 @@ type GenerateInvitationTokenInput struct {
 func (tm *TokenMaker) GenerateInvitationToken(input GenerateInvitationTokenInput) (string, error) {
 	expirationTime := time.Now().Add(tm.invitationTTL)
 	claims := &InvitationTokenClaims{
-		ID:             input.ID,
-		MemberID:       input.MemberID,
-		BusinessRootID: input.BusinessRootID,
-		MemberRole:     input.MemberRole,
-		MemberStatusID: input.MemberHistoryStatusID,
+		ProfileID:             input.ProfileID,
+		MemberID:              input.MemberID,
+		BusinessRootID:        input.BusinessRootID,
+		MemberRole:            input.MemberRole,
+		MemberHistoryStatusID: input.MemberHistoryStatusID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -55,4 +56,18 @@ func (tm *TokenMaker) ValidateInvitationToken(tokenString string) (*InvitationTo
 		return nil, errs.NewBadRequest("INVALID_INVITATION_TOKEN")
 	}
 	return token.Claims.(*InvitationTokenClaims), nil
+}
+
+func (tm *TokenMaker) InvitationDecodeTokenWithoutVerify(tokenString string) (*InvitationTokenClaims, error) {
+	parser := jwt.NewParser(
+		jwt.WithoutClaimsValidation(),
+	)
+
+	claims := &InvitationTokenClaims{}
+	_, _, err := parser.ParseUnverified(tokenString, claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
 }

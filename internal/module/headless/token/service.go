@@ -4,8 +4,6 @@ package token
 import (
 	"postmatic-api/config"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type TokenMaker struct {
@@ -34,19 +32,4 @@ func NewTokenMaker(cfg *config.Config) *TokenMaker {
 		invitationSecret:    []byte(cfg.JWT_INVITATION_TOKEN_SECRET),
 		invitationTTL:       cfg.JWT_INVITATION_TOKEN_EXPIRED,
 	}
-}
-
-// DECODE TOKEN
-func (tm *TokenMaker) DecodeTokenWithoutVerify(tokenString string) (*AccessTokenClaims, error) {
-	parser := jwt.NewParser(
-		jwt.WithoutClaimsValidation(),
-	)
-
-	claims := &AccessTokenClaims{}
-	_, _, err := parser.ParseUnverified(tokenString, claims)
-	if err != nil {
-		return nil, err
-	}
-
-	return claims, nil
 }

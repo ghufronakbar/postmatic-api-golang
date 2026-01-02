@@ -132,44 +132,6 @@ func (h *BusinessMemberHandler) EditMember(w http.ResponseWriter, r *http.Reques
 	response.OK(w, r, "SUCCESS_EDIT_BUSINESS_MEMBER", res)
 }
 
-func (h *BusinessMemberHandler) VerifyMemberInvitation(w http.ResponseWriter, r *http.Request) {
-	var req business_member.VerifyMemberInvitationInput
-
-	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
-
-	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, r, appErr.ValidationErrors)
-		return
-	}
-
-	res, err := h.busInSvc.VerifyMemberInvitation(r.Context(), req)
-	if err != nil {
-		response.Error(w, r, err, nil)
-		return
-	}
-
-	response.OK(w, r, "SUCCESS_VERIFY_BUSINESS_MEMBER", res)
-}
-
-func (h *BusinessMemberHandler) AnswerMemberInvitation(w http.ResponseWriter, r *http.Request) {
-	var req business_member.AnswerMemberInvitationInput
-
-	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
-
-	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
-		response.ValidationFailed(w, r, appErr.ValidationErrors)
-		return
-	}
-
-	res, err := h.busInSvc.AnswerMemberInvitation(r.Context(), req)
-	if err != nil {
-		response.Error(w, r, err, nil)
-		return
-	}
-
-	response.OK(w, r, "SUCCESS_ANSWER_BUSINESS_MEMBER_INVITATION", res)
-}
-
 func (h *BusinessMemberHandler) ResendMemberInvitation(w http.ResponseWriter, r *http.Request) {
 	var req business_member.ResendEmailInvitationInput
 
@@ -226,4 +188,39 @@ func (h *BusinessMemberHandler) RemoveMember(w http.ResponseWriter, r *http.Requ
 	}
 
 	response.OK(w, r, "SUCCESS_REMOVE_BUSINESS_MEMBER", res)
+}
+
+// INVITATION
+
+func (h *BusinessMemberHandler) VerifyMemberInvitation(w http.ResponseWriter, r *http.Request) {
+	var req business_member.VerifyMemberInvitationInput
+
+	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
+
+	res, err := h.busInSvc.VerifyMemberInvitation(r.Context(), req)
+	if err != nil {
+		response.Error(w, r, err, res)
+		return
+	}
+
+	response.OK(w, r, "SUCCESS_VERIFY_BUSINESS_MEMBER", res)
+}
+
+func (h *BusinessMemberHandler) AnswerMemberInvitation(w http.ResponseWriter, r *http.Request) {
+	var req business_member.AnswerMemberInvitationInput
+
+	req.MemberInvitationToken = chi.URLParam(r, "memberInvitationTokenOrMemberId")
+
+	if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+		response.ValidationFailed(w, r, appErr.ValidationErrors)
+		return
+	}
+
+	res, err := h.busInSvc.AnswerMemberInvitation(r.Context(), req)
+	if err != nil {
+		response.Error(w, r, err, res)
+		return
+	}
+
+	response.OK(w, r, "SUCCESS_ANSWER_BUSINESS_MEMBER_INVITATION", res)
 }

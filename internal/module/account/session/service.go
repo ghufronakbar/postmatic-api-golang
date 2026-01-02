@@ -71,7 +71,7 @@ func (s *SessionService) GetSession(ctx context.Context, claims *token.AccessTok
 		return nil, errs.NewUnauthorized("")
 	}
 
-	decoded, err := s.tm.DecodeTokenWithoutVerify(refreshToken)
+	decoded, err := s.tm.AccessDecodeTokenWithoutVerify(refreshToken)
 
 	if decoded == nil {
 		return nil, errs.NewUnauthorized("INVALID_REFRESH_TOKEN")

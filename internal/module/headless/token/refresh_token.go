@@ -46,3 +46,17 @@ func (tm *TokenMaker) ValidateRefreshToken(tokenString string) (*AccessTokenClai
 	}
 	return token.Claims.(*AccessTokenClaims), nil
 }
+
+func (tm *TokenMaker) RefreshDecodeTokenWithoutVerify(tokenString string) (*RefreshTokenClaims, error) {
+	parser := jwt.NewParser(
+		jwt.WithoutClaimsValidation(),
+	)
+
+	claims := &RefreshTokenClaims{}
+	_, _, err := parser.ParseUnverified(tokenString, claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
+}

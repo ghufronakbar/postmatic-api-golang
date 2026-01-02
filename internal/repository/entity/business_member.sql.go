@@ -373,6 +373,30 @@ func (q *Queries) GetMembersByBusinessRootIDs(ctx context.Context, businessRootI
 	return items, nil
 }
 
+const setBusinessMemberAnsweredAt = `-- name: SetBusinessMemberAnsweredAt :one
+UPDATE business_members
+SET answered_at = NOW()
+WHERE id = $1
+RETURNING id, status, role, answered_at, business_root_id, profile_id, created_at, updated_at, deleted_at
+`
+
+func (q *Queries) SetBusinessMemberAnsweredAt(ctx context.Context, id int64) (BusinessMember, error) {
+	row := q.db.QueryRowContext(ctx, setBusinessMemberAnsweredAt, id)
+	var i BusinessMember
+	err := row.Scan(
+		&i.ID,
+		&i.Status,
+		&i.Role,
+		&i.AnsweredAt,
+		&i.BusinessRootID,
+		&i.ProfileID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const softDeleteBusinessMemberByBusinessRootID = `-- name: SoftDeleteBusinessMemberByBusinessRootID :one
 UPDATE business_members
 SET deleted_at = NOW()

@@ -421,7 +421,7 @@ func (s *AuthService) CheckVerifyToken(ctx context.Context, input string) (Verif
 			Valid: false,
 		}, errs.NewBadRequest("INVALID_CREATE_ACCOUNT_TOKEN")
 	}
-	decoded, err := s.tm.DecodeTokenWithoutVerify(input)
+	decoded, err := s.tm.AccessDecodeTokenWithoutVerify(input)
 	if err != nil || decoded == nil {
 		// Token Invalid
 		return VerifyCreateAccountTokenResponse{

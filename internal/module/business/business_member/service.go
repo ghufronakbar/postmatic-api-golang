@@ -169,6 +169,7 @@ func (s *BusinessMemberService) InviteBusinessMember(ctx context.Context, input 
 				return err
 			}
 			link, err := s.createInvitationLink(createInvitationLinkInput{
+				ProfileID:             checkProf.ID,
 				Email:                 input.Email,
 				MemberID:              mem.ID,
 				BusinessRootID:        checkMember.BusinessRootID,
@@ -219,6 +220,7 @@ func (s *BusinessMemberService) InviteBusinessMember(ctx context.Context, input 
 				return err
 			}
 			link, err := s.createInvitationLink(createInvitationLinkInput{
+				ProfileID:             checkProf.ID,
 				MemberID:              mem.ID,
 				BusinessRootID:        input.BusinessRootID,
 				MemberRole:            string(mem.Role),
@@ -279,6 +281,7 @@ func (s *BusinessMemberService) InviteBusinessMember(ctx context.Context, input 
 				return err
 			}
 			link, err := s.createInvitationLink(createInvitationLinkInput{
+				ProfileID:             profile.ID,
 				MemberID:              mem.ID,
 				BusinessRootID:        input.BusinessRootID,
 				MemberRole:            string(mem.Role),
@@ -373,11 +376,35 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 			},
 		}, errs.NewBadRequest("PLEASE_WAIT")
 	}
+	var hisId int64
+	e := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+		_, err := q.UpdateBusinessMemberStatus(ctx, entity.UpdateBusinessMemberStatusParams{
+			ID:     checkMember.MemberID,
+			Status: entity.BusinessMemberStatusPending,
+		})
+		if err != nil {
+			return err
+		}
+		his, err := q.CreateBusinessMemberStatusHistory(ctx, entity.CreateBusinessMemberStatusHistoryParams{
+			MemberID: checkMember.MemberID,
+			Status:   entity.BusinessMemberStatusPending,
+			Role:     checkMember.MemberRole,
+		})
+		if err != nil {
+			return err
+		}
+		hisId = his.ID
+		return nil
+	})
+	if e != nil {
+		return InviteMemberResponse{}, e
+	}
 	link, err := s.createInvitationLink(createInvitationLinkInput{
+		ProfileID:             checkMember.MemberProfileID,
 		MemberID:              checkMember.MemberID,
 		BusinessRootID:        checkMember.MemberBusinessRootID,
 		MemberRole:            string(checkMember.MemberRole),
-		MemberHistoryStatusID: checkMember.HistoryMemberID,
+		MemberHistoryStatusID: hisId,
 		Email:                 checkMember.ProfileEmail,
 	})
 	if err != nil {
@@ -394,7 +421,7 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 			ID:             checkMember.MemberID,
 			BusinessRootID: checkMember.MemberBusinessRootID,
 			Role:           string(checkMember.MemberRole),
-			Status:         string(checkMember.MemberStatus),
+			Status:         string(entity.BusinessMemberStatusPending),
 			CreatedAt:      checkMember.MemberCreatedAt,
 			UpdatedAt:      checkMember.MemberUpdatedAt,
 			ProfileID:      checkMember.MemberProfileID,
@@ -600,21 +627,157 @@ func (s *BusinessMemberService) RemoveBusinessMember(ctx context.Context, input 
 // ================= INVITATION =================
 
 func (s *BusinessMemberService) VerifyMemberInvitation(ctx context.Context, input VerifyMemberInvitationInput) (BusinessMemberInvitationResponse, error) {
-	// TODO: check link valid or not
-	// TODO: decoded
-	return BusinessMemberInvitationResponse{}, nil
+	var res BusinessMemberInvitationResponse
+
+	dec, err := s.token.InvitationDecodeTokenWithoutVerify(input.MemberInvitationToken)
+	if err != nil {
+		return res, errs.NewBadRequest("INVALID_TOKEN")
+	}
+
+	// query business
+	checkBusiness, err := s.store.GetBusinessKnowledgeByBusinessRootID(ctx, dec.BusinessRootID)
+	if err == sql.ErrNoRows {
+		return res, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+	if err != nil {
+		return res, err
+	}
+	if checkBusiness.BusinessRootID == 0 {
+		return res, errs.NewNotFound("BUSINESS_NOT_FOUND")
+	}
+
+	// DECODED MEMBER
+	res.Role = dec.MemberRole
+	res.MemberID = dec.MemberID
+
+	// DECODED BUSINESS
+	res.BusinessName = checkBusiness.Name
+	res.BusinessRootID = checkBusiness.BusinessRootID
+	if checkBusiness.PrimaryLogoUrl.Valid {
+		res.BusinessLogo = &checkBusiness.PrimaryLogoUrl.String
+	}
+
+	checkProfile, err := s.store.GetProfileById(ctx, dec.ProfileID)
+	if err == sql.ErrNoRows {
+		return res, errs.NewNotFound("PROFILE_NOT_FOUND")
+	}
+	if err != nil {
+		return res, err
+	}
+	if checkProfile.ID == uuid.Nil {
+		return res, errs.NewNotFound("PROFILE_NOT_FOUND")
+	}
+
+	// DECODED PROFILE
+	res.ProfileEmail = checkProfile.Email
+	res.ProfileID = checkProfile.ID
+	res.ProfileName = checkProfile.Name
+	if checkProfile.ImageUrl.Valid {
+		res.ProfileImage = &checkProfile.ImageUrl.String
+	}
+
+	// query member
+	checkMember, err := s.store.GetBusinessMemberStatusHistoryByMemberID(ctx, dec.MemberID)
+	res.Status = string(checkMember.MemberStatus)
+	if err == sql.ErrNoRows {
+		return res, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+	if err != nil {
+		return res, err
+	}
+	if checkMember.MemberID == 0 || checkMember.BusinessRootID != dec.BusinessRootID {
+		return res, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+	if checkMember.HistoryMemberID != dec.MemberHistoryStatusID {
+		return res, errs.NewBadRequest("INVALID_TOKEN")
+	}
+
+	res.CreatedAt = checkMember.HistoryCreatedAt
+	res.ExpiredAt = dec.ExpiresAt.Time
+
+	allowedStatus := []string{
+		string(entity.BusinessMemberStatusPending),
+		string(entity.BusinessMemberStatusExpired),
+	}
+
+	if !utils.StringInSlice(string(checkMember.MemberStatus), allowedStatus) {
+		if checkMember.MemberStatus == entity.BusinessMemberStatusAccepted {
+			res.AlreadyMember = true
+		}
+		return res, errs.NewBadRequest("MEMBER_ALREADY_ANSWERED")
+	}
+
+	_, err = s.token.ValidateInvitationToken(input.MemberInvitationToken)
+	if err != nil {
+		if strings.Contains(err.Error(), "token is expired") {
+			return res, errs.NewBadRequest("TOKEN_EXPIRED")
+		}
+		return res, errs.NewBadRequest("INVALID_TOKEN")
+	}
+	res.Valid = true
+
+	return res, nil
 }
 
-func (s *BusinessMemberService) AnswerMemberInvitation(ctx context.Context, input AnswerMemberInvitationInput) (GeneralMemberResponse, error) {
-	// TODO: check link valid or not with VerifyMemberInvitation
-	// TODO: decoded
-	// TODO: update database
-	return GeneralMemberResponse{}, nil
+func (s *BusinessMemberService) AnswerMemberInvitation(ctx context.Context, input AnswerMemberInvitationInput) (BusinessMemberInvitationResponse, error) {
+	check, err := s.VerifyMemberInvitation(ctx, VerifyMemberInvitationInput{
+		MemberInvitationToken: input.MemberInvitationToken,
+	})
+	if err != nil {
+		return check, err
+	}
+
+	var mapAnswer = map[string]entity.BusinessMemberStatus{
+		"accept": entity.BusinessMemberStatusAccepted,
+		"reject": entity.BusinessMemberStatusRejected,
+	}
+
+	if !utils.StringInSlice(input.Answer, []string{"accept", "reject"}) {
+		return check, errs.NewBadRequest("INVALID_ANSWER")
+	}
+
+	if check.MemberID == 0 {
+		return check, errs.NewNotFound("MEMBER_NOT_FOUND")
+	}
+
+	e := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+		_, err := q.UpdateBusinessMemberStatus(ctx, entity.UpdateBusinessMemberStatusParams{
+			ID:     check.MemberID,
+			Status: mapAnswer[input.Answer],
+		})
+		if err != nil {
+			return err
+		}
+
+		_, err = q.CreateBusinessMemberStatusHistory(ctx, entity.CreateBusinessMemberStatusHistoryParams{
+			MemberID: check.MemberID,
+			Status:   mapAnswer[input.Answer],
+			Role:     entity.BusinessMemberRole(check.Role),
+		})
+		if err != nil {
+			return err
+		}
+		_, err = q.SetBusinessMemberAnsweredAt(ctx, check.MemberID)
+		if err != nil {
+			return err
+		}
+		check.Status = string(mapAnswer[input.Answer])
+		check.AlreadyMember = input.Answer == "accept"
+		return nil
+	})
+	if e != nil {
+		return check, e
+	}
+
+	// TODO: send email to member
+
+	return check, nil
 }
 
 // HELPER
 
 type createInvitationLinkInput struct {
+	ProfileID             uuid.UUID
 	MemberID              int64
 	BusinessRootID        int64
 	MemberRole            string
@@ -624,7 +787,7 @@ type createInvitationLinkInput struct {
 
 func (s *BusinessMemberService) createInvitationLink(input createInvitationLinkInput) (string, error) {
 	token, err := s.token.GenerateInvitationToken(token.GenerateInvitationTokenInput{
-		ID:                    uuid.New(),
+		ProfileID:             input.ProfileID,
 		MemberID:              input.MemberID,
 		BusinessRootID:        input.BusinessRootID,
 		MemberRole:            input.MemberRole,

@@ -123,3 +123,9 @@ UPDATE business_members
 SET role = sqlc.arg(role)
 WHERE id = sqlc.arg(id)
 RETURNING *;
+
+-- name: SetBusinessMemberAnsweredAt :one
+UPDATE business_members
+SET answered_at = NOW()
+WHERE id = sqlc.arg(id)
+RETURNING *;

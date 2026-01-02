@@ -53,3 +53,17 @@ func (tm *TokenMaker) ValidateCreateAccountToken(tokenString string) (*CreateAcc
 	}
 	return token.Claims.(*CreateAccountTokenClaims), nil
 }
+
+func (tm *TokenMaker) CreateAccountDecodeTokenWithoutVerify(tokenString string) (*CreateAccountTokenClaims, error) {
+	parser := jwt.NewParser(
+		jwt.WithoutClaimsValidation(),
+	)
+
+	claims := &CreateAccountTokenClaims{}
+	_, _, err := parser.ParseUnverified(tokenString, claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
+}

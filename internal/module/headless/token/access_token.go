@@ -53,3 +53,17 @@ func (tm *TokenMaker) ValidateAccessToken(tokenString string) (*AccessTokenClaim
 	}
 	return token.Claims.(*AccessTokenClaims), nil
 }
+
+func (tm *TokenMaker) AccessDecodeTokenWithoutVerify(tokenString string) (*AccessTokenClaims, error) {
+	parser := jwt.NewParser(
+		jwt.WithoutClaimsValidation(),
+	)
+
+	claims := &AccessTokenClaims{}
+	_, _, err := parser.ParseUnverified(tokenString, claims)
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
+}

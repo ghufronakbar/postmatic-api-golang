@@ -26,19 +26,20 @@ type BusinessProfileSub struct {
 }
 
 type BusinessMemberInvitationResponse struct {
+	MemberID       int64     `json:"memberId"`
 	ProfileName    string    `json:"profileName"`
 	ProfileEmail   string    `json:"profileEmail"`
 	ProfileID      uuid.UUID `json:"profileId"`
-	ProfileImage   string    `json:"profileImage"`
+	ProfileImage   *string   `json:"profileImage"`
 	BusinessName   string    `json:"businessName"`
 	BusinessRootID int64     `json:"businessRootId"`
-	BusinessLogo   string    `json:"businessLogo"`
+	BusinessLogo   *string   `json:"businessLogo"`
 	Role           string    `json:"role"`
 	Status         string    `json:"status"`
 	Valid          bool      `json:"valid"`
-	ExpiredAt      time.Time `json:"expiredAt"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	AlreadyMember  bool      `json:"alreadyMember"`
+	ExpiredAt      time.Time `json:"expiredAt"` // history
+	CreatedAt      time.Time `json:"createdAt"` // history
 }
 
 type GeneralMemberResponse struct {

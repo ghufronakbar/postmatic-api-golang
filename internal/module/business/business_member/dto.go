@@ -26,7 +26,7 @@ type VerifyMemberInvitationInput struct {
 
 type AnswerMemberInvitationInput struct {
 	MemberInvitationToken string `json:"memberInvitationToken" validate:"required"`
-	Answer                bool   `json:"answer"`
+	Answer                string `json:"answer" validate:"required,oneof=accept reject"`
 }
 
 type RemoveBusinessMemberInput struct {
