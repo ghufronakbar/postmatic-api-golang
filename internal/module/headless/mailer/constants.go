@@ -10,9 +10,10 @@ const (
 	WelcomeTemplate       EmailTemplate = "welcome.html"
 
 	// Member
-	MemberInvitationTemplate   EmailTemplate = "member_invitation.html"
-	MemberAnnounceKickTemplate EmailTemplate = "member_announce_kick.html"
-	MemberAnnounceRoleTemplate EmailTemplate = "member_announce_role.html"
+	MemberInvitationTemplate      EmailTemplate = "member_invitation.html"
+	MemberAnnounceKickTemplate    EmailTemplate = "member_announce_kick.html"
+	MemberAnnounceRoleTemplate    EmailTemplate = "member_announce_role.html"
+	MemberWelcomeBusinessTemplate EmailTemplate = "member_welcome_business.html"
 
 	// Layout
 	LayoutTemplate EmailTemplate = "layout.html"
@@ -21,7 +22,7 @@ const (
 // Validasi Helper
 func (e EmailTemplate) IsValid() bool {
 	switch e {
-	case MemberInvitationTemplate, MemberAnnounceKickTemplate, MemberAnnounceRoleTemplate, ResetPasswordTemplate, VerificationTemplate, WelcomeTemplate:
+	case MemberInvitationTemplate, MemberAnnounceKickTemplate, MemberAnnounceRoleTemplate, MemberWelcomeBusinessTemplate, ResetPasswordTemplate, VerificationTemplate, WelcomeTemplate:
 		return true
 	}
 	return false

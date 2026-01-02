@@ -1,0 +1,147 @@
+{{/* member_welcome_business.html */}}
+{{ template "layout" . }}
+
+{{ define "content" }}
+  <div class="eyebrow">Selamat Datang</div>
+
+  <div class="email-body" style="margin-top:6px;">
+    <h1 style="margin:12px 0 8px;font-size:24px;line-height:1.25;color:#0f172a;">
+      Halo {{ .Email }}!
+    </h1>
+
+    <p style="margin:0 0 14px;font-size:15px;line-height:1.7;color:#334155;">
+      Anda telah berhasil bergabung dengan tim <strong>{{ .BusinessName }}</strong> di <strong>Postmatic</strong>.
+    </p>
+
+    {{/* --- Identity / Summary Card --- */}}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+      style="border:1px solid #eef2f7;border-radius:14px;background:#ffffff;">
+      <tr>
+        <td style="padding:16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#64748b;font-weight:700;">
+                Ringkasan Akun
+              </td>
+              <td align="right" style="font-size:12px;color:#64748b;">
+                Peran:
+                <span style="display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;color:#0f172a;font-weight:800;">
+                  {{ if .Role }}{{ .Role }}{{ else }}member{{ end }}
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <div style="height:12px;line-height:12px;font-size:12px;">&nbsp;</div>
+
+          {{/* --- Profile ↔ Business row (same size, rounded, email-safe) --- */}}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <!-- Profile image -->
+              <td align="left" valign="middle" width="56" style="width:56px;">
+                <table role="presentation" width="56" height="56" cellpadding="0" cellspacing="0"
+                  style="width:56px;height:56px;border-radius:999px;overflow:hidden;border:1px solid #eef2f7;background:#f8fafc;">
+                  <tr>
+                    <td>
+                      <img
+                        src="{{ if .ProfileImage }}{{ .ProfileImage }}{{ else }}https://placehold.co/112x112/png?text=User{{ end }}"
+                        alt="Foto profil"
+                        width="56" height="56"
+                        style="display:block;width:56px;height:56px;border-radius:999px;"
+                      >
+                    </td>
+                  </tr>
+                </table>
+              </td>
+
+              <!-- Profile meta -->
+              <td valign="middle" style="padding:0 12px;">
+                <div style="font-size:13px;color:#64748b;margin:0 0 2px;">
+                  Akun Anda
+                </div>
+                <div style="font-size:15px;color:#0f172a;font-weight:800;word-break:break-word;">
+                  {{ .Email }}
+                </div>
+              </td>
+
+              <!-- Middle icon -->
+              <td align="center" valign="middle" width="40" style="width:40px;">
+                <span style="display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-weight:800;font-size:14px;">
+                  ↔
+                </span>
+              </td>
+
+              <!-- Business meta -->
+              <td valign="middle" style="padding:0 12px;">
+                <div style="font-size:13px;color:#64748b;margin:0 0 2px;text-align:right;">
+                  Tim
+                </div>
+                <div style="font-size:15px;color:#0f172a;font-weight:800;text-align:right;word-break:break-word;">
+                  {{ .BusinessName }}
+                </div>
+              </td>
+
+              <!-- Business image -->
+              <td align="right" valign="middle" width="56" style="width:56px;">
+                <table role="presentation" width="56" height="56" cellpadding="0" cellspacing="0"
+                  style="width:56px;height:56px;border-radius:999px;overflow:hidden;border:1px solid #eef2f7;background:#f8fafc;">
+                  <tr>
+                    <td>
+                      <img
+                        src="{{ if .BusinessLogo }}{{ .BusinessLogo }}{{ else }}https://placehold.co/112x112/png?text=Biz{{ end }}"
+                        alt="Logo bisnis"
+                        width="56" height="56"
+                        style="display:block;width:56px;height:56px;border-radius:999px;"
+                      >
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+
+          <div style="height:14px;line-height:14px;font-size:14px;">&nbsp;</div>
+
+          {{/* --- Details row --- */}}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #eef2f7;">
+            <tr>
+              <td style="padding-top:12px;">
+                <div style="font-size:12px;color:#64748b;margin:0 0 4px;">Email</div>
+                <div style="font-size:14px;color:#0f172a;font-weight:800;word-break:break-word;">
+                  {{ .Email }}
+                </div>
+              </td>
+
+              <td align="right" style="padding-top:12px;">
+                <div style="font-size:12px;color:#64748b;margin:0 0 4px;">Peran</div>
+                <div style="font-size:14px;color:#0f172a;font-weight:800;">
+                  {{ if .Role }}{{ .Role }}{{ else }}member{{ end }}
+                </div>
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+
+    <div class="divider" style="margin:22px 0;"></div>
+
+    {{/* --- Note --- */}}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+      style="background:#f8fafc;border:1px solid #eef2f7;border-radius:12px;">
+      <tr>
+        <td style="padding:14px 16px;">
+          <div style="font-size:14px;line-height:1.7;color:#334155;">
+            <strong>Catatan:</strong>
+            Jika Anda tidak merasa bergabung dengan tim <strong>{{ .BusinessName }}</strong>, mohon segera hubungi admin tim atau balas email ini untuk bantuan.
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.6;color:#64748b;">
+      Email ini bersifat pemberitahuan dan tidak memerlukan tindakan apa pun.
+    </p>
+  </div>
+{{ end }}

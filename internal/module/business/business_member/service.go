@@ -311,7 +311,7 @@ func (s *BusinessMemberService) InviteBusinessMember(ctx context.Context, input 
 		}
 	}
 
-	_ = s.addEmailToQueue(mailer.MemberInvitationInputDTO{
+	_ = s.addEmailInviteToQueue(mailer.MemberInvitationInputDTO{
 		Email:        input.Email,
 		ConfirmUrl:   invMemRes.InvitationLink,
 		BusinessName: checkBusinessRoot.Name,
@@ -410,7 +410,7 @@ func (s *BusinessMemberService) ResendMemberInvitation(ctx context.Context, inpu
 	if err != nil {
 		return InviteMemberResponse{}, err
 	}
-	_ = s.addEmailToQueue(mailer.MemberInvitationInputDTO{
+	_ = s.addEmailInviteToQueue(mailer.MemberInvitationInputDTO{
 		Email:        checkMember.ProfileEmail,
 		ConfirmUrl:   link,
 		BusinessName: checkMember.BusinessRootName,
@@ -688,7 +688,7 @@ func (s *BusinessMemberService) VerifyMemberInvitation(ctx context.Context, inpu
 	if checkMember.MemberID == 0 || checkMember.BusinessRootID != dec.BusinessRootID {
 		return res, errs.NewNotFound("MEMBER_NOT_FOUND")
 	}
-	if checkMember.HistoryMemberID != dec.MemberHistoryStatusID {
+	if checkMember.HistoryID != dec.MemberHistoryStatusID {
 		return res, errs.NewBadRequest("INVALID_TOKEN")
 	}
 
@@ -720,9 +720,11 @@ func (s *BusinessMemberService) VerifyMemberInvitation(ctx context.Context, inpu
 }
 
 func (s *BusinessMemberService) AnswerMemberInvitation(ctx context.Context, input AnswerMemberInvitationInput) (BusinessMemberInvitationResponse, error) {
+	nowStr := time.Now().Format("2006-01-02 15:04:05")
 	check, err := s.VerifyMemberInvitation(ctx, VerifyMemberInvitationInput{
 		MemberInvitationToken: input.MemberInvitationToken,
 	})
+
 	if err != nil {
 		return check, err
 	}
@@ -769,7 +771,19 @@ func (s *BusinessMemberService) AnswerMemberInvitation(ctx context.Context, inpu
 		return check, e
 	}
 
-	// TODO: send email to member
+	if input.Answer == "accept" {
+		er := s.addEmailWelcomeBusinessToQueue(mailer.MemberWelcomeBusinessInputDTO{
+			Email:        check.ProfileEmail,
+			BusinessName: check.BusinessName,
+			ProfileImage: check.ProfileImage,
+			BusinessLogo: check.BusinessLogo,
+			Role:         check.Role,
+			JoinedAt:     &nowStr,
+		})
+		if er != nil {
+			logger.From(ctx).Error("Failed to add email welcome business to queue", "error", er)
+		}
+	}
 
 	return check, nil
 }
@@ -813,7 +827,7 @@ func (s *BusinessMemberService) checkEmailLimit(ctx context.Context, input invit
 	return check.RetryAfterSeconds, nil
 }
 
-func (s *BusinessMemberService) addEmailToQueue(input mailer.MemberInvitationInputDTO, businessRootID int64) error {
+func (s *BusinessMemberService) addEmailInviteToQueue(input mailer.MemberInvitationInputDTO, businessRootID int64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	err := s.limiter.SaveLimiterInvitation(ctx, invitation_limiter_repository.LimiterInvitationInput{
@@ -824,6 +838,16 @@ func (s *BusinessMemberService) addEmailToQueue(input mailer.MemberInvitationInp
 		logger.From(ctx).Error("failed to save limiter invitation", "error", err)
 	}
 	err = s.queue.EnqueueInvitation(ctx, input)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *BusinessMemberService) addEmailWelcomeBusinessToQueue(input mailer.MemberWelcomeBusinessInputDTO) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err := s.queue.EnqueueWelcomeBusiness(ctx, input)
 	if err != nil {
 		return err
 	}

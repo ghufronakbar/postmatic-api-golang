@@ -60,3 +60,20 @@ type MemberAnnounceKickInputDTO struct {
 	Email        string `json:"Email"`
 	BusinessName string `json:"BusinessName"`
 }
+
+// MEMBER WELCOME BUSINESS EMAIL
+type MemberWelcomeBusinessInputDTO struct {
+	// recipient
+	Email string `json:"Email"`
+
+	// profile info (nilable)
+	ProfileImage *string `json:"ProfileImage,omitempty"`
+
+	// business info
+	BusinessName string  `json:"BusinessName"`
+	BusinessLogo *string `json:"BusinessLogo,omitempty"`
+
+	// member info
+	Role     string  `json:"Role"`
+	JoinedAt *string `json:"JoinedAt,omitempty"` // bebas: string RFC3339 / formatted
+}

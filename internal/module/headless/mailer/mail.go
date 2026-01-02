@@ -99,3 +99,18 @@ func (s *MailerService) SendAnnounceKickEmail(ctx context.Context, input MemberA
 	}
 	return nil
 }
+
+func (s *MailerService) SendWelcomeBusinessEmail(ctx context.Context, input MemberWelcomeBusinessInputDTO) error {
+	logger.From(ctx).Info("SendWelcomeBusinessEmail", "input", input)
+
+	err := s.sendEmail(ctx, SendEmailInput{
+		To:           input.Email,
+		Subject:      "Selamat Datang di " + input.BusinessName,
+		TemplateName: MemberWelcomeBusinessTemplate,
+		Data:         input,
+	})
+	if err != nil {
+		return errs.NewInternalServerError(err)
+	}
+	return nil
+}

@@ -22,6 +22,7 @@ type MailerProducer interface {
 	EnqueueInvitation(ctx context.Context, payload mailer.MemberInvitationInputDTO) error
 	EnqueueAnnounceRole(ctx context.Context, payload mailer.MemberAnnounceRoleInputDTO) error
 	EnqueueAnnounceKick(ctx context.Context, payload mailer.MemberAnnounceKickInputDTO) error
+	EnqueueWelcomeBusiness(ctx context.Context, payload mailer.MemberWelcomeBusinessInputDTO) error
 }
 
 // MailerService adalah kontrak yang dipakai oleh worker (consumer) untuk MENGEKSEKUSI job.
@@ -31,11 +32,15 @@ type MailerService = mailer.Mailer
 // Task type string yang dipakai Asynq untuk routing task ke handler yang sesuai.
 // Dibuat private (lowercase) agar tidak menjadi public API package queue.
 const (
+	// AUTH / WELCOME
 	taskMailerWelcome      = "queue:mailer:welcome"
 	taskMailerVerification = "queue:mailer:verification"
-	taskMailerInvitation   = "queue:mailer:invitation"
-	taskMailerAnnounceRole = "queue:mailer:announce:role"
-	taskMailerAnnounceKick = "queue:mailer:announce:kick"
+
+	// BUSINESS
+	taskMailerInvitation      = "queue:mailer:invitation"
+	taskMailerAnnounceRole    = "queue:mailer:announce:role"
+	taskMailerAnnounceKick    = "queue:mailer:announce:kick"
+	taskMailerWelcomeBusiness = "queue:mailer:welcome:business"
 )
 
 // EnqueueWelcomeEmail adalah API producer untuk mengantrikan email welcome.
@@ -122,6 +127,22 @@ func (p *Producer) EnqueueAnnounceKick(ctx context.Context, payload mailer.Membe
 	)
 }
 
+func (p *Producer) EnqueueWelcomeBusiness(ctx context.Context, payload mailer.MemberWelcomeBusinessInputDTO) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	task := asynq.NewTask(taskMailerWelcomeBusiness, b)
+
+	return p.enqueue(
+		ctx,
+		task,
+		asynq.Queue("default"),
+		asynq.MaxRetry(3),
+		asynq.Timeout(10*time.Second),
+	)
+}
+
 // registerMailerHandlers mendaftarkan consumer handler ke Asynq mux.
 // Ini dipanggil dari Worker.RegisterMailer(...).
 // Handler akan:
@@ -167,5 +188,13 @@ func registerMailerHandlers(mux *asynq.ServeMux, mailerSvc MailerService) {
 			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
 		}
 		return mailerSvc.SendAnnounceKickEmail(ctx, p)
+	})
+
+	mux.HandleFunc(taskMailerWelcomeBusiness, func(ctx context.Context, t *asynq.Task) error {
+		var p mailer.MemberWelcomeBusinessInputDTO
+		if err := json.Unmarshal(t.Payload(), &p); err != nil {
+			return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
+		}
+		return mailerSvc.SendWelcomeBusinessEmail(ctx, p)
 	})
 }

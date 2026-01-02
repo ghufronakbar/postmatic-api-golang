@@ -34,6 +34,7 @@ type Mailer interface {
 	SendInvitationEmail(ctx context.Context, input MemberInvitationInputDTO) error
 	SendAnnounceRoleEmail(ctx context.Context, input MemberAnnounceRoleInputDTO) error
 	SendAnnounceKickEmail(ctx context.Context, input MemberAnnounceKickInputDTO) error
+	SendWelcomeBusinessEmail(ctx context.Context, input MemberWelcomeBusinessInputDTO) error
 }
 
 func NewService(cfg *config.Config) Mailer {
