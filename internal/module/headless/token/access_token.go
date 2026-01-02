@@ -38,6 +38,7 @@ func (tm *TokenMaker) GenerateAccessToken(input GenerateAccessTokenInput) (strin
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
+		Role: input.Role,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
