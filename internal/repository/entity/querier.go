@@ -42,6 +42,7 @@ type Querier interface {
 	GetAppCreatorImageProductCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
 	GetAppCreatorImageTypeCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
 	GetAppProfileReferralRules(ctx context.Context) (AppProfileReferralRule, error)
+	GetAppTokenProductByTypeCurrency(ctx context.Context, arg GetAppTokenProductByTypeCurrencyParams) (AppTokenProduct, error)
 	GetBusinessImageContentsByBusinessRootId(ctx context.Context, arg GetBusinessImageContentsByBusinessRootIdParams) ([]BusinessImageContent, error)
 	GetBusinessKnowledgeByBusinessRootID(ctx context.Context, businessRootID int64) (GetBusinessKnowledgeByBusinessRootIDRow, error)
 	GetBusinessMemberStatusHistoryByMemberID(ctx context.Context, memberID int64) (GetBusinessMemberStatusHistoryByMemberIDRow, error)

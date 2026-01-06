@@ -21,6 +21,7 @@ import (
 	"postmatic-api/internal/module/app/referral_rule"
 	"postmatic-api/internal/module/app/rss"
 	"postmatic-api/internal/module/app/timezone"
+	"postmatic-api/internal/module/app/token_product"
 	"postmatic-api/internal/module/business/business_image_content"
 	"postmatic-api/internal/module/business/business_information"
 	"postmatic-api/internal/module/business/business_knowledge"
@@ -94,6 +95,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	busTimezonePrefSvc := business_timezone_pref.NewService(store, timezoneSvc)
 	catCreatorImageSvc := category_creator_image.NewCategoryCreatorImageService(store)
 	referralRuleSvc := referral_rule.NewReferralService(store)
+	tokenProductSvc := token_product.NewTokenProductService(store)
 	// AFFILIATOR
 	referralBasicSvc := referral_basic.NewService(store, referralRuleSvc)
 	// CREATOR
@@ -120,6 +122,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 	timezoneHandler := app_handler.NewTimezoneHandler(timezoneSvc)
 	catCreatorImageHandler := app_handler.NewCategoryCreatorImageHandler(catCreatorImageSvc)
 	ruleRefferralHandler := app_handler.NewReferralRuleHandler(referralRuleSvc)
+	tokenProductHandler := app_handler.NewTokenProductHandler(tokenProductSvc)
 	// CREATOR
 	creatorImageHandler := creator_handler.NewCreatorImageHandler(creatorImageSvc)
 	// AFFILIATOR
@@ -187,6 +190,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client) chi.Ro
 			r.Use(adminOnly)
 			r.Mount("/", ruleRefferralHandler.ReferralRuleRoutes())
 		})
+		r.Mount("/token-product", tokenProductHandler.TokenProductRoutes())
 	})
 
 	r.Route("/creator", func(r chi.Router) {

@@ -354,6 +354,49 @@ func (ns NullReferralType) Value() (driver.Value, error) {
 	return string(ns.ReferralType), nil
 }
 
+type TokenType string
+
+const (
+	TokenTypeImageToken      TokenType = "image_token"
+	TokenTypeVideoToken      TokenType = "video_token"
+	TokenTypeLivestreamToken TokenType = "livestream_token"
+)
+
+func (e *TokenType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TokenType(s)
+	case string:
+		*e = TokenType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TokenType: %T", src)
+	}
+	return nil
+}
+
+type NullTokenType struct {
+	TokenType TokenType `json:"token_type"`
+	Valid     bool      `json:"valid"` // Valid is true if TokenType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTokenType) Scan(value interface{}) error {
+	if value == nil {
+		ns.TokenType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TokenType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTokenType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TokenType), nil
+}
+
 type AppCreatorImageProductCategory struct {
 	ID             int64        `json:"id"`
 	IndonesianName string       `json:"indonesian_name"`
@@ -411,6 +454,32 @@ type AppRssFeed struct {
 	DeletedAt        sql.NullTime `json:"deleted_at"`
 	CreatedAt        time.Time    `json:"created_at"`
 	UpdatedAt        time.Time    `json:"updated_at"`
+}
+
+type AppTokenProduct struct {
+	ID           uuid.UUID    `json:"id"`
+	TokenType    TokenType    `json:"token_type"`
+	CurrencyCode string       `json:"currency_code"`
+	PriceAmount  int64        `json:"price_amount"`
+	TokenAmount  int64        `json:"token_amount"`
+	IsActive     bool         `json:"is_active"`
+	SortOrder    int32        `json:"sort_order"`
+	CreatedAt    time.Time    `json:"created_at"`
+	UpdatedAt    time.Time    `json:"updated_at"`
+	DeletedAt    sql.NullTime `json:"deleted_at"`
+}
+
+type AppTokenProductChange struct {
+	ID           int64     `json:"id"`
+	ProfileID    uuid.UUID `json:"profile_id"`
+	TokenType    TokenType `json:"token_type"`
+	CurrencyCode string    `json:"currency_code"`
+	PriceAmount  int64     `json:"price_amount"`
+	TokenAmount  int64     `json:"token_amount"`
+	IsActive     bool      `json:"is_active"`
+	SortOrder    int32     `json:"sort_order"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type BusinessImageContent struct {
