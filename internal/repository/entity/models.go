@@ -13,6 +13,133 @@ import (
 	"github.com/google/uuid"
 )
 
+type ActionChangeType string
+
+const (
+	ActionChangeTypeCreate ActionChangeType = "create"
+	ActionChangeTypeUpdate ActionChangeType = "update"
+	ActionChangeTypeDelete ActionChangeType = "delete"
+)
+
+func (e *ActionChangeType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ActionChangeType(s)
+	case string:
+		*e = ActionChangeType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ActionChangeType: %T", src)
+	}
+	return nil
+}
+
+type NullActionChangeType struct {
+	ActionChangeType ActionChangeType `json:"action_change_type"`
+	Valid            bool             `json:"valid"` // Valid is true if ActionChangeType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullActionChangeType) Scan(value interface{}) error {
+	if value == nil {
+		ns.ActionChangeType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ActionChangeType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullActionChangeType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ActionChangeType), nil
+}
+
+type AppPaymentAdminType string
+
+const (
+	AppPaymentAdminTypeFixed      AppPaymentAdminType = "fixed"
+	AppPaymentAdminTypePercentage AppPaymentAdminType = "percentage"
+)
+
+func (e *AppPaymentAdminType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppPaymentAdminType(s)
+	case string:
+		*e = AppPaymentAdminType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppPaymentAdminType: %T", src)
+	}
+	return nil
+}
+
+type NullAppPaymentAdminType struct {
+	AppPaymentAdminType AppPaymentAdminType `json:"app_payment_admin_type"`
+	Valid               bool                `json:"valid"` // Valid is true if AppPaymentAdminType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppPaymentAdminType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppPaymentAdminType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppPaymentAdminType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppPaymentAdminType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppPaymentAdminType), nil
+}
+
+type AppPaymentMethodType string
+
+const (
+	AppPaymentMethodTypeBank    AppPaymentMethodType = "bank"
+	AppPaymentMethodTypeEwallet AppPaymentMethodType = "ewallet"
+)
+
+func (e *AppPaymentMethodType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppPaymentMethodType(s)
+	case string:
+		*e = AppPaymentMethodType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppPaymentMethodType: %T", src)
+	}
+	return nil
+}
+
+type NullAppPaymentMethodType struct {
+	AppPaymentMethodType AppPaymentMethodType `json:"app_payment_method_type"`
+	Valid                bool                 `json:"valid"` // Valid is true if AppPaymentMethodType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppPaymentMethodType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppPaymentMethodType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppPaymentMethodType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppPaymentMethodType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppPaymentMethodType), nil
+}
+
 type AppRole string
 
 const (
@@ -410,6 +537,47 @@ type AppCreatorImageTypeCategory struct {
 	Name      string       `json:"name"`
 	CreatedAt sql.NullTime `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type AppPaymentMethod struct {
+	ID        int64                `json:"id"`
+	Code      string               `json:"code"`
+	Name      string               `json:"name"`
+	Type      AppPaymentMethodType `json:"type"`
+	Image     sql.NullString       `json:"image"`
+	TaxFee    int64                `json:"tax_fee"`
+	AdminType AppPaymentAdminType  `json:"admin_type"`
+	AdminFee  int64                `json:"admin_fee"`
+	IsActive  bool                 `json:"is_active"`
+	CreatedAt time.Time            `json:"created_at"`
+	UpdatedAt time.Time            `json:"updated_at"`
+	DeletedAt sql.NullTime         `json:"deleted_at"`
+}
+
+type AppPaymentMethodChange struct {
+	ID              int64                `json:"id"`
+	Action          ActionChangeType     `json:"action"`
+	ProfileID       uuid.UUID            `json:"profile_id"`
+	PaymentMethodID int64                `json:"payment_method_id"`
+	BeforeCode      string               `json:"before_code"`
+	BeforeName      string               `json:"before_name"`
+	BeforeType      AppPaymentMethodType `json:"before_type"`
+	BeforeImage     sql.NullString       `json:"before_image"`
+	BeforeAdminType AppPaymentAdminType  `json:"before_admin_type"`
+	BeforeAdminFee  int64                `json:"before_admin_fee"`
+	BeforeTaxFee    int64                `json:"before_tax_fee"`
+	BeforeIsActive  bool                 `json:"before_is_active"`
+	AfterCode       string               `json:"after_code"`
+	AfterName       string               `json:"after_name"`
+	AfterType       AppPaymentMethodType `json:"after_type"`
+	AfterImage      sql.NullString       `json:"after_image"`
+	AfterAdminType  AppPaymentAdminType  `json:"after_admin_type"`
+	AfterAdminFee   int64                `json:"after_admin_fee"`
+	AfterTaxFee     int64                `json:"after_tax_fee"`
+	AfterIsActive   bool                 `json:"after_is_active"`
+	CreatedAt       time.Time            `json:"created_at"`
+	UpdatedAt       time.Time            `json:"updated_at"`
+	DeletedAt       sql.NullTime         `json:"deleted_at"`
 }
 
 type AppProfileReferralChange struct {

@@ -333,6 +333,9 @@ import (
 
 ## ✅ Checklist Sebelum Commit
 
+- [ ] Jangan buat migrasi, selalu konfirmasi jika perlu table/field yang diperlukan agar dibuatkan oleh saya sendiri
+- [ ] Untuk generate sqlc baru tuliskan pada `internal/repository/queries/*.sql` dengan nama file `{nama_tabel_singular}*.sql` (setiap file `.sqlc` harus berdasarkan table tersebut, kecuali dibutuhkan join untuk get )
+- [ ] Pastikan logika menggunakan store, bukan query langsung. dan pastikan pakai db transaction jika melakukan lebih dari 1 query mutasi secara paralel
 - [ ] Semua handler menggunakan `NewHandler()` constructor
 - [ ] Semua service menggunakan `NewService()` constructor
 - [ ] Package name sesuai konvensi (`{module}_handler`, `{module}_service`)
