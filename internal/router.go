@@ -43,6 +43,8 @@ import (
 	category_creator_image_service "postmatic-api/internal/module/app/category_creator_image/service"
 	generative_image_model_handler "postmatic-api/internal/module/app/generative_image_model/handler"
 	generative_image_model_service "postmatic-api/internal/module/app/generative_image_model/service"
+	generative_text_model_handler "postmatic-api/internal/module/app/generative_text_model/handler"
+	generative_text_model_service "postmatic-api/internal/module/app/generative_text_model/service"
 	image_uploader_service "postmatic-api/internal/module/app/image_uploader/service"
 	payment_method_service "postmatic-api/internal/module/app/payment_method/service"
 	referral_rule_service "postmatic-api/internal/module/app/referral_rule/service"
@@ -117,6 +119,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	tokenProductSvc := token_product_service.NewTokenProductService(store)
 	paymentMethodSvc := payment_method_service.NewService(store)
 	generativeImageModelSvc := generative_image_model_service.NewService(store)
+	generativeTextModelSvc := generative_text_model_service.NewService(store)
 	// AFFILIATOR
 	referralBasicSvc := referral_basic_service.NewService(store, referralRuleSvc)
 	// CREATOR
@@ -146,6 +149,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	tokenProductHandler := token_product_handler.NewHandler(tokenProductSvc)
 	paymentMethodHandler := payment_method_handler.NewHandler(paymentMethodSvc)
 	generativeImageModelHandler := generative_image_model_handler.NewHandler(generativeImageModelSvc)
+	generativeTextModelHandler := generative_text_model_handler.NewHandler(generativeTextModelSvc)
 	// CREATOR
 	creatorImageHandler := creator_image_handler.NewHandler(creatorImageSvc)
 	// AFFILIATOR
@@ -216,6 +220,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 		r.Mount("/token-product", tokenProductHandler.Routes())
 		r.Mount("/payment-method", paymentMethodHandler.Routes(allAllowed, adminOnly))
 		r.Mount("/generative-image-model", generativeImageModelHandler.Routes(allAllowed, adminOnly))
+		r.Mount("/generative-text-model", generativeTextModelHandler.Routes(allAllowed, adminOnly))
 	})
 
 	r.Route("/creator", func(r chi.Router) {

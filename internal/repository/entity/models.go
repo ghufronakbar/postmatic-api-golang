@@ -98,6 +98,48 @@ func (ns NullAppGenerativeImageModelProviderType) Value() (driver.Value, error) 
 	return string(ns.AppGenerativeImageModelProviderType), nil
 }
 
+type AppGenerativeTextModelProviderType string
+
+const (
+	AppGenerativeTextModelProviderTypeOpenai AppGenerativeTextModelProviderType = "openai"
+	AppGenerativeTextModelProviderTypeGoogle AppGenerativeTextModelProviderType = "google"
+)
+
+func (e *AppGenerativeTextModelProviderType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppGenerativeTextModelProviderType(s)
+	case string:
+		*e = AppGenerativeTextModelProviderType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppGenerativeTextModelProviderType: %T", src)
+	}
+	return nil
+}
+
+type NullAppGenerativeTextModelProviderType struct {
+	AppGenerativeTextModelProviderType AppGenerativeTextModelProviderType `json:"app_generative_text_model_provider_type"`
+	Valid                              bool                               `json:"valid"` // Valid is true if AppGenerativeTextModelProviderType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppGenerativeTextModelProviderType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppGenerativeTextModelProviderType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppGenerativeTextModelProviderType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppGenerativeTextModelProviderType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppGenerativeTextModelProviderType), nil
+}
+
 type AppPaymentAdminType string
 
 const (
@@ -617,6 +659,38 @@ type AppGenerativeImageModelChange struct {
 	CreatedAt              time.Time                           `json:"created_at"`
 	UpdatedAt              time.Time                           `json:"updated_at"`
 	DeletedAt              sql.NullTime                        `json:"deleted_at"`
+}
+
+type AppGenerativeTextModel struct {
+	ID        int64                              `json:"id"`
+	Model     string                             `json:"model"`
+	Label     string                             `json:"label"`
+	Image     sql.NullString                     `json:"image"`
+	Provider  AppGenerativeTextModelProviderType `json:"provider"`
+	IsActive  bool                               `json:"is_active"`
+	CreatedAt time.Time                          `json:"created_at"`
+	UpdatedAt time.Time                          `json:"updated_at"`
+	DeletedAt sql.NullTime                       `json:"deleted_at"`
+}
+
+type AppGenerativeTextModelChange struct {
+	ID                    int64                              `json:"id"`
+	Action                ActionChangeType                   `json:"action"`
+	ProfileID             uuid.UUID                          `json:"profile_id"`
+	GenerativeTextModelID int64                              `json:"generative_text_model_id"`
+	BeforeModel           string                             `json:"before_model"`
+	BeforeLabel           string                             `json:"before_label"`
+	BeforeImage           sql.NullString                     `json:"before_image"`
+	BeforeProvider        AppGenerativeTextModelProviderType `json:"before_provider"`
+	BeforeIsActive        bool                               `json:"before_is_active"`
+	AfterModel            string                             `json:"after_model"`
+	AfterLabel            string                             `json:"after_label"`
+	AfterImage            sql.NullString                     `json:"after_image"`
+	AfterProvider         AppGenerativeTextModelProviderType `json:"after_provider"`
+	AfterIsActive         bool                               `json:"after_is_active"`
+	CreatedAt             time.Time                          `json:"created_at"`
+	UpdatedAt             time.Time                          `json:"updated_at"`
+	DeletedAt             sql.NullTime                       `json:"deleted_at"`
 }
 
 type AppPaymentMethod struct {
