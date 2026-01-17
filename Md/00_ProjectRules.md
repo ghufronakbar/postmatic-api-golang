@@ -148,23 +148,81 @@ func (s *ServiceName) MethodName(ctx context.Context, input InputType) (Response
 
 ### Error Handling
 
+Semua error harus menggunakan `pkg/errs` untuk konsistensi. **JANGAN** gunakan `fmt.Errorf` atau error biasa.
+
+#### AppError Struct
+
 ```go
-// Gunakan custom errors dari pkg/errs
-if err != nil {
-    return nil, errs.NewInternalServerError(err)
+type AppError struct {
+    Code             int               // HTTP status code
+    Message          string            // Error message (constant, e.g. "RESOURCE_NOT_FOUND")
+    Err              error             // Original error (for logging, not sent to client)
+    ValidationErrors map[string]string // Validation errors (for validation failure)
 }
+```
 
-if notFound {
-    return nil, errs.NewNotFound("RESOURCE_NOT_FOUND")
-}
+#### Factory Functions
 
-if badRequest {
-    return nil, errs.NewBadRequest("INVALID_INPUT")
-}
+```go
+import "postmatic-api/pkg/errs"
 
-if unauthorized {
-    return nil, errs.NewUnauthorized("UNAUTHORIZED_ACCESS")
+// 400 Bad Request - Client error, invalid input
+errs.NewBadRequest("INVALID_INPUT")
+errs.NewBadRequest("DUPLICATE_ENTRY")
+
+// 401 Unauthorized - Authentication required
+errs.NewUnauthorized("UNAUTHORIZED_ACCESS")
+errs.NewUnauthorized("TOKEN_EXPIRED")
+
+// 403 Forbidden - Authenticated but not allowed
+errs.NewForbidden("FORBIDDEN")
+errs.NewForbidden("NOT_OWNER")
+
+// 404 Not Found - Resource not found
+errs.NewNotFound("RESOURCE_NOT_FOUND")
+errs.NewNotFound("USER_NOT_FOUND")
+
+// 500 Internal Server Error - Server error (wrap original error)
+errs.NewInternalServerError(err)
+
+// 400 Validation Failed - With field-level errors
+errs.NewValidationFailed(map[string]string{
+    "email": "INVALID_EMAIL",
+    "name":  "REQUIRED",
+})
+```
+
+#### Naming Convention untuk Error Messages
+
+- Gunakan **SCREAMING_SNAKE_CASE**
+- Format: `{ENTITY}_{ACTION}_{STATUS}` atau `{ENTITY}_{STATUS}`
+- Contoh:
+  - `USER_NOT_FOUND`
+  - `PAYMENT_METHOD_CODE_ALREADY_EXISTS`
+  - `MIDTRANS_CHARGE_GOPAY_FAILED`
+  - `INVALID_RATIO_FORMAT`
+
+#### Usage in Service
+
+```go
+func (s *Service) GetById(ctx context.Context, id int64) (Response, error) {
+    data, err := s.store.GetById(ctx, id)
+    if err == sql.ErrNoRows {
+        return Response{}, errs.NewNotFound("RESOURCE_NOT_FOUND")
+    }
+    if err != nil {
+        return Response{}, errs.NewInternalServerError(err)
+    }
+    return mapToResponse(data), nil
 }
+```
+
+#### Usage in Headless Modules (pihak ketiga)
+
+```go
+// Log error detail, return generic message
+log.Error("Failed to charge", "error", err)
+return nil, errs.NewBadRequest("MIDTRANS_CHARGE_FAILED")
 ```
 
 ### Response Format
@@ -356,6 +414,90 @@ import (
 4. **Jangan** return error tanpa wrapping dengan `errs`
 5. **Jangan** import package service langsung tanpa alias jika ada nama konflik
 6. **Jangan** buat file dengan nama sama di level yang berbeda
+
+---
+
+## 📝 Logger Usage
+
+Logger menggunakan `slog` yang di-wrap dalam `pkg/logger`:
+
+### Inisialisasi (di main.go)
+
+```go
+logger.Init(cfg.ENV) // "development" atau "production"
+```
+
+### Penggunaan di Code
+
+```go
+import "postmatic-api/pkg/logger"
+
+// Global logger (tanpa context)
+logger.L().Info("message", "key", value)
+logger.L().Error("error message", "error", err)
+logger.L().Debug("debug info", "data", someData)
+
+// Logger dari context (di service/handler yang menerima context)
+log := logger.From(ctx)
+log.Info("Processing request", "userID", userID)
+log.Error("Failed operation", "error", err)
+```
+
+### Log Levels
+
+| Level   | Penggunaan                 |
+| ------- | -------------------------- |
+| `Debug` | Development info, verbose  |
+| `Info`  | Normal operation, tracking |
+| `Warn`  | Potential issues           |
+| `Error` | Errors, failures           |
+
+---
+
+## 🔌 Headless Modules
+
+Headless modules adalah service-only modules yang **tidak** terekspos ke HTTP. Digunakan untuk integrasi pihak ketiga atau logic internal.
+
+### Struktur
+
+```
+internal/module/headless/{module_name}/
+├── service.go     # Interface + Constructor + Common Methods
+├── dto.go         # Input/Output DTOs (wrapper untuk SDK types)
+├── mapper.go      # SDK response to DTO mappers
+├── helper.go      # Helper functions
+└── {feature}.go   # Feature-specific implementations
+```
+
+### Konvensi
+
+| Aspek       | Pattern                                          |
+| ----------- | ------------------------------------------------ |
+| Interface   | `type Service interface {...}`                   |
+| Struct      | `type {module}Service struct {...}` (unexported) |
+| Constructor | `NewService(...) Service`                        |
+| DTO Input   | `{Action}Input` (e.g., `ChargeGopayInput`)       |
+| DTO Output  | `{Entity}Response` (e.g., `ChargeResponse`)      |
+
+### Contoh (Midtrans)
+
+```go
+// Di module caller
+midtransSvc := midtrans.NewService(cfg.MIDTRANS_SERVER_KEY, cfg.MIDTRANS_IS_PRODUCTION)
+
+// Usage
+res, err := midtransSvc.ChargeGopay(ctx, midtrans.ChargeGopayInput{
+    OrderID:     "ORDER-123",
+    GrossAmount: 100000,
+})
+```
+
+### Kenapa DTO Wrapper?
+
+1. **Abstraksi SDK**: Mudah migrasi jika SDK berubah atau ganti provider
+2. **Kontrol Types**: Hanya expose fields yang diperlukan
+3. **Validation**: Input DTO bisa punya validation tags
+4. **Testing**: Mudah mock tanpa depend on SDK types
 
 ---
 

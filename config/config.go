@@ -82,6 +82,12 @@ type Config struct {
 	S3_BUCKET                  string
 	S3_PRESIGN_EXPIRES_SECONDS time.Duration
 	S3_PUBLIC_BASE_URL         string
+
+	// MIDTRANS
+	MIDTRANS_SERVER_KEY    string
+	MIDTRANS_CLIENT_KEY    string
+	MIDTRANS_MERCHANT_ID   string
+	MIDTRANS_IS_PRODUCTION bool
 }
 
 func Load() *Config {
@@ -187,6 +193,12 @@ func Load() *Config {
 		S3_BUCKET:                  getEnv("S3_BUCKET"),
 		S3_PRESIGN_EXPIRES_SECONDS: s3PresignExpiresDuration,
 		S3_PUBLIC_BASE_URL:         getEnvOptional("S3_PUBLIC_BASE_URL", ""),
+
+		// MIDTRANS
+		MIDTRANS_SERVER_KEY:    getEnv("MIDTRANS_SERVER_KEY"),
+		MIDTRANS_CLIENT_KEY:    getEnv("MIDTRANS_CLIENT_KEY"),
+		MIDTRANS_MERCHANT_ID:   getEnv("MIDTRANS_MERCHANT_ID"),
+		MIDTRANS_IS_PRODUCTION: getEnvOptional("MIDTRANS_IS_PRODUCTION", "false") == "true",
 	}
 }
 
