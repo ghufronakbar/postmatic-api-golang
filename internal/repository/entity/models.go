@@ -56,6 +56,48 @@ func (ns NullActionChangeType) Value() (driver.Value, error) {
 	return string(ns.ActionChangeType), nil
 }
 
+type AppGenerativeImageModelProviderType string
+
+const (
+	AppGenerativeImageModelProviderTypeOpenai AppGenerativeImageModelProviderType = "openai"
+	AppGenerativeImageModelProviderTypeGoogle AppGenerativeImageModelProviderType = "google"
+)
+
+func (e *AppGenerativeImageModelProviderType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AppGenerativeImageModelProviderType(s)
+	case string:
+		*e = AppGenerativeImageModelProviderType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AppGenerativeImageModelProviderType: %T", src)
+	}
+	return nil
+}
+
+type NullAppGenerativeImageModelProviderType struct {
+	AppGenerativeImageModelProviderType AppGenerativeImageModelProviderType `json:"app_generative_image_model_provider_type"`
+	Valid                               bool                                `json:"valid"` // Valid is true if AppGenerativeImageModelProviderType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAppGenerativeImageModelProviderType) Scan(value interface{}) error {
+	if value == nil {
+		ns.AppGenerativeImageModelProviderType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AppGenerativeImageModelProviderType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAppGenerativeImageModelProviderType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AppGenerativeImageModelProviderType), nil
+}
+
 type AppPaymentAdminType string
 
 const (
@@ -537,6 +579,44 @@ type AppCreatorImageTypeCategory struct {
 	Name      string       `json:"name"`
 	CreatedAt sql.NullTime `json:"created_at"`
 	UpdatedAt sql.NullTime `json:"updated_at"`
+}
+
+type AppGenerativeImageModel struct {
+	ID          int64                               `json:"id"`
+	Model       string                              `json:"model"`
+	Label       string                              `json:"label"`
+	Image       sql.NullString                      `json:"image"`
+	Provider    AppGenerativeImageModelProviderType `json:"provider"`
+	IsActive    bool                                `json:"is_active"`
+	ValidRatios []string                            `json:"valid_ratios"`
+	ImageSizes  []string                            `json:"image_sizes"`
+	CreatedAt   time.Time                           `json:"created_at"`
+	UpdatedAt   time.Time                           `json:"updated_at"`
+	DeletedAt   sql.NullTime                        `json:"deleted_at"`
+}
+
+type AppGenerativeImageModelChange struct {
+	ID                     int64                               `json:"id"`
+	Action                 ActionChangeType                    `json:"action"`
+	ProfileID              uuid.UUID                           `json:"profile_id"`
+	GenerativeImageModelID int64                               `json:"generative_image_model_id"`
+	BeforeModel            string                              `json:"before_model"`
+	BeforeLabel            string                              `json:"before_label"`
+	BeforeImage            sql.NullString                      `json:"before_image"`
+	BeforeProvider         AppGenerativeImageModelProviderType `json:"before_provider"`
+	BeforeIsActive         bool                                `json:"before_is_active"`
+	BeforeValidRatios      []string                            `json:"before_valid_ratios"`
+	BeforeImageSizes       []string                            `json:"before_image_sizes"`
+	AfterModel             string                              `json:"after_model"`
+	AfterLabel             string                              `json:"after_label"`
+	AfterImage             sql.NullString                      `json:"after_image"`
+	AfterProvider          AppGenerativeImageModelProviderType `json:"after_provider"`
+	AfterIsActive          bool                                `json:"after_is_active"`
+	AfterValidRatios       []string                            `json:"after_valid_ratios"`
+	AfterImageSizes        []string                            `json:"after_image_sizes"`
+	CreatedAt              time.Time                           `json:"created_at"`
+	UpdatedAt              time.Time                           `json:"updated_at"`
+	DeletedAt              sql.NullTime                        `json:"deleted_at"`
 }
 
 type AppPaymentMethod struct {
