@@ -17,15 +17,15 @@ type CloudinaryUploaderService struct {
 	cld *cloudinary.Cloudinary
 }
 
-func NewService(cfg *config.Config) (*CloudinaryUploaderService, error) {
+func NewService(cfg *config.Config) *CloudinaryUploaderService {
 	cld, err := cloudinary.NewFromParams(cfg.CLOUDINARY_CLOUD_NAME, cfg.CLOUDINARY_API_KEY, cfg.CLOUDINARY_API_SECRET)
 	if err != nil {
-		return nil, err
+		panic("Cannot connect to Cloudinary" + err.Error())
 	}
 	return &CloudinaryUploaderService{
 		cfg: cfg,
 		cld: cld,
-	}, nil
+	}
 }
 
 func (s *CloudinaryUploaderService) UploadSingleImage(ctx context.Context, file io.Reader) (*CloudinaryUploadSingleImageResponse, error) {

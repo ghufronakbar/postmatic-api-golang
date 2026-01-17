@@ -22,7 +22,7 @@ type S3UploaderService struct {
 	presign *s3.PresignClient
 }
 
-func NewService(cfg *config.Config) (*S3UploaderService, error) {
+func NewService(cfg *config.Config) *S3UploaderService {
 	loaded, err := awsCfg.LoadDefaultConfig(context.Background(),
 		awsCfg.WithRegion(cfg.S3_REGION),
 		awsCfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
@@ -45,7 +45,7 @@ func NewService(cfg *config.Config) (*S3UploaderService, error) {
 		),
 	)
 	if err != nil {
-		return nil, err
+		panic("Cannot connect to S3" + err.Error())
 	}
 
 	client := s3.NewFromConfig(loaded, func(o *s3.Options) {
@@ -57,7 +57,7 @@ func NewService(cfg *config.Config) (*S3UploaderService, error) {
 		cfg:     cfg,
 		s3:      client,
 		presign: s3.NewPresignClient(client),
-	}, nil
+	}
 }
 
 // objectKeyBuilder:

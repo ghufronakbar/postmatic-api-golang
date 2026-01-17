@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"postmatic-api/config"
-	handler "postmatic-api/internal/http"
-	"postmatic-api/internal/http/middleware"
+	"postmatic-api/internal"
+	"postmatic-api/internal/internal_middleware"
 	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/pkg/logger"
@@ -30,6 +30,12 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	// Connect to Redis
+	rdb, err := config.ConnectRedis(cfg)
+	if err != nil {
+		log.Fatal("Cannot connect to Redis: " + err.Error())
+	}
 
 	// producer (enqueue)
 	asynqClient := config.NewAsynqClient(cfg)
@@ -54,12 +60,12 @@ func main() {
 	// HTTP router root
 	r := chi.NewRouter()
 	r.Use(chiMw.RequestID)
-	r.Use(middleware.RequestLogger)
+	r.Use(internal_middleware.RequestLogger)
 	r.Use(chiMw.StripSlashes)
 	r.Use(chiMw.Recoverer)
 
-	// inject cfg + asynqClient
-	r.Mount("/api", handler.NewRouter(db, cfg, asynqClient))
+	// inject cfg + asynqClient + rdb
+	r.Mount("/api", internal.NewRouter(db, cfg, asynqClient, rdb))
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.PORT,

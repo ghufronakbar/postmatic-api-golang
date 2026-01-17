@@ -1,6 +1,20 @@
-# Project Structure
+# Refactoring Code
 
-_Generated: 2026-01-17 13:10:56_
+Anda adalah backend engineer Golang professional.
+
+## Tujuan:
+
+- Melakukan refactoring code
+
+## Rules:
+
+- Jangan ubah request/response dan business logic
+- Pastikan code berfungsi sama seperti sebelumnya
+- Pastika bisa di build dengan command `go ./cmd/api/main.go`
+
+## Description:
+
+Legacy untuk struktur folder saya adalah sebagai berikut:
 
 Root: `.`
 
@@ -317,3 +331,81 @@ Root: `.`
 - test.js
 - up.sh
 ```
+
+Tujuan refactor struktur folder sebagai berikut:
+Root: `.`
+
+```text
+.
+- cmd/
+  - api/
+    - main.go
+  - seed/
+    - creator_image_seed/
+      - creator_image.json
+      - main.go
+    - rss_seed/
+      - main.go
+      - rss.json
+- config/
+  - asynq.go
+  - config.go
+  - database.go
+  - google_oauth.go
+  - redis.go
+  - s3.go
+  - cloudinary.go // ubah config cloudinary disini yang awalnya di service
+- internal/
+  - internal_middleware/
+    - auth.go
+    - logger.go
+    - owned_business.go
+    - req_filter.go
+  - router.go
+  - module/
+    - account/
+      - auth/
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
+        - handler/
+          - handler.go
+    - affiliator/
+      - referral_basic/
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
+        - handler/
+          - handler.go
+    - app/
+      - category_creator_image/
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
+        - handler/
+          - handler.go
+      - image_uploader/
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
+        - handler/
+          - handler.go
+```
+
+Note:
+tujuan utama adalah membuat handler berada pada di folder module.
+
+Refactor Style Code:
+
+- untuk package di service ditulis seperti `image_uploader_service` seperti pada di folder `internal/module/app/image_uploader/service`
+- untuk package di handler ditulis seperti `image_uploader_handler` seperti pada di folder `internal/module/app/image_uploader/handler`
+- mounting route di `internal/router.go`
+- mounting route per handler di `internal/module/app/*/handler/handler.go`
+- untuk penulisan service pastikan pakai NewService(), bukan NewImageUploaderService() dan segala macamnya
+- untuk penulisan handler pastikan pakai NewHandler(), bukan NewImageUploaderHandler() dan segala macamnya
+- perbaiki penulisan middleware
+- perbaiki `internal/router.go` agar tidak ada init di router untuk seperti config, redis

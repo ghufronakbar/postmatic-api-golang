@@ -1,0 +1,8 @@
+package business_timezone_pref_service
+
+type BusinessTimezonePrefResponse struct {
+	RootBusinessId int64  `json:"rootBusinessId"`
+	Timezone       string `json:"timezone"`
+	Offset         string `json:"offset"`
+	Label          string `json:"label"`
+}
