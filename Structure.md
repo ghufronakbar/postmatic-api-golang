@@ -1,6 +1,6 @@
 # Project Structure
 
-_Generated: 2026-01-17 13:10:56_
+_Generated: 2026-01-18 22:53:39_
 
 Root: `.`
 
@@ -13,8 +13,20 @@ Root: `.`
 - .golangci.yml
 - Makefile
 - Md/
+  - 00_ProjectRules.md
   - 00_Refactor.md
+  - Module/
+    - App/
+      - App.GenerativeImageModel.md
+      - App.GenerativeTextModel.md
+      - App.PaymentMethod.md
+    - Headless/
+      - Headless.Midtrans.md
+    - Payment/
+      - Payment.Common.md
+      - Payment.ImageToken.md
 - Review.md
+- Todo.md
 - air.sh
 - build.sh
 - cmd/
@@ -39,135 +51,192 @@ Root: `.`
 - go.mod
 - go.sum
 - internal/
-  - http/
-    - handler/
-      - account_handler/
-        - auth_handler.go
-        - cookie_handler.go
-        - google_oauth_handler.go
-        - profile_handler.go
-        - session_handler.go
-      - affiliator_handler/
-        - referral_basic_handler.go
-      - app_handler/
-        - category_creator_image_handler.go
-        - image_uploader_handler.go
-        - referral_rule_handler.go
-        - rss_handler.go
-        - timezone_handler.go
-        - token_product_handler.go
-      - business_handler/
-        - business_image_content_handler.go
-        - business_information_handler.go
-        - business_knowledge_handler.go
-        - business_member_handler.go
-        - business_product_handler.go
-        - business_role_handler.go
-        - business_rss_subscription_handler.go
-        - business_timezone_pref_handler.go
-      - creator_handler/
-        - creator_image_handler.go
-    - middleware/
-      - auth.go
-      - logger.go
-      - owned_business.go
-      - req_filter.go
-    - router.go
+  - internal_middleware/
+    - auth.go
+    - logger.go
+    - owned_business.go
+    - req_filter.go
   - module/
     - account/
       - auth/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - cookie.go
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
       - google_oauth/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
       - profile/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
       - session/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
     - affiliator/
       - referral_basic/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - dto_validate.go
+          - filter.go
+          - service.go
+          - viewmodel.go
     - app/
       - category_creator_image/
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - filter.go
+          - service.go
+          - viewmodel.go
+      - generative_image_model/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
+      - generative_text_model/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - image_uploader/
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - service.go
+          - viewmodel.go
+      - payment_method/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - referral_rule/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - rss/
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - filter.go
+          - service.go
+          - viewmodel.go
       - timezone/
-        - service.go
-        - timezone.json
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - service.go
+          - timezone.json
+          - viewmodel.go
       - token_product/
-        - dto.go
-        - filter.go
-        - helper.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - helper.go
+          - service.go
+          - viewmodel.go
     - business/
       - business_image_content/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - business_information/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - business_knowledge/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
       - business_member/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - business_product/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - business_role/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
       - business_rss_subscription/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - business_timezone_pref/
-        - dto.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - service.go
+          - viewmodel.go
     - creator/
       - creator_image/
-        - dto.go
-        - filter.go
-        - service.go
-        - viewmodel.go
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
     - headless/
       - cloudinary_uploader/
         - service.go
@@ -175,6 +244,9 @@ Root: `.`
       - mailer/
         - constants.go
         - dto.go
+        - dto_auth.go
+        - dto_member.go
+        - dto_payment.go
         - mail.go
         - service.go
         - templates/
@@ -183,9 +255,19 @@ Root: `.`
           - member_announce_role.html
           - member_invitation.html
           - member_welcome_business.html
+          - payment_canceled.html
+          - payment_checkout.html
+          - payment_success.html
           - reset_password.html
           - verification.html
           - welcome.html
+      - midtrans/
+        - bank.go
+        - dto.go
+        - ewallet.go
+        - helper.go
+        - mapper.go
+        - service.go
       - queue/
         - enqueue.go
         - mailer.go
@@ -201,10 +283,31 @@ Root: `.`
         - invitation_token.go
         - refresh_token.go
         - service.go
+    - payment/
+      - common/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - midtrans.go
+          - service.go
+          - viewmodel.go
+      - image_token/
+        - handler/
+          - handler.go
+        - service/
+          - calculator.go
+          - dto.go
+          - midtrans.go
+          - service.go
+          - viewmodel.go
   - repository/
     - entity/
       - app_creator_image_product_category.sql.go
       - app_creator_image_type_category.sql.go
+      - app_generative_image_model.sql.go
+      - app_generative_text_model.sql.go
+      - app_payment_method.sql.go
       - app_profile_referral_change.sql.go
       - app_profile_referral_rules.sql.go
       - app_rss_category.sql.go
@@ -222,15 +325,21 @@ Root: `.`
       - creator_image.sql.go
       - db.go
       - models.go
+      - payment_history.sql.go
+      - payment_history_action.sql.go
       - profile.sql.go
       - profile_referral_code.sql.go
       - querier.go
+      - referral_record.sql.go
       - store.go
       - uploaded_image.sql.go
       - user.sql.go
     - queries/
       - app_creator_image_product_category.sql
       - app_creator_image_type_category.sql
+      - app_generative_image_model.sql
+      - app_generative_text_model.sql
+      - app_payment_method.sql
       - app_profile_referral_change.sql
       - app_profile_referral_rules.sql
       - app_rss_category.sql
@@ -246,8 +355,11 @@ Root: `.`
       - business_rss_subscription.sql
       - business_timezone_pref.sql
       - creator_image.sql
+      - payment_history.sql
+      - payment_history_action.sql
       - profile.sql
       - profile_referral_code.sql
+      - referral_record.sql
       - uploaded_image.sql
       - user.sql
     - redis/
@@ -266,6 +378,7 @@ Root: `.`
       - session_repository/
         - dto.go
         - session_repository.go
+  - router.go
 - migration_record.sql
 - migrations/
   - 20251214120953_init_extension.sql
@@ -285,6 +398,14 @@ Root: `.`
   - 20260102153913_create_app_profile_referral_rules_table.sql
   - 20260102173819_create_profile_referral_codes.sql
   - 20260106163450_create_app_token_products_table.sql
+  - 20260117074156_create_app_payment_methods_table.sql
+  - 20260117150840_create_app_generative_image_models_table.sql
+  - 20260117152211_seed_app_generative_image_models_table.sql
+  - 20260117160514_create_app_generative_text_models_table.sql
+  - 20260117160526_seed_app_generative_text_models_table.sql
+  - 20260117215018_create_referral_records_table.sql
+  - 20260117215846_create_payment_histories_table.sql
+  - 20260118085914_create_payment_history_actions_table.sql
 - pkg/
   - errs/
     - app_error.go
@@ -309,11 +430,7 @@ Root: `.`
     - sql.go
     - validator.go
 - schema.sh
-- seed.sh
-- seeders/
-  - 1_profile_user.sql
 - sqlc.yaml
 - structure.sh
-- test.js
 - up.sh
 ```
