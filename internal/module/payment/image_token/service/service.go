@@ -11,9 +11,12 @@ import (
 	referral_basic_service "postmatic-api/internal/module/affiliator/referral_basic/service"
 	payment_method_service "postmatic-api/internal/module/app/payment_method/service"
 	token_product_service "postmatic-api/internal/module/app/token_product/service"
+	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/midtrans"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
+	"postmatic-api/pkg/logger"
 	"postmatic-api/pkg/utils"
 
 	"github.com/google/uuid"
@@ -26,6 +29,7 @@ type ImageTokenPaymentService struct {
 	paymentMethod *payment_method_service.PaymentMethodService
 	referral      *referral_basic_service.ReferralBasicService
 	midtrans      midtrans.Service
+	queue         queue.MailerProducer
 }
 
 // NewService creates a new ImageTokenPaymentService
@@ -35,6 +39,7 @@ func NewService(
 	paymentMethod *payment_method_service.PaymentMethodService,
 	referral *referral_basic_service.ReferralBasicService,
 	midtrans midtrans.Service,
+	queue queue.MailerProducer,
 ) *ImageTokenPaymentService {
 	return &ImageTokenPaymentService{
 		store:         store,
@@ -42,6 +47,7 @@ func NewService(
 		paymentMethod: paymentMethod,
 		referral:      referral,
 		midtrans:      midtrans,
+		queue:         queue,
 	}
 }
 
@@ -256,8 +262,18 @@ func (s *ImageTokenPaymentService) CreatePayment(ctx context.Context, input Crea
 		return response, errs.NewInternalServerError(err)
 	}
 
-	// 7. Charge via Midtrans based on payment method type
-	customerDetails := midtrans.CustomerDetails{}
+	// 7. Get profile for customer details
+	profile, err := s.store.GetProfileById(ctx, input.ProfileID)
+	if err != nil {
+		logger.From(ctx).Error("Failed to get profile for payment", "profileID", input.ProfileID, "error", err)
+		return response, errs.NewBadRequest("PROFILE_NOT_FOUND")
+	}
+
+	// 8. Charge via Midtrans based on payment method type
+	customerDetails := midtrans.CustomerDetails{
+		FirstName: profile.Name,
+		Email:     profile.Email,
+	}
 	items := []midtrans.ItemDetail{
 		{
 			ID:       tokenCalc.ID.String(),
@@ -368,6 +384,46 @@ func (s *ImageTokenPaymentService) CreatePayment(ctx context.Context, input Crea
 		}
 	}
 
+	// 12. Send checkout confirmation email (async via queue)
+	go func() {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		// Build actions for email
+		emailActions := make([]mailer.PaymentActionInput, len(publicActions))
+		for i, action := range publicActions {
+			emailActions[i] = mailer.PaymentActionInput{
+				Label:     action.Label,
+				Value:     action.Value,
+				ValueType: string(action.ValueType),
+			}
+		}
+
+		// Format expiry time
+		var expiresAtStr string
+		if paymentHistory.MidtransExpiredAt.Valid {
+			expiresAtStr = paymentHistory.MidtransExpiredAt.Time.Format("02 Jan 2006, 15:04 WIB")
+		}
+
+		// Format total amount
+		totalAmountStr := "Rp " + formatNumberWithSeparator(checkResult.Calculation.TotalAmount)
+
+		err := s.queue.EnqueuePaymentCheckout(ctxBg, mailer.PaymentCheckoutInputDTO{
+			Email:         profile.Email,
+			Name:          profile.Name,
+			OrderID:       orderID,
+			ProductName:   fmt.Sprintf("Image Token x%d", input.TokenAmount),
+			PaymentMethod: pm.Name,
+			TotalAmount:   totalAmountStr,
+			ExpiresAt:     expiresAtStr,
+			Actions:       emailActions,
+		})
+		if err != nil {
+			logger.L().Error("Failed to enqueue checkout email", "orderID", orderID, "error", err)
+		}
+
+	}()
+
 	return response, nil
 }
 
@@ -387,4 +443,37 @@ func mapGopayActionToLabel(name string) (label string, valueType string, isPubli
 	default:
 		return name, "link", false
 	}
+}
+
+// formatNumberWithSeparator formats number with thousand separator (dots)
+func formatNumberWithSeparator(n int64) string {
+	if n == 0 {
+		return "0"
+	}
+
+	negative := n < 0
+	if negative {
+		n = -n
+	}
+
+	// Convert to string first
+	numStr := ""
+	for n > 0 {
+		numStr = string('0'+byte(n%10)) + numStr
+		n /= 10
+	}
+
+	// Add thousand separators from right to left
+	result := ""
+	for i, c := range numStr {
+		if i > 0 && (len(numStr)-i)%3 == 0 {
+			result += "."
+		}
+		result += string(c)
+	}
+
+	if negative {
+		return "-" + result
+	}
+	return result
 }

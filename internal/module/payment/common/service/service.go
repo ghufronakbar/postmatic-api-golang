@@ -4,8 +4,11 @@ package payment_common_service
 import (
 	"context"
 	"database/sql"
+	"time"
 
+	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/midtrans"
+	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
@@ -19,13 +22,15 @@ import (
 type PaymentCommonService struct {
 	store    entity.Store
 	midtrans midtrans.Service
+	queue    queue.MailerProducer
 }
 
 // NewService creates a new PaymentCommonService
-func NewService(store entity.Store, midtrans midtrans.Service) *PaymentCommonService {
+func NewService(store entity.Store, midtrans midtrans.Service, queue queue.MailerProducer) *PaymentCommonService {
 	return &PaymentCommonService{
 		store:    store,
 		midtrans: midtrans,
+		queue:    queue,
 	}
 }
 
@@ -145,6 +150,11 @@ func (s *PaymentCommonService) GetPaymentHistoryById(ctx context.Context, id str
 							Status: entity.ReferralRecordStatus(newStatus),
 						})
 					}
+
+					// Send success email if status changed to success
+					if newStatus == "success" {
+						s.sendPaymentSuccessEmail(ctx, payment)
+					}
 				}
 			}
 		}
@@ -210,6 +220,9 @@ func (s *PaymentCommonService) CancelPayment(ctx context.Context, id string, pro
 		})
 	}
 
+	// Send canceled email
+	s.sendPaymentCanceledEmail(ctx, updated)
+
 	return mapPaymentHistoryToResponse(updated), nil
 }
 
@@ -260,6 +273,11 @@ func (s *PaymentCommonService) HandleWebhook(ctx context.Context, notification M
 				ID:     payment.ReferralRecordID.Int64,
 				Status: entity.ReferralRecordStatus(newStatus),
 			})
+		}
+
+		// Send success email if status changed to success
+		if newStatus == "success" {
+			s.sendPaymentSuccessEmail(ctx, payment)
 		}
 
 		// TODO: If success, add tokens to user's balance
@@ -332,4 +350,88 @@ func mapPaymentHistoryToResponse(p entity.PaymentHistory) PaymentHistoryResponse
 	}
 
 	return resp
+}
+
+// sendPaymentSuccessEmail enqueues success invoice email
+func (s *PaymentCommonService) sendPaymentSuccessEmail(ctx context.Context, payment entity.PaymentHistory) {
+	log := logger.From(ctx)
+
+	// Get profile for email
+	profile, err := s.store.GetProfileById(ctx, payment.ProfileID)
+	if err != nil {
+		log.Error("Failed to get profile for success email", "profileID", payment.ProfileID, "error", err)
+		return
+	}
+
+	// Get paid time
+	var paidAt time.Time
+	if payment.PaymentSuccessAt.Valid {
+		paidAt = payment.PaymentSuccessAt.Time
+	} else {
+		paidAt = time.Now()
+	}
+
+	// Enqueue email via goroutine with background context
+	go func() {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := s.queue.EnqueuePaymentSuccess(ctxBg, mailer.PaymentSuccessInputDTO{
+			Email:          profile.Email,
+			Name:           profile.Name,
+			OrderID:        payment.MidtransTransactionID.String,
+			ProductName:    payment.RecordProductName,
+			ItemPrice:      payment.SubtotalItemAmount,
+			DiscountAmount: payment.DiscountAmount,
+			AdminFeeAmount: payment.AdminFeeAmount,
+			TaxAmount:      payment.TaxAmount,
+			TotalAmount:    payment.TotalAmount,
+			Currency:       payment.Currency,
+			PaymentMethod:  payment.PaymentMethod,
+			PaidAt:         paidAt,
+		})
+		if err != nil {
+			logger.L().Error("Failed to enqueue success email", "paymentID", payment.ID, "error", err)
+		}
+	}()
+}
+
+// sendPaymentCanceledEmail enqueues canceled notification email
+func (s *PaymentCommonService) sendPaymentCanceledEmail(ctx context.Context, payment entity.PaymentHistory) {
+	log := logger.From(ctx)
+
+	// Get profile for email
+	profile, err := s.store.GetProfileById(ctx, payment.ProfileID)
+	if err != nil {
+		log.Error("Failed to get profile for canceled email", "profileID", payment.ProfileID, "error", err)
+		return
+	}
+
+	// Get canceled time
+	var canceledAt time.Time
+	if payment.PaymentCanceledAt.Valid {
+		canceledAt = payment.PaymentCanceledAt.Time
+	} else {
+		canceledAt = time.Now()
+	}
+
+	// Enqueue email via goroutine with background context
+	go func() {
+		ctxBg, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := s.queue.EnqueuePaymentCanceled(ctxBg, mailer.PaymentCanceledInputDTO{
+			Email:         profile.Email,
+			Name:          profile.Name,
+			OrderID:       payment.MidtransTransactionID.String,
+			ProductName:   payment.RecordProductName,
+			TotalAmount:   payment.TotalAmount,
+			Currency:      payment.Currency,
+			PaymentMethod: payment.PaymentMethod,
+			CanceledAt:    canceledAt,
+		})
+		if err != nil {
+			logger.L().Error("Failed to enqueue canceled email", "paymentID", payment.ID, "error", err)
+		}
+	}()
 }

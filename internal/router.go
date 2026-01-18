@@ -132,8 +132,8 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	// HEADLESS
 	midtransSvc := midtrans.NewService(cfg.MIDTRANS_SERVER_KEY, cfg.MIDTRANS_IS_PRODUCTION)
 	// PAYMENT
-	imageTokenPaymentSvc := image_token_service.NewService(store, tokenProductSvc, paymentMethodSvc, referralBasicSvc, midtransSvc)
-	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc)
+	imageTokenPaymentSvc := image_token_service.NewService(store, tokenProductSvc, paymentMethodSvc, referralBasicSvc, midtransSvc, queueProducer)
+	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc, queueProducer)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT

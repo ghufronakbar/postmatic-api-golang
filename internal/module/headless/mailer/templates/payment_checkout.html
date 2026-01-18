@@ -1,0 +1,133 @@
+{{ template "layout" . }} {{ define "content" }}
+<div class="eyebrow">Konfirmasi Pesanan</div>
+
+<div class="email-body">
+  <h1>Halo {{ .Name }}!</h1>
+  <p>
+    Terima kasih telah melakukan pemesanan di <strong>{{ .AppName }}</strong>.
+  </p>
+  <p>Berikut adalah detail pesanan Anda:</p>
+
+  <!-- Order Details Table -->
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0">
+    <tr style="background: #f8fafc">
+      <td style="padding: 12px; border: 1px solid #e2e8f0; font-weight: 600">
+        Order ID
+      </td>
+      <td style="padding: 12px; border: 1px solid #e2e8f0">{{ .OrderID }}</td>
+    </tr>
+    <tr>
+      <td style="padding: 12px; border: 1px solid #e2e8f0; font-weight: 600">
+        Produk
+      </td>
+      <td style="padding: 12px; border: 1px solid #e2e8f0">
+        {{ .ProductName }}
+      </td>
+    </tr>
+    <tr style="background: #f8fafc">
+      <td style="padding: 12px; border: 1px solid #e2e8f0; font-weight: 600">
+        Metode Pembayaran
+      </td>
+      <td style="padding: 12px; border: 1px solid #e2e8f0">
+        {{ .PaymentMethod }}
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 12px; border: 1px solid #e2e8f0; font-weight: 600">
+        Total Pembayaran
+      </td>
+      <td
+        style="
+          padding: 12px;
+          border: 1px solid #e2e8f0;
+          color: #1657e6;
+          font-weight: 700;
+          font-size: 18px;
+        "
+      >
+        {{ .TotalAmount }}
+      </td>
+    </tr>
+    <tr style="background: #f8fafc">
+      <td style="padding: 12px; border: 1px solid #e2e8f0; font-weight: 600">
+        Batas Pembayaran
+      </td>
+      <td style="padding: 12px; border: 1px solid #e2e8f0; color: #dc2626">
+        {{ .ExpiresAt }}
+      </td>
+    </tr>
+  </table>
+
+  <!-- Payment Instructions -->
+  {{ if .Actions }}
+  <div
+    style="
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+    "
+  >
+    <p style="margin: 0 0 12px 0; font-weight: 600; color: #1e40af">
+      Instruksi Pembayaran:
+    </p>
+    {{ range .Actions }}
+    <div
+      style="
+        margin: 8px 0;
+        padding: 10px;
+        background: #ffffff;
+        border-radius: 4px;
+        border: 1px solid #e2e8f0;
+      "
+    >
+      <p
+        style="
+          margin: 0 0 4px 0;
+          font-size: 12px;
+          color: #64748b;
+          text-transform: uppercase;
+        "
+      >
+        {{ .Label }}
+      </p>
+      {{ if eq .ValueType "text" }}
+      <p
+        style="
+          margin: 0;
+          font-size: 18px;
+          font-weight: 700;
+          color: #0f172a;
+          letter-spacing: 1px;
+        "
+      >
+        {{ .Value }}
+      </p>
+      {{ else if eq .ValueType "link" }}
+      <a href="{{ .Value }}" style="color: #1657e6; word-break: break-all"
+        >{{ .Value }}</a
+      >
+      {{ else if eq .ValueType "image" }}
+      <p style="margin: 0">
+        <a href="{{ .Value }}" style="color: #1657e6">Lihat QR Code</a>
+      </p>
+      {{ else }}
+      <p style="margin: 0; font-size: 16px; color: #0f172a">{{ .Value }}</p>
+      {{ end }}
+    </div>
+    {{ end }}
+  </div>
+  {{ end }}
+
+  <div class="divider"></div>
+  <p class="muted">
+    Segera lakukan pembayaran sebelum batas waktu yang ditentukan. Pesanan akan
+    otomatis dibatalkan jika pembayaran tidak diterima.
+  </p>
+  <p class="muted">
+    Jika Anda tidak merasa melakukan pesanan ini, abaikan email ini atau hubungi
+    tim support kami.
+  </p>
+</div>
+{{ end }}

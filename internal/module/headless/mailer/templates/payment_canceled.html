@@ -1,0 +1,68 @@
+{{ template "layout" . }} {{ define "content" }}
+<div class="eyebrow">Pembayaran Dibatalkan</div>
+
+<div class="email-body">
+  <h1>Pesanan Dibatalkan</h1>
+  <p>Halo <strong>{{ .Name }}</strong>,</p>
+  <p>
+    Pesanan Anda telah dibatalkan. Berikut adalah detail pesanan yang
+    dibatalkan:
+  </p>
+
+  <!-- Order Details -->
+  <div
+    style="
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+    "
+  >
+    <table style="width: 100%; border-collapse: collapse">
+      <tr>
+        <td style="padding: 8px 0; font-weight: 600; color: #991b1b">
+          Order ID
+        </td>
+        <td style="padding: 8px 0; text-align: right; color: #991b1b">
+          {{ .OrderID }}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #7f1d1d">Produk</td>
+        <td style="padding: 8px 0; text-align: right; color: #7f1d1d">
+          {{ .ProductName }}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #7f1d1d">Total</td>
+        <td style="padding: 8px 0; text-align: right; color: #7f1d1d">
+          {{ .TotalAmount }}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #7f1d1d">Metode Pembayaran</td>
+        <td style="padding: 8px 0; text-align: right; color: #7f1d1d">
+          {{ .PaymentMethod }}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #7f1d1d">Waktu Pembatalan</td>
+        <td style="padding: 8px 0; text-align: right; color: #7f1d1d">
+          {{ .CanceledAt }}
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <p>
+    Jika Anda ingin melakukan pembelian kembali, silakan kunjungi aplikasi kami.
+  </p>
+
+  <div class="divider"></div>
+  <p class="muted">
+    Jika Anda tidak merasa membatalkan pesanan ini, segera hubungi tim support
+    kami.
+  </p>
+</div>
+{{ end }}

@@ -657,8 +657,266 @@ res, err := midtransSvc.ChargeGopay(ctx, midtrans.ChargeGopayInput{
 
 ---
 
+## 📧 Queue & Mailer
+
+### Overview
+
+Project menggunakan **Asynq** (Redis-based queue) untuk mengirim email secara asinkron. Arsitektur:
+
+```
+┌─────────────┐     ┌──────────────┐     ┌───────────────┐
+│  Service    │────▶│   Producer   │────▶│   Redis       │
+│ (enqueue)   │     │ (queue pkg)  │     │   Queue       │
+└─────────────┘     └──────────────┘     └───────┬───────┘
+                                                  │
+                                         ┌────────▼────────┐
+                                         │     Worker      │
+                                         │  (process jobs) │
+                                         └────────┬────────┘
+                                                  │
+                                         ┌────────▼────────┐
+                                         │  Mailer Service │
+                                         │   (send email)  │
+                                         └─────────────────┘
+```
+
+### File Structure
+
+```
+internal/module/headless/
+├── queue/
+│   ├── producer.go       # Producer struct (New)
+│   ├── enqueue.go        # Helper enqueue function
+│   ├── mailer.go         # MailerProducer interface + handlers
+│   └── worker.go         # Worker configuration
+└── mailer/
+    ├── constants.go      # EmailTemplate constants
+    ├── dto.go            # SendEmailInput base DTO
+    ├── dto_auth.go       # Auth-related DTOs
+    ├── dto_member.go     # Member-related DTOs
+    ├── dto_payment.go    # Payment-related DTOs
+    ├── service.go        # MailerService constructor + sendEmail
+    ├── mail.go           # Email sending methods
+    └── templates/        # HTML email templates
+```
+
+### Menambah Email Baru
+
+#### 1. Tambah Template Constant (`constants.go`)
+
+```go
+const (
+    // Existing
+    VerificationTemplate EmailTemplate = "verification.html"
+
+    // New
+    PaymentSuccessTemplate EmailTemplate = "payment_success.html"
+)
+
+func (e EmailTemplate) IsValid() bool {
+    switch e {
+    case VerificationTemplate, PaymentSuccessTemplate: // tambahkan di sini
+        return true
+    }
+    return false
+}
+```
+
+#### 2. Buat DTO (`dto_{category}.go`)
+
+```go
+// dto_payment.go
+
+// Template input (untuk internal template parsing)
+type paymentSuccessInput struct {
+    Name        string `json:"Name"`
+    OrderID     string `json:"OrderID"`
+    TotalAmount string `json:"TotalAmount"` // formatted
+}
+
+// Public DTO (untuk enqueue dari service lain)
+type PaymentSuccessInputDTO struct {
+    Email       string    `json:"Email"`
+    Name        string    `json:"Name"`
+    OrderID     string    `json:"OrderID"`
+    TotalAmount int64     `json:"TotalAmount"` // raw value
+    Currency    string    `json:"Currency"`
+}
+```
+
+#### 3. Tambah Interface Method (`service.go`)
+
+```go
+type Mailer interface {
+    // existing...
+    SendPaymentSuccessEmail(ctx context.Context, input PaymentSuccessInputDTO) error
+}
+```
+
+#### 4. Implementasi Send Method (`mail.go`)
+
+```go
+func (s *MailerService) SendPaymentSuccessEmail(ctx context.Context, input PaymentSuccessInputDTO) error {
+    logger.From(ctx).Info("SendPaymentSuccessEmail", "orderID", input.OrderID)
+
+    templateData := paymentSuccessInput{
+        Name:        input.Name,
+        OrderID:     input.OrderID,
+        TotalAmount: formatCurrency(input.TotalAmount, input.Currency),
+    }
+
+    return s.sendEmail(ctx, SendEmailInput{
+        To:           input.Email,
+        Subject:      "Invoice Pembayaran #" + input.OrderID,
+        TemplateName: PaymentSuccessTemplate,
+        Data:         templateData,
+    })
+}
+```
+
+#### 5. Buat HTML Template (`templates/payment_success.html`)
+
+```html
+{{ template "layout" . }} {{ define "content" }}
+<div class="eyebrow">Invoice</div>
+<div class="email-body">
+  <h1>Halo {{ .Name }}!</h1>
+  <p>Order ID: {{ .OrderID }}</p>
+  <p>Total: {{ .TotalAmount }}</p>
+</div>
+{{ end }}
+```
+
+#### 6. Tambah Queue Interface & Handler (`queue/mailer.go`)
+
+```go
+// Interface
+type MailerProducer interface {
+    // existing...
+    EnqueuePaymentSuccess(ctx context.Context, payload mailer.PaymentSuccessInputDTO) error
+}
+
+// Task constant
+const taskMailerPaymentSuccess = "queue:mailer:payment:success"
+
+// Producer method
+func (p *Producer) EnqueuePaymentSuccess(ctx context.Context, payload mailer.PaymentSuccessInputDTO) error {
+    b, _ := json.Marshal(payload)
+    task := asynq.NewTask(taskMailerPaymentSuccess, b)
+    return p.enqueue(ctx, task, asynq.Queue("default"), asynq.MaxRetry(3), asynq.Timeout(15*time.Second))
+}
+
+// Handler registration (in registerMailerHandlers)
+mux.HandleFunc(taskMailerPaymentSuccess, func(ctx context.Context, t *asynq.Task) error {
+    var p mailer.PaymentSuccessInputDTO
+    if err := json.Unmarshal(t.Payload(), &p); err != nil {
+        return fmt.Errorf("invalid payload: %v: %w", err, asynq.SkipRetry)
+    }
+    return mailerSvc.SendPaymentSuccessEmail(ctx, p)
+})
+```
+
+#### 7. Panggil dari Service
+
+```go
+// Dengan goroutine + background context (non-blocking)
+go func() {
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+    defer cancel()
+
+    err := s.queue.EnqueuePaymentSuccess(ctx, mailer.PaymentSuccessInputDTO{
+        Email:       profile.Email,
+        Name:        profile.Name,
+        OrderID:     orderID,
+        TotalAmount: payment.TotalAmount,
+        Currency:    "IDR",
+    })
+    if err != nil {
+        logger.L().Error("Failed to enqueue email", "error", err)
+    }
+}()
+```
+
+### Email Template Guidelines
+
+#### Layout (`layout.html`)
+
+Template menggunakan wrapper layout yang menyediakan:
+
+- Header dengan logo
+- Footer dengan contact info
+- Base styling
+
+Template konten harus define `content` block:
+
+```html
+{{ template "layout" . }} {{ define "content" }}
+<!-- content here -->
+{{ end }}
+```
+
+#### Available Variables (Global)
+
+| Variable              | Source                   |
+| --------------------- | ------------------------ |
+| `{{ .AppName }}`      | Config APP_NAME          |
+| `{{ .Logo }}`         | Config APP_LOGO          |
+| `{{ .Address }}`      | Config APP_ADDRESS       |
+| `{{ .ContactEmail }}` | Config APP_CONTACT_EMAIL |
+| `{{ .Subject }}`      | From SendEmailInput      |
+
+#### Button Component
+
+```html
+{{ template "button" dict "Url" .ConfirmUrl "Label" "Konfirmasi Email" }}
+```
+
+### Formatting Helpers
+
+Untuk format angka dengan thousand separator (titik):
+
+```go
+// Di mail.go
+func formatNumber(n int64) string {
+    // Returns: "1.234.567" untuk 1234567
+}
+
+// Usage
+totalStr := "Rp " + formatNumber(input.TotalAmount) // "Rp 673.483"
+```
+
+### Dependency Injection
+
+```go
+// Di router.go
+queueProducer := queue.NewProducer(asynqClient)
+
+// Service yang butuh email
+paymentSvc := payment_service.NewService(store, midtrans, queueProducer)
+```
+
+### Logging
+
+Selalu log email operations:
+
+```go
+// Di mail.go methods
+logger.From(ctx).Info("SendPaymentSuccessEmail", "orderID", input.OrderID, "email", input.Email)
+
+// Error handling
+if err != nil {
+    logger.From(ctx).Error("Failed to send email", "orderID", input.OrderID, "error", err)
+}
+
+// Di goroutine (tanpa context)
+logger.L().Error("Failed to enqueue email", "error", err)
+```
+
+---
+
 ## 📚 References
 
 - [Go Project Layout](https://github.com/golang-standards/project-layout)
 - [Chi Router](https://github.com/go-chi/chi)
 - [SQLC](https://sqlc.dev/)
+- [Asynq](https://github.com/hibiken/asynq)
