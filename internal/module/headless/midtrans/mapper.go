@@ -33,7 +33,9 @@ func mapChargeResponse(res *coreapi.ChargeResponse) *ChargeResponse {
 	}
 
 	// Map VA Numbers (for bank transfer)
+	// Handle different response formats from different banks
 	if len(res.VaNumbers) > 0 {
+		// Standard bank format (BNI, BCA, BRI)
 		resp.VANumbers = make([]VANumber, len(res.VaNumbers))
 		for i, va := range res.VaNumbers {
 			resp.VANumbers[i] = VANumber{
@@ -41,11 +43,26 @@ func mapChargeResponse(res *coreapi.ChargeResponse) *ChargeResponse {
 				VANumber: va.VANumber,
 			}
 		}
-	}
-
-	// Permata VA
-	if res.PermataVaNumber != "" {
+	} else if res.PermataVaNumber != "" {
+		// Permata uses separate field: permata_va_number
+		resp.VANumbers = []VANumber{
+			{
+				Bank:     "permata",
+				VANumber: res.PermataVaNumber,
+			},
+		}
 		resp.PermataVANumber = res.PermataVaNumber
+	} else if res.BillKey != "" && res.BillerCode != "" {
+		// Mandiri uses echannel: bill_key + biller_code
+		// Combine as "biller_code:bill_key" for display
+		resp.VANumbers = []VANumber{
+			{
+				Bank:     "mandiri",
+				VANumber: res.BillerCode + res.BillKey, // Combined format
+			},
+		}
+		resp.BillKey = res.BillKey
+		resp.BillerCode = res.BillerCode
 	}
 
 	return resp

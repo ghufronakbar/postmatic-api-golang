@@ -523,6 +523,184 @@ func (ns NullImageProvider) Value() (driver.Value, error) {
 	return string(ns.ImageProvider), nil
 }
 
+type PaymentActionValueType string
+
+const (
+	PaymentActionValueTypeImage PaymentActionValueType = "image"
+	PaymentActionValueTypeLink  PaymentActionValueType = "link"
+	PaymentActionValueTypeText  PaymentActionValueType = "text"
+	PaymentActionValueTypeClaim PaymentActionValueType = "claim"
+)
+
+func (e *PaymentActionValueType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PaymentActionValueType(s)
+	case string:
+		*e = PaymentActionValueType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PaymentActionValueType: %T", src)
+	}
+	return nil
+}
+
+type NullPaymentActionValueType struct {
+	PaymentActionValueType PaymentActionValueType `json:"payment_action_value_type"`
+	Valid                  bool                   `json:"valid"` // Valid is true if PaymentActionValueType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPaymentActionValueType) Scan(value interface{}) error {
+	if value == nil {
+		ns.PaymentActionValueType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PaymentActionValueType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPaymentActionValueType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PaymentActionValueType), nil
+}
+
+type PaymentProductType string
+
+const (
+	PaymentProductTypeImageToken      PaymentProductType = "image_token"
+	PaymentProductTypeVideoToken      PaymentProductType = "video_token"
+	PaymentProductTypeLivestreamToken PaymentProductType = "livestream_token"
+)
+
+func (e *PaymentProductType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PaymentProductType(s)
+	case string:
+		*e = PaymentProductType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PaymentProductType: %T", src)
+	}
+	return nil
+}
+
+type NullPaymentProductType struct {
+	PaymentProductType PaymentProductType `json:"payment_product_type"`
+	Valid              bool               `json:"valid"` // Valid is true if PaymentProductType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPaymentProductType) Scan(value interface{}) error {
+	if value == nil {
+		ns.PaymentProductType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PaymentProductType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPaymentProductType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PaymentProductType), nil
+}
+
+type PaymentStatus string
+
+const (
+	PaymentStatusPending  PaymentStatus = "pending"
+	PaymentStatusSuccess  PaymentStatus = "success"
+	PaymentStatusFailed   PaymentStatus = "failed"
+	PaymentStatusCanceled PaymentStatus = "canceled"
+	PaymentStatusRefunded PaymentStatus = "refunded"
+	PaymentStatusExpired  PaymentStatus = "expired"
+	PaymentStatusDenied   PaymentStatus = "denied"
+)
+
+func (e *PaymentStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PaymentStatus(s)
+	case string:
+		*e = PaymentStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PaymentStatus: %T", src)
+	}
+	return nil
+}
+
+type NullPaymentStatus struct {
+	PaymentStatus PaymentStatus `json:"payment_status"`
+	Valid         bool          `json:"valid"` // Valid is true if PaymentStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPaymentStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.PaymentStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PaymentStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPaymentStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PaymentStatus), nil
+}
+
+type ReferralRecordStatus string
+
+const (
+	ReferralRecordStatusPending  ReferralRecordStatus = "pending"
+	ReferralRecordStatusSuccess  ReferralRecordStatus = "success"
+	ReferralRecordStatusFailed   ReferralRecordStatus = "failed"
+	ReferralRecordStatusCanceled ReferralRecordStatus = "canceled"
+)
+
+func (e *ReferralRecordStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ReferralRecordStatus(s)
+	case string:
+		*e = ReferralRecordStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ReferralRecordStatus: %T", src)
+	}
+	return nil
+}
+
+type NullReferralRecordStatus struct {
+	ReferralRecordStatus ReferralRecordStatus `json:"referral_record_status"`
+	Valid                bool                 `json:"valid"` // Valid is true if ReferralRecordStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullReferralRecordStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ReferralRecordStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ReferralRecordStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullReferralRecordStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ReferralRecordStatus), nil
+}
+
 type ReferralType string
 
 const (
@@ -937,6 +1115,58 @@ type CreatorImageTypeCategory struct {
 	CreatedAt      sql.NullTime `json:"created_at"`
 }
 
+type PaymentHistory struct {
+	ID                    uuid.UUID          `json:"id"`
+	ProfileID             uuid.UUID          `json:"profile_id"`
+	BusinessRootID        int64              `json:"business_root_id"`
+	ProductAmount         int64              `json:"product_amount"`
+	Status                PaymentStatus      `json:"status"`
+	Currency              string             `json:"currency"`
+	PaymentMethod         string             `json:"payment_method"`
+	PaymentMethodType     string             `json:"payment_method_type"`
+	RecordProductName     string             `json:"record_product_name"`
+	RecordProductType     PaymentProductType `json:"record_product_type"`
+	RecordProductPrice    int64              `json:"record_product_price"`
+	RecordProductImageUrl string             `json:"record_product_image_url"`
+	ReferenceProductID    uuid.UUID          `json:"reference_product_id"`
+	SubtotalItemAmount    int64              `json:"subtotal_item_amount"`
+	DiscountAmount        int64              `json:"discount_amount"`
+	DiscountPercentage    sql.NullInt32      `json:"discount_percentage"`
+	DiscountType          DiscountType       `json:"discount_type"`
+	AdminFeeAmount        int64              `json:"admin_fee_amount"`
+	AdminFeePercentage    sql.NullInt32      `json:"admin_fee_percentage"`
+	AdminFeeType          DiscountType       `json:"admin_fee_type"`
+	TaxAmount             int64              `json:"tax_amount"`
+	TaxPercentage         int32              `json:"tax_percentage"`
+	ReferralRecordID      sql.NullInt64      `json:"referral_record_id"`
+	MidtransTransactionID sql.NullString     `json:"midtrans_transaction_id"`
+	MidtransExpiredAt     sql.NullTime       `json:"midtrans_expired_at"`
+	PaymentPendingAt      sql.NullTime       `json:"payment_pending_at"`
+	PaymentSuccessAt      sql.NullTime       `json:"payment_success_at"`
+	PaymentFailedAt       sql.NullTime       `json:"payment_failed_at"`
+	PaymentCanceledAt     sql.NullTime       `json:"payment_canceled_at"`
+	PaymentExpiredAt      sql.NullTime       `json:"payment_expired_at"`
+	PaymentRefundedAt     sql.NullTime       `json:"payment_refunded_at"`
+	TotalAmount           int64              `json:"total_amount"`
+	CreatedAt             time.Time          `json:"created_at"`
+	UpdatedAt             time.Time          `json:"updated_at"`
+	DeletedAt             sql.NullTime       `json:"deleted_at"`
+}
+
+type PaymentHistoryAction struct {
+	ID               int64                  `json:"id"`
+	PaymentHistoryID uuid.UUID              `json:"payment_history_id"`
+	Name             string                 `json:"name"`
+	Label            string                 `json:"label"`
+	Value            string                 `json:"value"`
+	ValueType        PaymentActionValueType `json:"value_type"`
+	PaymentType      AppPaymentMethodType   `json:"payment_type"`
+	ActionMethod     string                 `json:"action_method"`
+	IsPublic         bool                   `json:"is_public"`
+	CreatedAt        time.Time              `json:"created_at"`
+	UpdatedAt        time.Time              `json:"updated_at"`
+}
+
 type Profile struct {
 	ID          uuid.UUID      `json:"id"`
 	Name        string         `json:"name"`
@@ -965,6 +1195,28 @@ type ProfileReferralCode struct {
 	CreatedAt         time.Time     `json:"created_at"`
 	UpdatedAt         time.Time     `json:"updated_at"`
 	DeletedAt         sql.NullTime  `json:"deleted_at"`
+}
+
+type ReferralRecord struct {
+	ID                      int64                `json:"id"`
+	ConsumerProfileID       uuid.UUID            `json:"consumer_profile_id"`
+	BusinessRootID          int64                `json:"business_root_id"`
+	ProfileReferralCodeID   int64                `json:"profile_referral_code_id"`
+	RecordType              ReferralType         `json:"record_type"`
+	RecordTotalDiscount     int64                `json:"record_total_discount"`
+	RecordDiscountType      DiscountType         `json:"record_discount_type"`
+	RecordExpiredDays       sql.NullInt32        `json:"record_expired_days"`
+	RecordMaxDiscount       int64                `json:"record_max_discount"`
+	RecordMaxUsage          sql.NullInt32        `json:"record_max_usage"`
+	RecordRewardPerReferral int64                `json:"record_reward_per_referral"`
+	DiscountAmountGranted   int64                `json:"discount_amount_granted"`
+	DiscountCurrency        string               `json:"discount_currency"`
+	RewardAmountGranted     int64                `json:"reward_amount_granted"`
+	RewardCurrency          string               `json:"reward_currency"`
+	Status                  ReferralRecordStatus `json:"status"`
+	CreatedAt               time.Time            `json:"created_at"`
+	UpdatedAt               time.Time            `json:"updated_at"`
+	DeletedAt               sql.NullTime         `json:"deleted_at"`
 }
 
 type UploadedImage struct {

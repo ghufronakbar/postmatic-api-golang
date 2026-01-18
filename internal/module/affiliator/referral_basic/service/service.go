@@ -5,6 +5,7 @@ import (
 	"context"
 	crand "crypto/rand"
 	"database/sql"
+	"time"
 
 	referral_rule_service "postmatic-api/internal/module/app/referral_rule/service"
 	"postmatic-api/internal/repository/entity"
@@ -123,4 +124,120 @@ func generateReffBasicCode(n int) (string, error) {
 		b[i] = charset[int(b[i])%len(charset)]
 	}
 	return string(b), nil
+}
+
+// GetReferralCodeByCode returns the referral code detail by code
+func (s *ReferralBasicService) GetReferralCodeByCode(ctx context.Context, code string) (ReferralCodeDetailResponse, error) {
+	reff, err := s.store.GetProfileReferralCodeByCode(ctx, code)
+	if err == sql.ErrNoRows {
+		return ReferralCodeDetailResponse{}, errs.NewNotFound("REFERRAL_CODE_NOT_FOUND")
+	}
+	if err != nil {
+		return ReferralCodeDetailResponse{}, errs.NewInternalServerError(err)
+	}
+
+	return mapReferralCodeToDetail(reff), nil
+}
+
+// ValidateReferralForPayment validates if a referral code can be used for payment
+func (s *ReferralBasicService) ValidateReferralForPayment(ctx context.Context, input ValidateReferralInput) (*ReferralValidationResponse, error) {
+	// 1. Get referral code
+	reff, err := s.store.GetProfileReferralCodeByCode(ctx, input.Code)
+	if err == sql.ErrNoRows {
+		return &ReferralValidationResponse{Valid: false, Message: "REFERRAL_CODE_NOT_FOUND"}, nil
+	}
+	if err != nil {
+		return nil, errs.NewInternalServerError(err)
+	}
+
+	// 2. Check if active
+	if !reff.IsActive {
+		return &ReferralValidationResponse{Valid: false, Message: "REFERRAL_CODE_INACTIVE"}, nil
+	}
+
+	// 3. Check self-referral (cannot use own code)
+	if reff.ProfileID == input.ProfileID {
+		return &ReferralValidationResponse{Valid: false, Message: "CANNOT_USE_OWN_REFERRAL_CODE"}, nil
+	}
+
+	// 4. Check if expired
+	if reff.ExpiredDays.Valid {
+		expiryDate := reff.CreatedAt.AddDate(0, 0, int(reff.ExpiredDays.Int32))
+		if time.Now().After(expiryDate) {
+			return &ReferralValidationResponse{Valid: false, Message: "REFERRAL_CODE_EXPIRED"}, nil
+		}
+	}
+
+	// 5. Check max usage limit
+	if reff.MaxUsage.Valid {
+		usageCount, err := s.store.CountReferralCodeUsage(ctx, reff.ID)
+		if err != nil {
+			return nil, errs.NewInternalServerError(err)
+		}
+		if int(usageCount) >= int(reff.MaxUsage.Int32) {
+			return &ReferralValidationResponse{Valid: false, Message: "REFERRAL_CODE_MAX_USAGE_REACHED"}, nil
+		}
+	}
+
+	// 6. Check if profile already used this code
+	profileUsed, err := s.store.CheckProfileUsedReferralCode(ctx, entity.CheckProfileUsedReferralCodeParams{
+		ConsumerProfileID:     input.ProfileID,
+		ProfileReferralCodeID: reff.ID,
+	})
+	if err != nil {
+		return nil, errs.NewInternalServerError(err)
+	}
+	if profileUsed {
+		return &ReferralValidationResponse{Valid: false, Message: "PROFILE_ALREADY_USED_REFERRAL_CODE"}, nil
+	}
+
+	// 7. Check if business already used this code
+	businessUsed, err := s.store.CheckBusinessUsedReferralCode(ctx, entity.CheckBusinessUsedReferralCodeParams{
+		BusinessRootID:        input.BusinessRootID,
+		ProfileReferralCodeID: reff.ID,
+	})
+	if err != nil {
+		return nil, errs.NewInternalServerError(err)
+	}
+	if businessUsed {
+		return &ReferralValidationResponse{Valid: false, Message: "BUSINESS_ALREADY_USED_REFERRAL_CODE"}, nil
+	}
+
+	// All validations passed
+	return &ReferralValidationResponse{
+		Valid:             true,
+		Message:           "REFERRAL_CODE_VALID",
+		ReferralCodeID:    reff.ID,
+		DiscountType:      string(reff.DiscountType),
+		TotalDiscount:     reff.TotalDiscount,
+		MaxDiscount:       reff.MaxDiscount,
+		OwnerProfileID:    reff.ProfileID,
+		RewardPerReferral: reff.RewardPerReferral,
+	}, nil
+}
+
+func mapReferralCodeToDetail(r entity.ProfileReferralCode) ReferralCodeDetailResponse {
+	var expDays *int32
+	if r.ExpiredDays.Valid {
+		expDays = &r.ExpiredDays.Int32
+	}
+	var maxUsage *int32
+	if r.MaxUsage.Valid {
+		maxUsage = &r.MaxUsage.Int32
+	}
+	return ReferralCodeDetailResponse{
+		ID:                r.ID,
+		Code:              r.Code,
+		Type:              string(r.Type),
+		IsActive:          r.IsActive,
+		TotalDiscount:     r.TotalDiscount,
+		DiscountType:      string(r.DiscountType),
+		ExpiredDays:       expDays,
+		MaxDiscount:       r.MaxDiscount,
+		MaxUsage:          maxUsage,
+		RewardPerReferral: r.RewardPerReferral,
+		OwnerProfileID:    r.ProfileID,
+		CreatedAt:         r.CreatedAt,
+		UpdatedAt:         r.UpdatedAt,
+	}
 }

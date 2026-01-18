@@ -12,6 +12,10 @@ import (
 	google_oauth_handler "postmatic-api/internal/module/account/google_oauth/handler"
 	profile_handler "postmatic-api/internal/module/account/profile/handler"
 	session_handler "postmatic-api/internal/module/account/session/handler"
+	payment_common_handler "postmatic-api/internal/module/payment/common/handler"
+	payment_common_service "postmatic-api/internal/module/payment/common/service"
+	image_token_handler "postmatic-api/internal/module/payment/image_token/handler"
+	image_token_service "postmatic-api/internal/module/payment/image_token/service"
 
 	referral_basic_handler "postmatic-api/internal/module/affiliator/referral_basic/handler"
 
@@ -61,6 +65,7 @@ import (
 	business_timezone_pref_service "postmatic-api/internal/module/business/business_timezone_pref/service"
 	creator_image_service "postmatic-api/internal/module/creator/creator_image/service"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
+	"postmatic-api/internal/module/headless/midtrans"
 	"postmatic-api/internal/module/headless/queue"
 	"postmatic-api/internal/module/headless/s3_uploader"
 	"postmatic-api/internal/module/headless/token"
@@ -124,6 +129,11 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	referralBasicSvc := referral_basic_service.NewService(store, referralRuleSvc)
 	// CREATOR
 	creatorImageSvc := creator_image_service.NewService(store, catCreatorImageSvc)
+	// HEADLESS
+	midtransSvc := midtrans.NewService(cfg.MIDTRANS_SERVER_KEY, cfg.MIDTRANS_IS_PRODUCTION)
+	// PAYMENT
+	imageTokenPaymentSvc := image_token_service.NewService(store, tokenProductSvc, paymentMethodSvc, referralBasicSvc, midtransSvc)
+	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -154,6 +164,9 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	creatorImageHandler := creator_image_handler.NewHandler(creatorImageSvc)
 	// AFFILIATOR
 	referralBasicHandler := referral_basic_handler.NewHandler(referralBasicSvc)
+	// PAYMENT
+	imageTokenPaymentHandler := image_token_handler.NewHandler(imageTokenPaymentSvc)
+	paymentCommonHandler := payment_common_handler.NewHandler(paymentCommonSvc)
 
 	// 4. =========== INITIAL MIDDLEWARE ===========
 	allAllowed := internal_middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin, entity.AppRoleUser})
@@ -235,6 +248,14 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 		r.Use(allAllowed)
 		r.Mount("/referral-basic", referralBasicHandler.Routes())
 	})
+
+	// Payment routes
+	r.Route("/payment", func(r chi.Router) {
+		r.Mount("/image-token", imageTokenPaymentHandler.Routes(allAllowed))
+		r.Mount("/", paymentCommonHandler.Routes(allAllowed))
+	})
+	// Webhook route (no auth, public)
+	r.Post("/payment/webhook", paymentCommonHandler.WebhookRoute())
 
 	return r
 }

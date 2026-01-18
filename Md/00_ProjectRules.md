@@ -105,7 +105,80 @@ internal/module/account/auth/
 
 - Gunakan **snake_case** untuk nama file
 - Handler: `handler.go`, `cookie.go` (helper)
-- Service: `service.go`, `dto.go`, `viewmodel.go`, `filter.go`
+- Service: `service.go`, `dto.go`, `viewmodel.go`, `filter.go`, `midtrans.go` (3rd party types)
+
+---
+
+## 📄 File Path Comments
+
+Setiap file harus dimulai dengan komentar yang menunjukkan path relatif dari root project:
+
+```go
+// internal/module/payment/image_token/service/dto.go
+package image_token_service
+```
+
+Format: `// {relative_path_from_project_root}`
+
+---
+
+## 📂 Service File Organization
+
+Setiap service folder harus memiliki file yang terpisah dengan fungsi spesifik:
+
+| File            | Isi                                         | Contoh                                |
+| --------------- | ------------------------------------------- | ------------------------------------- |
+| `dto.go`        | **Input** DTOs (params ke service methods)  | `CreatePaymentInput`, `GetFilter`     |
+| `viewmodel.go`  | **Output** DTOs (responses dari service)    | `PaymentResponse`, `PriceCalculation` |
+| `service.go`    | Business logic dan service struct           | `PaymentService`, `NewService()`      |
+| `filter.go`     | Filter structs untuk query (optional)       | `GetPaymentFilter`                    |
+| `{feature}.go`  | Feature-specific code (calculator, helpers) | `calculator.go`, `mapper.go`          |
+| `{3rdparty}.go` | 3rd-party types (webhook payloads, dll)     | `midtrans.go`                         |
+
+### Contoh Struktur
+
+```
+internal/module/payment/image_token/service/
+├── dto.go          # CheckPriceInput, CreatePaymentInput
+├── viewmodel.go    # CheckPriceResponse, CreatePaymentResponse
+├── service.go      # ImageTokenPaymentService
+└── calculator.go   # price calculation logic
+```
+
+---
+
+## 🔄 JSON Response Conventions
+
+### Null vs Undefined
+
+Untuk field opsional yang bisa `null`, **hindari** `omitempty` agar response tetap konsisten:
+
+```go
+// ❌ Bad - menggunakan omitempty, return undefined jika nil
+type Response struct {
+    ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+}
+
+// ✅ Good - tanpa omitempty, return null jika nil
+type Response struct {
+    ExpiresAt *time.Time `json:"expiresAt"`
+}
+```
+
+Response:
+
+```json
+// ❌ Bad (undefined/missing)
+{"paymentId": "123"}
+
+// ✅ Good (explicit null)
+{"paymentId": "123", "expiresAt": null}
+```
+
+### Gunakan `omitempty` Hanya Untuk
+
+- Field yang benar-benar opsional di response (e.g., arrays yang mungkin empty)
+- Internal/debug fields
 
 ---
 
@@ -239,6 +312,89 @@ response.Error(w, r, err, nil)
 
 // Validation error
 response.ValidationFailed(w, r, validationErrors)
+```
+
+---
+
+## 📋 Request Body Validation
+
+Gunakan `pkg/utils/validator.go` untuk validasi request body dengan field-level error messages.
+
+### Penggunaan
+
+```go
+import "postmatic-api/pkg/utils"
+
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
+    var req InputStruct
+
+    // Validate request body (parse JSON + validate tags)
+    if appErr := utils.ValidateStruct(r.Body, &req); appErr != nil {
+        response.ValidationFailed(w, r, appErr.ValidationErrors)
+        return
+    }
+
+    // req sudah terisi dan valid
+    res, err := h.svc.Create(r.Context(), req)
+    // ...
+}
+```
+
+### DTO dengan Validation Tags
+
+```go
+type CreatePaymentInput struct {
+    TokenAmount   int64  `json:"tokenAmount" validate:"required,min=1"`
+    CurrencyCode  string `json:"currencyCode" validate:"required"`
+    PaymentMethod string `json:"paymentMethod" validate:"required"`
+    ReferralCode  *string `json:"referralCode"`
+}
+```
+
+### Available Validation Tags
+
+| Tag        | Usage                 | Example               |
+| ---------- | --------------------- | --------------------- |
+| `required` | Field wajib diisi     | `validate:"required"` |
+| `email`    | Format email valid    | `validate:"email"`    |
+| `url`      | Format URL valid      | `validate:"url"`      |
+| `min`      | Minimum value/length  | `validate:"min=1"`    |
+| `max`      | Maximum value/length  | `validate:"max=100"`  |
+| `len`      | Exact length          | `validate:"len=6"`    |
+| `gte`      | Greater than or equal | `validate:"gte=0"`    |
+| `lte`      | Less than or equal    | `validate:"lte=100"`  |
+
+### Error Response Format
+
+Validation error akan menghasilkan response 400 dengan field-level errors:
+
+```json
+{
+  "metaData": { "code": 400, "message": "Bad Request" },
+  "responseMessage": "VALIDATION_FAILED",
+  "validationErrors": {
+    "tokenAmount": "is required",
+    "email": "must be a valid email",
+    "unknownField": "unknown field"
+  }
+}
+```
+
+### Query Params Validation
+
+Untuk query params, validasi manual dengan `response.ValidationFailed`:
+
+```go
+tokenAmountStr := r.URL.Query().Get("tokenAmount")
+if tokenAmountStr == "" {
+    response.ValidationFailed(w, r, map[string]string{"tokenAmount": "REQUIRED"})
+    return
+}
+tokenAmount, err := strconv.ParseInt(tokenAmountStr, 10, 64)
+if err != nil || tokenAmount <= 0 {
+    response.ValidationFailed(w, r, map[string]string{"tokenAmount": "MUST_BE_POSITIVE_INTEGER"})
+    return
+}
 ```
 
 ---

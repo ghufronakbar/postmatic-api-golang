@@ -52,9 +52,12 @@ type ChargeResponse struct {
 	StatusMessage     string `json:"statusMessage"`
 	// E-Wallet specific
 	Actions []PaymentAction `json:"actions,omitempty"`
-	// Bank Transfer specific (VA Numbers)
-	VANumbers       []VANumber `json:"vaNumbers,omitempty"`
-	PermataVANumber string     `json:"permataVaNumber,omitempty"`
+	// Bank Transfer specific (VA Numbers) - normalized from various bank formats
+	VANumbers []VANumber `json:"vaNumbers,omitempty"`
+	// Raw response fields (for reference, normalized to VANumbers above)
+	PermataVANumber string `json:"permataVaNumber,omitempty"` // Permata uses separate field
+	BillKey         string `json:"billKey,omitempty"`         // Mandiri echannel
+	BillerCode      string `json:"billerCode,omitempty"`      // Mandiri echannel
 }
 
 // PaymentAction represents action URLs for e-wallet payments

@@ -1,0 +1,1 @@
+Note: Berdasarkan test Anda, sepertinya Midtrans sandbox mengembalikan permata_va_number untuk Mandiri (bukan bill_key+biller_code). Ini mungkin karena sandbox behavior. Di production mungkin berbeda sesuai docs official.

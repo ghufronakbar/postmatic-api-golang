@@ -6,16 +6,20 @@ package entity
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
 
 type Querier interface {
+	CheckBusinessUsedReferralCode(ctx context.Context, arg CheckBusinessUsedReferralCodeParams) (bool, error)
+	CheckProfileUsedReferralCode(ctx context.Context, arg CheckProfileUsedReferralCodeParams) (bool, error)
 	CountAllAppCreatorImageProductCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllAppCreatorImageTypeCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllCreatorImage(ctx context.Context, arg CountAllCreatorImageParams) (int64, error)
 	CountAllGenerativeImageModels(ctx context.Context, arg CountAllGenerativeImageModelsParams) (int64, error)
 	CountAllGenerativeTextModels(ctx context.Context, arg CountAllGenerativeTextModelsParams) (int64, error)
+	CountAllPaymentHistories(ctx context.Context, arg CountAllPaymentHistoriesParams) (int64, error)
 	CountAllPaymentMethods(ctx context.Context, arg CountAllPaymentMethodsParams) (int64, error)
 	CountAllRSSCategory(ctx context.Context, search interface{}) (int64, error)
 	CountAllRSSFeed(ctx context.Context, arg CountAllRSSFeedParams) (int64, error)
@@ -23,6 +27,7 @@ type Querier interface {
 	CountBusinessProductsByBusinessRootId(ctx context.Context, arg CountBusinessProductsByBusinessRootIdParams) (int64, error)
 	CountBusinessRssSubscriptionsByBusinessRootID(ctx context.Context, arg CountBusinessRssSubscriptionsByBusinessRootIDParams) (int64, error)
 	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
+	CountReferralCodeUsage(ctx context.Context, profileReferralCodeID int64) (int32, error)
 	CreateBusinessImageContent(ctx context.Context, arg CreateBusinessImageContentParams) (BusinessImageContent, error)
 	CreateBusinessKnowledge(ctx context.Context, arg CreateBusinessKnowledgeParams) (BusinessKnowledge, error)
 	CreateBusinessMember(ctx context.Context, arg CreateBusinessMemberParams) (BusinessMember, error)
@@ -36,11 +41,15 @@ type Querier interface {
 	CreateGenerativeImageModelChange(ctx context.Context, arg CreateGenerativeImageModelChangeParams) (AppGenerativeImageModelChange, error)
 	CreateGenerativeTextModel(ctx context.Context, arg CreateGenerativeTextModelParams) (AppGenerativeTextModel, error)
 	CreateGenerativeTextModelChange(ctx context.Context, arg CreateGenerativeTextModelChangeParams) (AppGenerativeTextModelChange, error)
+	CreatePaymentHistory(ctx context.Context, arg CreatePaymentHistoryParams) (PaymentHistory, error)
+	CreatePaymentHistoryAction(ctx context.Context, arg CreatePaymentHistoryActionParams) (PaymentHistoryAction, error)
 	CreatePaymentMethod(ctx context.Context, arg CreatePaymentMethodParams) (AppPaymentMethod, error)
 	CreatePaymentMethodChange(ctx context.Context, arg CreatePaymentMethodChangeParams) (AppPaymentMethodChange, error)
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateProfileReferralCode(ctx context.Context, arg CreateProfileReferralCodeParams) (ProfileReferralCode, error)
+	CreateReferralRecord(ctx context.Context, arg CreateReferralRecordParams) (ReferralRecord, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeletePaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) error
 	EditBusinessRssSubscription(ctx context.Context, arg EditBusinessRssSubscriptionParams) (BusinessRssSubscription, error)
 	ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptID(ctx context.Context, arg ExistsBusinessRssSubscriptionByBusinessRootIDAndFeedIDExceptIDParams) (bool, error)
 	GetAllAppCreatorImageProductCategories(ctx context.Context, arg GetAllAppCreatorImageProductCategoriesParams) ([]GetAllAppCreatorImageProductCategoriesRow, error)
@@ -48,6 +57,7 @@ type Querier interface {
 	GetAllCreatorImage(ctx context.Context, arg GetAllCreatorImageParams) ([]GetAllCreatorImageRow, error)
 	GetAllGenerativeImageModels(ctx context.Context, arg GetAllGenerativeImageModelsParams) ([]AppGenerativeImageModel, error)
 	GetAllGenerativeTextModels(ctx context.Context, arg GetAllGenerativeTextModelsParams) ([]AppGenerativeTextModel, error)
+	GetAllPaymentHistories(ctx context.Context, arg GetAllPaymentHistoriesParams) ([]PaymentHistory, error)
 	GetAllPaymentMethods(ctx context.Context, arg GetAllPaymentMethodsParams) ([]AppPaymentMethod, error)
 	GetAllRSSCategory(ctx context.Context, arg GetAllRSSCategoryParams) ([]AppRssCategory, error)
 	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)
@@ -86,6 +96,10 @@ type Querier interface {
 	GetMembersByBusinessRootID(ctx context.Context, businessRootID int64) ([]GetMembersByBusinessRootIDRow, error)
 	GetMembersByBusinessRootIDWithStatus(ctx context.Context, arg GetMembersByBusinessRootIDWithStatusParams) ([]GetMembersByBusinessRootIDWithStatusRow, error)
 	GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []int64) ([]GetMembersByBusinessRootIDsRow, error)
+	GetPaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) ([]PaymentHistoryAction, error)
+	GetPaymentHistoryById(ctx context.Context, id uuid.UUID) (PaymentHistory, error)
+	GetPaymentHistoryByIdAndProfile(ctx context.Context, arg GetPaymentHistoryByIdAndProfileParams) (PaymentHistory, error)
+	GetPaymentHistoryByMidtransTransactionId(ctx context.Context, midtransTransactionID sql.NullString) (PaymentHistory, error)
 	GetPaymentMethodByCode(ctx context.Context, code string) (AppPaymentMethod, error)
 	GetPaymentMethodByCodeAdmin(ctx context.Context, code string) (AppPaymentMethod, error)
 	GetPaymentMethodByCodeUser(ctx context.Context, code string) (AppPaymentMethod, error)
@@ -96,6 +110,8 @@ type Querier interface {
 	GetProfileById(ctx context.Context, id uuid.UUID) (Profile, error)
 	GetProfileReferralCodeByCode(ctx context.Context, code string) (ProfileReferralCode, error)
 	GetProfileReferralCodeByProfileIdBasic(ctx context.Context, profileID uuid.UUID) (ProfileReferralCode, error)
+	GetPublicPaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) ([]PaymentHistoryAction, error)
+	GetReferralRecordById(ctx context.Context, id int64) (ReferralRecord, error)
 	GetRssFeedById(ctx context.Context, id int64) (AppRssFeed, error)
 	GetUploadedImageByHashkey(ctx context.Context, hashkey string) (UploadedImage, error)
 	GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error)
@@ -124,8 +140,11 @@ type Querier interface {
 	UpdateGenerativeImageModel(ctx context.Context, arg UpdateGenerativeImageModelParams) (AppGenerativeImageModel, error)
 	UpdateGenerativeTextModel(ctx context.Context, arg UpdateGenerativeTextModelParams) (AppGenerativeTextModel, error)
 	UpdateManyBusinessMemberStatus(ctx context.Context, arg UpdateManyBusinessMemberStatusParams) error
+	UpdatePaymentHistoryMidtransId(ctx context.Context, arg UpdatePaymentHistoryMidtransIdParams) (PaymentHistory, error)
+	UpdatePaymentHistoryStatus(ctx context.Context, arg UpdatePaymentHistoryStatusParams) (PaymentHistory, error)
 	UpdatePaymentMethod(ctx context.Context, arg UpdatePaymentMethodParams) (AppPaymentMethod, error)
 	UpdateProfile(ctx context.Context, arg UpdateProfileParams) (Profile, error)
+	UpdateReferralRecordStatus(ctx context.Context, arg UpdateReferralRecordStatusParams) (ReferralRecord, error)
 	UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error)
 	UpsertAppProfileReferralRules(ctx context.Context, arg UpsertAppProfileReferralRulesParams) (AppProfileReferralRule, error)
 	UpsertBusinessKnowledgeByBusinessRootID(ctx context.Context, arg UpsertBusinessKnowledgeByBusinessRootIDParams) (BusinessKnowledge, error)
