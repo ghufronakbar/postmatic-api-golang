@@ -743,6 +743,48 @@ func (ns NullReferralType) Value() (driver.Value, error) {
 	return string(ns.ReferralType), nil
 }
 
+type TokenTransactionType string
+
+const (
+	TokenTransactionTypeIn  TokenTransactionType = "in"
+	TokenTransactionTypeOut TokenTransactionType = "out"
+)
+
+func (e *TokenTransactionType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = TokenTransactionType(s)
+	case string:
+		*e = TokenTransactionType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for TokenTransactionType: %T", src)
+	}
+	return nil
+}
+
+type NullTokenTransactionType struct {
+	TokenTransactionType TokenTransactionType `json:"token_transaction_type"`
+	Valid                bool                 `json:"valid"` // Valid is true if TokenTransactionType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullTokenTransactionType) Scan(value interface{}) error {
+	if value == nil {
+		ns.TokenTransactionType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.TokenTransactionType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullTokenTransactionType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.TokenTransactionType), nil
+}
+
 type TokenType string
 
 const (
@@ -1113,6 +1155,18 @@ type CreatorImageTypeCategory struct {
 	CreatorImageID int64        `json:"creator_image_id"`
 	TypeCategoryID int64        `json:"type_category_id"`
 	CreatedAt      sql.NullTime `json:"created_at"`
+}
+
+type GenerativeTokenImageTransaction struct {
+	ID               int64                `json:"id"`
+	Type             TokenTransactionType `json:"type"`
+	Amount           int64                `json:"amount"`
+	ProfileID        uuid.UUID            `json:"profile_id"`
+	BusinessRootID   int64                `json:"business_root_id"`
+	PaymentHistoryID uuid.NullUUID        `json:"payment_history_id"`
+	CreatedAt        time.Time            `json:"created_at"`
+	UpdatedAt        time.Time            `json:"updated_at"`
+	DeletedAt        sql.NullTime         `json:"deleted_at"`
 }
 
 type PaymentHistory struct {

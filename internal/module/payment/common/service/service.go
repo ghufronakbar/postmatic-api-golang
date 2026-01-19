@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"time"
 
+	image_token_service "postmatic-api/internal/module/generative_token/image_token/service"
 	"postmatic-api/internal/module/headless/mailer"
 	"postmatic-api/internal/module/headless/midtrans"
 	"postmatic-api/internal/module/headless/queue"
@@ -20,17 +21,24 @@ import (
 
 // PaymentCommonService handles common payment operations
 type PaymentCommonService struct {
-	store    entity.Store
-	midtrans midtrans.Service
-	queue    queue.MailerProducer
+	store           entity.Store
+	midtrans        midtrans.Service
+	queue           queue.MailerProducer
+	generativeToken *image_token_service.ImageTokenService
 }
 
 // NewService creates a new PaymentCommonService
-func NewService(store entity.Store, midtrans midtrans.Service, queue queue.MailerProducer) *PaymentCommonService {
+func NewService(
+	store entity.Store,
+	midtrans midtrans.Service,
+	queue queue.MailerProducer,
+	generativeToken *image_token_service.ImageTokenService,
+) *PaymentCommonService {
 	return &PaymentCommonService{
-		store:    store,
-		midtrans: midtrans,
-		queue:    queue,
+		store:           store,
+		midtrans:        midtrans,
+		queue:           queue,
+		generativeToken: generativeToken,
 	}
 }
 
@@ -86,9 +94,23 @@ func (s *PaymentCommonService) GetPaymentHistories(ctx context.Context, filter G
 		return nil, nil, errs.NewInternalServerError(err)
 	}
 
+	// Collect success payment IDs for background sync
+	var successPaymentIDs []uuid.UUID
 	responses := make([]PaymentHistoryResponse, len(data))
 	for i, d := range data {
 		responses[i] = mapPaymentHistoryToResponse(d)
+		if d.Status == entity.PaymentStatusSuccess {
+			successPaymentIDs = append(successPaymentIDs, d.ID)
+		}
+	}
+
+	// Background sync for missing token transactions
+	if len(successPaymentIDs) > 0 {
+		go func() {
+			bgCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			s.generativeToken.SyncMissingTokenTransactions(bgCtx, successPaymentIDs)
+		}()
 	}
 
 	return responses, &pag, nil
@@ -134,24 +156,49 @@ func (s *PaymentCommonService) GetPaymentHistoryById(ctx context.Context, id str
 			if newStatus != string(payment.Status) {
 				log.Info("Updating payment status from midtrans", "oldStatus", payment.Status, "newStatus", newStatus)
 
-				updated, err := s.store.UpdatePaymentHistoryStatus(ctx, entity.UpdatePaymentHistoryStatusParams{
-					ID:     payment.ID,
-					Status: entity.PaymentStatus(newStatus),
-				})
-				if err != nil {
-					log.Error("Failed to update payment status", "error", err)
-				} else {
-					payment = updated
+				// Use transaction for status update + token credit
+				var updatedPayment entity.PaymentHistory
+				txErr := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+					var err error
+					updatedPayment, err = q.UpdatePaymentHistoryStatus(ctx, entity.UpdatePaymentHistoryStatusParams{
+						ID:     payment.ID,
+						Status: entity.PaymentStatus(newStatus),
+					})
+					if err != nil {
+						return err
+					}
 
-					// Also update referral record status if applicable
+					// Update referral record status if applicable
 					if payment.ReferralRecordID.Valid {
-						_, _ = s.store.UpdateReferralRecordStatus(ctx, entity.UpdateReferralRecordStatusParams{
+						_, _ = q.UpdateReferralRecordStatus(ctx, entity.UpdateReferralRecordStatusParams{
 							ID:     payment.ReferralRecordID.Int64,
 							Status: entity.ReferralRecordStatus(newStatus),
 						})
 					}
 
-					// Send success email if status changed to success
+					// Credit token if status changed to success
+					if newStatus == "success" {
+						err = s.generativeToken.CreditTokenFromPayment(ctx, q, image_token_service.CreateTokenTransactionInput{
+							ProfileID:        payment.ProfileID,
+							BusinessRootID:   payment.BusinessRootID,
+							PaymentHistoryID: payment.ID,
+							Amount:           payment.ProductAmount,
+						})
+						if err != nil {
+							log.Error("Failed to credit token", "paymentID", payment.ID, "error", err)
+							// Don't fail transaction for token credit error
+						}
+					}
+
+					return nil
+				})
+
+				if txErr != nil {
+					log.Error("Failed to update payment status in transaction", "error", txErr)
+				} else {
+					payment = updatedPayment
+
+					// Send success email if status changed to success (async)
 					if newStatus == "success" {
 						s.sendPaymentSuccessEmail(ctx, payment)
 					}
@@ -254,33 +301,54 @@ func (s *PaymentCommonService) HandleWebhook(ctx context.Context, notification M
 		return errs.NewInternalServerError(err)
 	}
 
-	// 3. Map status and update
+	// 3. Map status and update using transaction
 	newStatus := mapMidtransStatusToPaymentStatus(notification.TransactionStatus)
 	if newStatus != string(payment.Status) {
 		log.Info("Updating payment status from webhook", "oldStatus", payment.Status, "newStatus", newStatus)
 
-		_, err := s.store.UpdatePaymentHistoryStatus(ctx, entity.UpdatePaymentHistoryStatusParams{
-			ID:     payment.ID,
-			Status: entity.PaymentStatus(newStatus),
-		})
-		if err != nil {
-			return errs.NewInternalServerError(err)
-		}
-
-		// Also update referral record status if applicable
-		if payment.ReferralRecordID.Valid {
-			_, _ = s.store.UpdateReferralRecordStatus(ctx, entity.UpdateReferralRecordStatusParams{
-				ID:     payment.ReferralRecordID.Int64,
-				Status: entity.ReferralRecordStatus(newStatus),
+		// Use transaction for status update + token credit
+		txErr := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+			_, err := q.UpdatePaymentHistoryStatus(ctx, entity.UpdatePaymentHistoryStatusParams{
+				ID:     payment.ID,
+				Status: entity.PaymentStatus(newStatus),
 			})
+			if err != nil {
+				return err
+			}
+
+			// Update referral record status if applicable
+			if payment.ReferralRecordID.Valid {
+				_, _ = q.UpdateReferralRecordStatus(ctx, entity.UpdateReferralRecordStatusParams{
+					ID:     payment.ReferralRecordID.Int64,
+					Status: entity.ReferralRecordStatus(newStatus),
+				})
+			}
+
+			// Credit token if status changed to success
+			if newStatus == "success" {
+				err = s.generativeToken.CreditTokenFromPayment(ctx, q, image_token_service.CreateTokenTransactionInput{
+					ProfileID:        payment.ProfileID,
+					BusinessRootID:   payment.BusinessRootID,
+					PaymentHistoryID: payment.ID,
+					Amount:           payment.ProductAmount,
+				})
+				if err != nil {
+					log.Error("Failed to credit token from webhook", "paymentID", payment.ID, "error", err)
+					// Don't fail transaction for token credit error
+				}
+			}
+
+			return nil
+		})
+
+		if txErr != nil {
+			return errs.NewInternalServerError(txErr)
 		}
 
-		// Send success email if status changed to success
+		// Send success email if status changed to success (async)
 		if newStatus == "success" {
 			s.sendPaymentSuccessEmail(ctx, payment)
 		}
-
-		// TODO: If success, add tokens to user's balance
 	}
 
 	return nil

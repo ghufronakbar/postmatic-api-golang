@@ -37,6 +37,7 @@ import (
 	business_timezone_pref_handler "postmatic-api/internal/module/business/business_timezone_pref/handler"
 
 	creator_image_handler "postmatic-api/internal/module/creator/creator_image/handler"
+	gen_token_image_handler "postmatic-api/internal/module/generative_token/image_token/handler"
 
 	// Module services
 	auth_service "postmatic-api/internal/module/account/auth/service"
@@ -64,6 +65,7 @@ import (
 	business_rss_subscription_service "postmatic-api/internal/module/business/business_rss_subscription/service"
 	business_timezone_pref_service "postmatic-api/internal/module/business/business_timezone_pref/service"
 	creator_image_service "postmatic-api/internal/module/creator/creator_image/service"
+	gen_token_image_service "postmatic-api/internal/module/generative_token/image_token/service"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/midtrans"
 	"postmatic-api/internal/module/headless/queue"
@@ -131,9 +133,11 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	creatorImageSvc := creator_image_service.NewService(store, catCreatorImageSvc)
 	// HEADLESS
 	midtransSvc := midtrans.NewService(cfg.MIDTRANS_SERVER_KEY, cfg.MIDTRANS_IS_PRODUCTION)
+	// GENERATIVE TOKEN
+	genTokenImageSvc := gen_token_image_service.NewService(store)
 	// PAYMENT
 	imageTokenPaymentSvc := image_token_service.NewService(store, tokenProductSvc, paymentMethodSvc, referralBasicSvc, midtransSvc, queueProducer)
-	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc, queueProducer)
+	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc, queueProducer, genTokenImageSvc)
 
 	// 3. =========== INITIAL HANDLER ===========
 	// ACCOUNT
@@ -247,6 +251,13 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	r.Route("/affiliator", func(r chi.Router) {
 		r.Use(allAllowed)
 		r.Mount("/referral-basic", referralBasicHandler.Routes())
+	})
+
+	// Generative Token routes
+	genTokenImageHandler := gen_token_image_handler.NewHandler(genTokenImageSvc, ownedMw)
+	r.Route("/generative-token", func(r chi.Router) {
+		r.Use(allAllowed)
+		r.Mount("/image-token", genTokenImageHandler.Routes())
 	})
 
 	// Payment routes
