@@ -15,3 +15,15 @@ type CreateTokenTransactionInput struct {
 type SyncMissingTokenInput struct {
 	PaymentIDs []uuid.UUID
 }
+
+// GetTokenTransactionsFilter is input for filtering token transactions
+type GetTokenTransactionsFilter struct {
+	BusinessRootID int64
+	Type           *string // "in" or "out", nil for all
+	DateStart      *string // YYYY-MM-DD format
+	DateEnd        *string // YYYY-MM-DD format
+	SortBy         string
+	SortDir        string
+	Page           int
+	Limit          int
+}

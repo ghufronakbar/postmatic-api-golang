@@ -4,10 +4,12 @@ package image_token_service
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
+	"postmatic-api/pkg/pagination"
 
 	"github.com/google/uuid"
 )
@@ -131,4 +133,95 @@ func (s *ImageTokenService) GetTokenStatus(ctx context.Context, businessRootID i
 	response.IsExhausted = response.AvailableToken <= 0
 
 	return response, nil
+}
+
+// GetTokenTransactions returns paginated token transactions for a business
+func (s *ImageTokenService) GetTokenTransactions(ctx context.Context, filter GetTokenTransactionsFilter) ([]TokenTransactionResponse, *pagination.Pagination, error) {
+	// Convert type string to NullTokenTransactionType
+	var typeFilter entity.NullTokenTransactionType
+	if filter.Type != nil && (*filter.Type == "in" || *filter.Type == "out") {
+		typeFilter = entity.NullTokenTransactionType{
+			TokenTransactionType: entity.TokenTransactionType(*filter.Type),
+			Valid:                true,
+		}
+	}
+
+	// Convert date strings to sql.NullTime
+	dateStart := parseDateToNullTime(filter.DateStart)
+	dateEnd := parseDateToNullTime(filter.DateEnd)
+
+	// Count total
+	count, err := s.store.CountAllTokenTransactionsByBusiness(ctx, entity.CountAllTokenTransactionsByBusinessParams{
+		BusinessRootID: filter.BusinessRootID,
+		Type:           typeFilter,
+		DateStart:      dateStart,
+		DateEnd:        dateEnd,
+	})
+	if err != nil {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	pag := pagination.NewPagination(&pagination.PaginationParams{
+		Total: int(count),
+		Page:  filter.Page,
+		Limit: filter.Limit,
+	})
+
+	// Calculate offset
+	offset := (filter.Page - 1) * filter.Limit
+	if offset < 0 {
+		offset = 0
+	}
+
+	// Get data
+	data, err := s.store.GetAllTokenTransactionsByBusiness(ctx, entity.GetAllTokenTransactionsByBusinessParams{
+		BusinessRootID: filter.BusinessRootID,
+		Type:           typeFilter,
+		DateStart:      dateStart,
+		DateEnd:        dateEnd,
+		SortBy:         filter.SortBy,
+		SortDir:        filter.SortDir,
+		PageLimit:      int32(filter.Limit),
+		PageOffset:     int32(offset),
+	})
+	if err != nil {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	responses := make([]TokenTransactionResponse, len(data))
+	for i, d := range data {
+		responses[i] = mapTokenTransactionToResponse(d)
+	}
+
+	return responses, &pag, nil
+}
+
+// mapTokenTransactionToResponse maps entity to response
+func mapTokenTransactionToResponse(t entity.GenerativeTokenImageTransaction) TokenTransactionResponse {
+	var paymentHistoryID *uuid.UUID
+	if t.PaymentHistoryID.Valid {
+		paymentHistoryID = &t.PaymentHistoryID.UUID
+	}
+
+	return TokenTransactionResponse{
+		ID:               t.ID,
+		Type:             string(t.Type),
+		Amount:           t.Amount,
+		ProfileID:        t.ProfileID,
+		BusinessRootID:   t.BusinessRootID,
+		PaymentHistoryID: paymentHistoryID,
+		CreatedAt:        t.CreatedAt,
+	}
+}
+
+// parseDateToNullTime converts a date string (YYYY-MM-DD) to sql.NullTime
+func parseDateToNullTime(dateStr *string) sql.NullTime {
+	if dateStr == nil || *dateStr == "" {
+		return sql.NullTime{Valid: false}
+	}
+	t, err := time.Parse("2006-01-02", *dateStr)
+	if err != nil {
+		return sql.NullTime{Valid: false}
+	}
+	return sql.NullTime{Time: t, Valid: true}
 }

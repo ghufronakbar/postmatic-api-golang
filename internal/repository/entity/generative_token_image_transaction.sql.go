@@ -7,10 +7,50 @@ package entity
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
+
+const countAllTokenTransactionsByBusiness = `-- name: CountAllTokenTransactionsByBusiness :one
+SELECT COUNT(*)::bigint AS total
+FROM generative_token_image_transactions t
+WHERE
+    t.deleted_at IS NULL
+    AND t.business_root_id = $1
+    AND (
+        $2::token_transaction_type IS NULL
+        OR t.type = $2::token_transaction_type
+    )
+    AND (
+        $3::date IS NULL
+        OR t.created_at::date >= $3::date
+    )
+    AND (
+        $4::date IS NULL
+        OR t.created_at::date <= $4::date
+    )
+`
+
+type CountAllTokenTransactionsByBusinessParams struct {
+	BusinessRootID int64                    `json:"business_root_id"`
+	Type           NullTokenTransactionType `json:"type"`
+	DateStart      sql.NullTime             `json:"date_start"`
+	DateEnd        sql.NullTime             `json:"date_end"`
+}
+
+func (q *Queries) CountAllTokenTransactionsByBusiness(ctx context.Context, arg CountAllTokenTransactionsByBusinessParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllTokenTransactionsByBusiness,
+		arg.BusinessRootID,
+		arg.Type,
+		arg.DateStart,
+		arg.DateEnd,
+	)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
 
 const createGenerativeTokenImageTransaction = `-- name: CreateGenerativeTokenImageTransaction :one
 INSERT INTO generative_token_image_transactions (
@@ -53,6 +93,89 @@ func (q *Queries) CreateGenerativeTokenImageTransaction(ctx context.Context, arg
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const getAllTokenTransactionsByBusiness = `-- name: GetAllTokenTransactionsByBusiness :many
+SELECT t.id, t.type, t.amount, t.profile_id, t.business_root_id, t.payment_history_id, t.created_at, t.updated_at, t.deleted_at
+FROM generative_token_image_transactions t
+WHERE
+    t.deleted_at IS NULL
+    AND t.business_root_id = $1
+    AND (
+        $2::token_transaction_type IS NULL
+        OR t.type = $2::token_transaction_type
+    )
+    AND (
+        $3::date IS NULL
+        OR t.created_at::date >= $3::date
+    )
+    AND (
+        $4::date IS NULL
+        OR t.created_at::date <= $4::date
+    )
+ORDER BY
+    CASE WHEN $5 = 'id' AND $6 = 'asc' THEN t.id END ASC,
+    CASE WHEN $5 = 'id' AND $6 = 'desc' THEN t.id END DESC,
+    CASE WHEN $5 = 'created_at' AND $6 = 'asc' THEN t.created_at END ASC,
+    CASE WHEN $5 = 'created_at' AND $6 = 'desc' THEN t.created_at END DESC,
+    CASE WHEN $5 = 'amount' AND $6 = 'asc' THEN t.amount END ASC,
+    CASE WHEN $5 = 'amount' AND $6 = 'desc' THEN t.amount END DESC,
+    t.created_at DESC
+LIMIT $8
+OFFSET $7
+`
+
+type GetAllTokenTransactionsByBusinessParams struct {
+	BusinessRootID int64                    `json:"business_root_id"`
+	Type           NullTokenTransactionType `json:"type"`
+	DateStart      sql.NullTime             `json:"date_start"`
+	DateEnd        sql.NullTime             `json:"date_end"`
+	SortBy         interface{}              `json:"sort_by"`
+	SortDir        interface{}              `json:"sort_dir"`
+	PageOffset     int32                    `json:"page_offset"`
+	PageLimit      int32                    `json:"page_limit"`
+}
+
+func (q *Queries) GetAllTokenTransactionsByBusiness(ctx context.Context, arg GetAllTokenTransactionsByBusinessParams) ([]GenerativeTokenImageTransaction, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTokenTransactionsByBusiness,
+		arg.BusinessRootID,
+		arg.Type,
+		arg.DateStart,
+		arg.DateEnd,
+		arg.SortBy,
+		arg.SortDir,
+		arg.PageOffset,
+		arg.PageLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GenerativeTokenImageTransaction
+	for rows.Next() {
+		var i GenerativeTokenImageTransaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.Type,
+			&i.Amount,
+			&i.ProfileID,
+			&i.BusinessRootID,
+			&i.PaymentHistoryID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getGenerativeTokenImageTransactionByPaymentHistoryId = `-- name: GetGenerativeTokenImageTransactionByPaymentHistoryId :one

@@ -14,6 +14,69 @@ Module untuk mengelola transaksi token generative image (pembelian dan penggunaa
 
 ---
 
+## Endpoints
+
+### GET /api/app/generative-token/{businessId}/image-token
+
+**Fungsi**: Menampilkan history token transactions (in/out) dengan pagination.
+
+**Auth**: All Allowed + OwnedBusinessMiddleware
+
+**Middleware**:
+
+- `OwnedBusinessMiddleware` - validasi user adalah member dari business
+- `ReqFilterMiddleware` - parse query params
+
+**Query Params**:
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| category | string | No | Filter by type: `in` (purchased), `out` (used), empty for all |
+| dateStart | string | No | Filter by start date (YYYY-MM-DD format) |
+| dateEnd | string | No | Filter by end date (YYYY-MM-DD format) |
+| sortBy | string | No | Sort by field (created_at, amount, id). Default: id |
+| sort | string | No | Sort direction (asc, desc). Default: desc |
+| page | int | No | Page number. Default: 1 |
+| limit | int | No | Items per page. Default: 10 |
+
+**Response**:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "in",
+      "amount": 100,
+      "profileId": "uuid",
+      "businessRootId": 1,
+      "paymentHistoryId": "uuid",
+      "createdAt": "2026-01-19T00:00:00Z"
+    }
+  ],
+  "filter": {...},
+  "pagination": {...}
+}
+```
+
+### GET /api/app/generative-token/{businessId}/image-token/status
+
+**Fungsi**: Mendapatkan total token yang ada dan tersedia.
+
+**Auth**: All Allowed + OwnedBusinessMiddleware
+
+**Response**:
+
+```json
+{
+  "availableToken": 100,
+  "usedToken": 20,
+  "totalToken": 120,
+  "isExhausted": false
+}
+```
+
+---
+
 ## Func CreditTokenFromPayment
 
 Untuk memasukkan data ke `generative_token_image_transactions` dengan type `in`.
