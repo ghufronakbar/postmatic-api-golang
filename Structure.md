@@ -1,6 +1,6 @@
 # Project Structure
 
-_Generated: 2026-01-18 22:53:39_
+_Generated: 2026-01-20 01:03:37_
 
 Root: `.`
 
@@ -20,6 +20,9 @@ Root: `.`
       - App.GenerativeImageModel.md
       - App.GenerativeTextModel.md
       - App.PaymentMethod.md
+      - App.SocialPlatform.md
+    - GenerativeToken/
+      - GenerativeToken.ImageToken.md
     - Headless/
       - Headless.Midtrans.md
     - Payment/
@@ -150,6 +153,14 @@ Root: `.`
           - filter.go
           - service.go
           - viewmodel.go
+      - social_platform/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
       - timezone/
         - handler/
           - handler.go
@@ -237,6 +248,15 @@ Root: `.`
           - filter.go
           - service.go
           - viewmodel.go
+    - generative_token/
+      - image_token/
+        - handler/
+          - handler.go
+        - service/
+          - dto.go
+          - filter.go
+          - service.go
+          - viewmodel.go
     - headless/
       - cloudinary_uploader/
         - service.go
@@ -288,7 +308,7 @@ Root: `.`
         - handler/
           - handler.go
         - service/
-          - dto.go
+          - filter.go
           - midtrans.go
           - service.go
           - viewmodel.go
@@ -312,6 +332,7 @@ Root: `.`
       - app_profile_referral_rules.sql.go
       - app_rss_category.sql.go
       - app_rss_feed.sql.go
+      - app_social_platform.sql.go
       - app_token_product.sql.go
       - business_image_content.sql.go
       - business_knowledge.sql.go
@@ -324,6 +345,7 @@ Root: `.`
       - business_timezone_pref.sql.go
       - creator_image.sql.go
       - db.go
+      - generative_token_image_transaction.sql.go
       - models.go
       - payment_history.sql.go
       - payment_history_action.sql.go
@@ -344,6 +366,7 @@ Root: `.`
       - app_profile_referral_rules.sql
       - app_rss_category.sql
       - app_rss_feed.sql
+      - app_social_platform.sql
       - app_token_product.sql
       - business_image_content.sql
       - business_knowledge.sql
@@ -355,6 +378,7 @@ Root: `.`
       - business_rss_subscription.sql
       - business_timezone_pref.sql
       - creator_image.sql
+      - generative_token_image_transaction.sql
       - payment_history.sql
       - payment_history_action.sql
       - profile.sql
@@ -406,6 +430,9 @@ Root: `.`
   - 20260117215018_create_referral_records_table.sql
   - 20260117215846_create_payment_histories_table.sql
   - 20260118085914_create_payment_history_actions_table.sql
+  - 20260119153424_create_generative_token_image_transactions_table.sql
+  - 20260119172202_create_app_social_platforms_table.sql
+  - 20260119173007_seed_app_social_platforms_table.sql
 - pkg/
   - errs/
     - app_error.go
@@ -430,7 +457,7 @@ Root: `.`
     - sql.go
     - validator.go
 - schema.sh
+- seed.sh
 - sqlc.yaml
-- structure.sh
 - up.sh
 ```
