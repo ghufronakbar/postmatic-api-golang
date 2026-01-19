@@ -99,3 +99,47 @@ UPDATE payment_histories
 SET midtrans_transaction_id = $2
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING *;
+
+-- name: GetPaymentHistoryByIdAndBusiness :one
+SELECT * FROM payment_histories
+WHERE id = $1 AND business_root_id = $2 AND deleted_at IS NULL;
+
+-- name: GetAllPaymentHistoriesByBusiness :many
+SELECT p.*
+FROM payment_histories p
+WHERE
+    p.deleted_at IS NULL
+    AND p.business_root_id = sqlc.arg(business_root_id)
+    AND (
+        COALESCE(sqlc.narg(search), '') = ''
+        OR p.record_product_name ILIKE ('%' || sqlc.narg(search) || '%')
+        OR p.payment_method ILIKE ('%' || sqlc.narg(search) || '%')
+    )
+    AND (
+        sqlc.narg(status)::payment_status IS NULL
+        OR p.status = sqlc.narg(status)::payment_status
+    )
+ORDER BY
+    CASE WHEN sqlc.arg(sort_by) = 'created_at' AND sqlc.arg(sort_dir) = 'asc' THEN p.created_at END ASC,
+    CASE WHEN sqlc.arg(sort_by) = 'created_at' AND sqlc.arg(sort_dir) = 'desc' THEN p.created_at END DESC,
+    CASE WHEN sqlc.arg(sort_by) = 'total_amount' AND sqlc.arg(sort_dir) = 'asc' THEN p.total_amount END ASC,
+    CASE WHEN sqlc.arg(sort_by) = 'total_amount' AND sqlc.arg(sort_dir) = 'desc' THEN p.total_amount END DESC,
+    p.created_at DESC
+LIMIT sqlc.arg(page_limit)
+OFFSET sqlc.arg(page_offset);
+
+-- name: CountAllPaymentHistoriesByBusiness :one
+SELECT COUNT(*)::bigint AS total
+FROM payment_histories p
+WHERE
+    p.deleted_at IS NULL
+    AND p.business_root_id = sqlc.arg(business_root_id)
+    AND (
+        COALESCE(sqlc.narg(search), '') = ''
+        OR p.record_product_name ILIKE ('%' || sqlc.narg(search) || '%')
+        OR p.payment_method ILIKE ('%' || sqlc.narg(search) || '%')
+    )
+    AND (
+        sqlc.narg(status)::payment_status IS NULL
+        OR p.status = sqlc.narg(status)::payment_status
+    );

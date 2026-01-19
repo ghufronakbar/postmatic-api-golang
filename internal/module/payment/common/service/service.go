@@ -42,8 +42,8 @@ func NewService(
 	}
 }
 
-// GetPaymentHistories returns paginated payment histories for a profile
-func (s *PaymentCommonService) GetPaymentHistories(ctx context.Context, filter GetPaymentHistoriesFilter) ([]PaymentHistoryResponse, *pagination.Pagination, error) {
+// GetPaymentHistoriesByProfile returns paginated payment histories for a profile
+func (s *PaymentCommonService) GetPaymentHistoriesByProfile(ctx context.Context, filter GetPaymentHistoriesFilter) ([]PaymentHistoryResponse, *pagination.Pagination, error) {
 	profileID, err := uuid.Parse(filter.ProfileID)
 	if err != nil {
 		return nil, nil, errs.NewBadRequest("INVALID_PROFILE_ID")
@@ -210,8 +210,78 @@ func (s *PaymentCommonService) GetPaymentHistoryById(ctx context.Context, id str
 	return mapPaymentHistoryToResponse(payment), nil
 }
 
-// CancelPayment cancels a pending payment
-func (s *PaymentCommonService) CancelPayment(ctx context.Context, id string, profileID string) (PaymentHistoryResponse, error) {
+// GetPaymentHistoriesByBusiness returns paginated payment histories for a business
+func (s *PaymentCommonService) GetPaymentHistoriesByBusiness(ctx context.Context, filter GetPaymentHistoriesByBusinessFilter) ([]PaymentHistoryResponse, *pagination.Pagination, error) {
+	// Convert status string to NullPaymentStatus
+	var statusFilter entity.NullPaymentStatus
+	if filter.Status != nil {
+		statusFilter = entity.NullPaymentStatus{
+			PaymentStatus: entity.PaymentStatus(*filter.Status),
+			Valid:         true,
+		}
+	}
+
+	// Count total
+	count, err := s.store.CountAllPaymentHistoriesByBusiness(ctx, entity.CountAllPaymentHistoriesByBusinessParams{
+		BusinessRootID: filter.BusinessRootID,
+		Search:         filter.Search,
+		Status:         statusFilter,
+	})
+	if err != nil {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	pag := pagination.NewPagination(&pagination.PaginationParams{
+		Total: int(count),
+		Page:  filter.Page,
+		Limit: filter.Limit,
+	})
+
+	// Calculate offset
+	offset := (filter.Page - 1) * filter.Limit
+	if offset < 0 {
+		offset = 0
+	}
+
+	// Get data
+	data, err := s.store.GetAllPaymentHistoriesByBusiness(ctx, entity.GetAllPaymentHistoriesByBusinessParams{
+		BusinessRootID: filter.BusinessRootID,
+		Search:         filter.Search,
+		Status:         statusFilter,
+		SortBy:         filter.SortBy,
+		SortDir:        filter.SortDir,
+		PageLimit:      int32(filter.Limit),
+		PageOffset:     int32(offset),
+	})
+	if err != nil {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	// Collect success payment IDs for background sync
+	var successPaymentIDs []uuid.UUID
+	responses := make([]PaymentHistoryResponse, len(data))
+	for i, d := range data {
+		responses[i] = mapPaymentHistoryToResponse(d)
+		if d.Status == entity.PaymentStatusSuccess {
+			successPaymentIDs = append(successPaymentIDs, d.ID)
+		}
+	}
+
+	// Background sync for missing token transactions
+	if len(successPaymentIDs) > 0 {
+		go func() {
+			bgCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			s.generativeToken.SyncMissingTokenTransactions(bgCtx, successPaymentIDs)
+		}()
+	}
+
+	return responses, &pag, nil
+}
+
+// GetPaymentHistoryByIdAndBusiness returns a single payment history by ID and business
+// If status is pending, it will check midtrans and update the status
+func (s *PaymentCommonService) GetPaymentHistoryByIdAndBusiness(ctx context.Context, id string, businessRootID int64) (PaymentHistoryResponse, error) {
 	log := logger.From(ctx)
 
 	paymentID, err := uuid.Parse(id)
@@ -219,14 +289,97 @@ func (s *PaymentCommonService) CancelPayment(ctx context.Context, id string, pro
 		return PaymentHistoryResponse{}, errs.NewBadRequest("INVALID_PAYMENT_ID")
 	}
 
-	profID, err := uuid.Parse(profileID)
+	payment, err := s.store.GetPaymentHistoryByIdAndBusiness(ctx, entity.GetPaymentHistoryByIdAndBusinessParams{
+		ID:             paymentID,
+		BusinessRootID: businessRootID,
+	})
+	if err == sql.ErrNoRows {
+		return PaymentHistoryResponse{}, errs.NewNotFound("PAYMENT_NOT_FOUND")
+	}
 	if err != nil {
-		return PaymentHistoryResponse{}, errs.NewBadRequest("INVALID_PROFILE_ID")
+		return PaymentHistoryResponse{}, errs.NewInternalServerError(err)
 	}
 
-	payment, err := s.store.GetPaymentHistoryByIdAndProfile(ctx, entity.GetPaymentHistoryByIdAndProfileParams{
-		ID:        paymentID,
-		ProfileID: profID,
+	// If pending, check midtrans status and update
+	if payment.Status == entity.PaymentStatusPending && payment.MidtransTransactionID.Valid {
+		log.Info("Payment is pending, checking midtrans status", "paymentID", id, "midtransID", payment.MidtransTransactionID.String)
+
+		midtransStatus, err := s.midtrans.CheckStatus(ctx, payment.MidtransTransactionID.String)
+		if err != nil {
+			log.Error("Failed to check midtrans status", "error", err)
+			// Continue with current data, don't fail
+		} else {
+			// Map midtrans status to our status
+			newStatus := mapMidtransStatusToPaymentStatus(midtransStatus.TransactionStatus)
+			if newStatus != string(payment.Status) {
+				log.Info("Updating payment status from midtrans", "oldStatus", payment.Status, "newStatus", newStatus)
+
+				// Use transaction for status update + token credit
+				var updatedPayment entity.PaymentHistory
+				txErr := s.store.ExecTx(ctx, func(q *entity.Queries) error {
+					var err error
+					updatedPayment, err = q.UpdatePaymentHistoryStatus(ctx, entity.UpdatePaymentHistoryStatusParams{
+						ID:     payment.ID,
+						Status: entity.PaymentStatus(newStatus),
+					})
+					if err != nil {
+						return err
+					}
+
+					// Update referral record status if applicable
+					if payment.ReferralRecordID.Valid {
+						_, _ = q.UpdateReferralRecordStatus(ctx, entity.UpdateReferralRecordStatusParams{
+							ID:     payment.ReferralRecordID.Int64,
+							Status: entity.ReferralRecordStatus(newStatus),
+						})
+					}
+
+					// Credit token if status changed to success
+					if newStatus == "success" {
+						err = s.generativeToken.CreditTokenFromPayment(ctx, q, image_token_service.CreateTokenTransactionInput{
+							ProfileID:        payment.ProfileID,
+							BusinessRootID:   payment.BusinessRootID,
+							PaymentHistoryID: payment.ID,
+							Amount:           payment.ProductAmount,
+						})
+						if err != nil {
+							log.Error("Failed to credit token", "paymentID", payment.ID, "error", err)
+							// Don't fail transaction for token credit error
+						}
+					}
+
+					return nil
+				})
+
+				if txErr != nil {
+					log.Error("Failed to update payment status in transaction", "error", txErr)
+				} else {
+					payment = updatedPayment
+
+					// Send success email if status changed to success (async)
+					if newStatus == "success" {
+						s.sendPaymentSuccessEmail(ctx, payment)
+					}
+				}
+			}
+		}
+	}
+
+	return mapPaymentHistoryToResponse(payment), nil
+}
+
+// CancelPaymentByBusiness cancels a pending payment by business
+func (s *PaymentCommonService) CancelPaymentByBusiness(ctx context.Context, id string, businessRootID int64) (PaymentHistoryResponse, error) {
+	log := logger.From(ctx)
+
+	paymentID, err := uuid.Parse(id)
+	if err != nil {
+		return PaymentHistoryResponse{}, errs.NewBadRequest("INVALID_PAYMENT_ID")
+	}
+
+	payment, err := s.store.GetPaymentHistoryByIdAndBusiness(ctx, entity.GetPaymentHistoryByIdAndBusinessParams{
+		ID:             paymentID,
+		BusinessRootID: businessRootID,
 	})
 	if err == sql.ErrNoRows {
 		return PaymentHistoryResponse{}, errs.NewNotFound("PAYMENT_NOT_FOUND")

@@ -170,7 +170,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	referralBasicHandler := referral_basic_handler.NewHandler(referralBasicSvc)
 	// PAYMENT
 	imageTokenPaymentHandler := image_token_handler.NewHandler(imageTokenPaymentSvc)
-	paymentCommonHandler := payment_common_handler.NewHandler(paymentCommonSvc)
+	paymentCommonHandler := payment_common_handler.NewHandler(paymentCommonSvc, ownedMw)
 
 	// 4. =========== INITIAL MIDDLEWARE ===========
 	allAllowed := internal_middleware.AuthMiddleware(*tokenSvc, []entity.AppRole{entity.AppRoleAdmin, entity.AppRoleUser})

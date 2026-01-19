@@ -42,6 +42,36 @@ func (q *Queries) CountAllPaymentHistories(ctx context.Context, arg CountAllPaym
 	return total, err
 }
 
+const countAllPaymentHistoriesByBusiness = `-- name: CountAllPaymentHistoriesByBusiness :one
+SELECT COUNT(*)::bigint AS total
+FROM payment_histories p
+WHERE
+    p.deleted_at IS NULL
+    AND p.business_root_id = $1
+    AND (
+        COALESCE($2, '') = ''
+        OR p.record_product_name ILIKE ('%' || $2 || '%')
+        OR p.payment_method ILIKE ('%' || $2 || '%')
+    )
+    AND (
+        $3::payment_status IS NULL
+        OR p.status = $3::payment_status
+    )
+`
+
+type CountAllPaymentHistoriesByBusinessParams struct {
+	BusinessRootID int64             `json:"business_root_id"`
+	Search         interface{}       `json:"search"`
+	Status         NullPaymentStatus `json:"status"`
+}
+
+func (q *Queries) CountAllPaymentHistoriesByBusiness(ctx context.Context, arg CountAllPaymentHistoriesByBusinessParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllPaymentHistoriesByBusiness, arg.BusinessRootID, arg.Search, arg.Status)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const createPaymentHistory = `-- name: CreatePaymentHistory :one
 INSERT INTO payment_histories (
     profile_id,
@@ -276,6 +306,108 @@ func (q *Queries) GetAllPaymentHistories(ctx context.Context, arg GetAllPaymentH
 	return items, nil
 }
 
+const getAllPaymentHistoriesByBusiness = `-- name: GetAllPaymentHistoriesByBusiness :many
+SELECT p.id, p.profile_id, p.business_root_id, p.product_amount, p.status, p.currency, p.payment_method, p.payment_method_type, p.record_product_name, p.record_product_type, p.record_product_price, p.record_product_image_url, p.reference_product_id, p.subtotal_item_amount, p.discount_amount, p.discount_percentage, p.discount_type, p.admin_fee_amount, p.admin_fee_percentage, p.admin_fee_type, p.tax_amount, p.tax_percentage, p.referral_record_id, p.midtrans_transaction_id, p.midtrans_expired_at, p.payment_pending_at, p.payment_success_at, p.payment_failed_at, p.payment_canceled_at, p.payment_expired_at, p.payment_refunded_at, p.total_amount, p.created_at, p.updated_at, p.deleted_at
+FROM payment_histories p
+WHERE
+    p.deleted_at IS NULL
+    AND p.business_root_id = $1
+    AND (
+        COALESCE($2, '') = ''
+        OR p.record_product_name ILIKE ('%' || $2 || '%')
+        OR p.payment_method ILIKE ('%' || $2 || '%')
+    )
+    AND (
+        $3::payment_status IS NULL
+        OR p.status = $3::payment_status
+    )
+ORDER BY
+    CASE WHEN $4 = 'created_at' AND $5 = 'asc' THEN p.created_at END ASC,
+    CASE WHEN $4 = 'created_at' AND $5 = 'desc' THEN p.created_at END DESC,
+    CASE WHEN $4 = 'total_amount' AND $5 = 'asc' THEN p.total_amount END ASC,
+    CASE WHEN $4 = 'total_amount' AND $5 = 'desc' THEN p.total_amount END DESC,
+    p.created_at DESC
+LIMIT $7
+OFFSET $6
+`
+
+type GetAllPaymentHistoriesByBusinessParams struct {
+	BusinessRootID int64             `json:"business_root_id"`
+	Search         interface{}       `json:"search"`
+	Status         NullPaymentStatus `json:"status"`
+	SortBy         interface{}       `json:"sort_by"`
+	SortDir        interface{}       `json:"sort_dir"`
+	PageOffset     int32             `json:"page_offset"`
+	PageLimit      int32             `json:"page_limit"`
+}
+
+func (q *Queries) GetAllPaymentHistoriesByBusiness(ctx context.Context, arg GetAllPaymentHistoriesByBusinessParams) ([]PaymentHistory, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPaymentHistoriesByBusiness,
+		arg.BusinessRootID,
+		arg.Search,
+		arg.Status,
+		arg.SortBy,
+		arg.SortDir,
+		arg.PageOffset,
+		arg.PageLimit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PaymentHistory
+	for rows.Next() {
+		var i PaymentHistory
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProfileID,
+			&i.BusinessRootID,
+			&i.ProductAmount,
+			&i.Status,
+			&i.Currency,
+			&i.PaymentMethod,
+			&i.PaymentMethodType,
+			&i.RecordProductName,
+			&i.RecordProductType,
+			&i.RecordProductPrice,
+			&i.RecordProductImageUrl,
+			&i.ReferenceProductID,
+			&i.SubtotalItemAmount,
+			&i.DiscountAmount,
+			&i.DiscountPercentage,
+			&i.DiscountType,
+			&i.AdminFeeAmount,
+			&i.AdminFeePercentage,
+			&i.AdminFeeType,
+			&i.TaxAmount,
+			&i.TaxPercentage,
+			&i.ReferralRecordID,
+			&i.MidtransTransactionID,
+			&i.MidtransExpiredAt,
+			&i.PaymentPendingAt,
+			&i.PaymentSuccessAt,
+			&i.PaymentFailedAt,
+			&i.PaymentCanceledAt,
+			&i.PaymentExpiredAt,
+			&i.PaymentRefundedAt,
+			&i.TotalAmount,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPaymentHistoryById = `-- name: GetPaymentHistoryById :one
 SELECT id, profile_id, business_root_id, product_amount, status, currency, payment_method, payment_method_type, record_product_name, record_product_type, record_product_price, record_product_image_url, reference_product_id, subtotal_item_amount, discount_amount, discount_percentage, discount_type, admin_fee_amount, admin_fee_percentage, admin_fee_type, tax_amount, tax_percentage, referral_record_id, midtrans_transaction_id, midtrans_expired_at, payment_pending_at, payment_success_at, payment_failed_at, payment_canceled_at, payment_expired_at, payment_refunded_at, total_amount, created_at, updated_at, deleted_at FROM payment_histories
 WHERE id = $1 AND deleted_at IS NULL
@@ -283,6 +415,59 @@ WHERE id = $1 AND deleted_at IS NULL
 
 func (q *Queries) GetPaymentHistoryById(ctx context.Context, id uuid.UUID) (PaymentHistory, error) {
 	row := q.db.QueryRowContext(ctx, getPaymentHistoryById, id)
+	var i PaymentHistory
+	err := row.Scan(
+		&i.ID,
+		&i.ProfileID,
+		&i.BusinessRootID,
+		&i.ProductAmount,
+		&i.Status,
+		&i.Currency,
+		&i.PaymentMethod,
+		&i.PaymentMethodType,
+		&i.RecordProductName,
+		&i.RecordProductType,
+		&i.RecordProductPrice,
+		&i.RecordProductImageUrl,
+		&i.ReferenceProductID,
+		&i.SubtotalItemAmount,
+		&i.DiscountAmount,
+		&i.DiscountPercentage,
+		&i.DiscountType,
+		&i.AdminFeeAmount,
+		&i.AdminFeePercentage,
+		&i.AdminFeeType,
+		&i.TaxAmount,
+		&i.TaxPercentage,
+		&i.ReferralRecordID,
+		&i.MidtransTransactionID,
+		&i.MidtransExpiredAt,
+		&i.PaymentPendingAt,
+		&i.PaymentSuccessAt,
+		&i.PaymentFailedAt,
+		&i.PaymentCanceledAt,
+		&i.PaymentExpiredAt,
+		&i.PaymentRefundedAt,
+		&i.TotalAmount,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getPaymentHistoryByIdAndBusiness = `-- name: GetPaymentHistoryByIdAndBusiness :one
+SELECT id, profile_id, business_root_id, product_amount, status, currency, payment_method, payment_method_type, record_product_name, record_product_type, record_product_price, record_product_image_url, reference_product_id, subtotal_item_amount, discount_amount, discount_percentage, discount_type, admin_fee_amount, admin_fee_percentage, admin_fee_type, tax_amount, tax_percentage, referral_record_id, midtrans_transaction_id, midtrans_expired_at, payment_pending_at, payment_success_at, payment_failed_at, payment_canceled_at, payment_expired_at, payment_refunded_at, total_amount, created_at, updated_at, deleted_at FROM payment_histories
+WHERE id = $1 AND business_root_id = $2 AND deleted_at IS NULL
+`
+
+type GetPaymentHistoryByIdAndBusinessParams struct {
+	ID             uuid.UUID `json:"id"`
+	BusinessRootID int64     `json:"business_root_id"`
+}
+
+func (q *Queries) GetPaymentHistoryByIdAndBusiness(ctx context.Context, arg GetPaymentHistoryByIdAndBusinessParams) (PaymentHistory, error) {
+	row := q.db.QueryRowContext(ctx, getPaymentHistoryByIdAndBusiness, arg.ID, arg.BusinessRootID)
 	var i PaymentHistory
 	err := row.Scan(
 		&i.ID,
