@@ -120,7 +120,7 @@ ORDER BY
     CASE WHEN $5 = 'created_at' AND $6 = 'desc' THEN t.created_at END DESC,
     CASE WHEN $5 = 'amount' AND $6 = 'asc' THEN t.amount END ASC,
     CASE WHEN $5 = 'amount' AND $6 = 'desc' THEN t.amount END DESC,
-    t.created_at DESC
+    t.id DESC
 LIMIT $8
 OFFSET $7
 `

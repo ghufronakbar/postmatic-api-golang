@@ -743,6 +743,54 @@ func (ns NullReferralType) Value() (driver.Value, error) {
 	return string(ns.ReferralType), nil
 }
 
+type SocialPlatformType string
+
+const (
+	SocialPlatformTypeLinkedIn          SocialPlatformType = "linked_in"
+	SocialPlatformTypeFacebookPage      SocialPlatformType = "facebook_page"
+	SocialPlatformTypeInstagramBusiness SocialPlatformType = "instagram_business"
+	SocialPlatformTypeWhatsappBusiness  SocialPlatformType = "whatsapp_business"
+	SocialPlatformTypeTiktok            SocialPlatformType = "tiktok"
+	SocialPlatformTypeYoutube           SocialPlatformType = "youtube"
+	SocialPlatformTypeTwitter           SocialPlatformType = "twitter"
+	SocialPlatformTypePinterest         SocialPlatformType = "pinterest"
+)
+
+func (e *SocialPlatformType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SocialPlatformType(s)
+	case string:
+		*e = SocialPlatformType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SocialPlatformType: %T", src)
+	}
+	return nil
+}
+
+type NullSocialPlatformType struct {
+	SocialPlatformType SocialPlatformType `json:"social_platform_type"`
+	Valid              bool               `json:"valid"` // Valid is true if SocialPlatformType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSocialPlatformType) Scan(value interface{}) error {
+	if value == nil {
+		ns.SocialPlatformType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SocialPlatformType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSocialPlatformType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SocialPlatformType), nil
+}
+
 type TokenTransactionType string
 
 const (
@@ -996,6 +1044,38 @@ type AppRssFeed struct {
 	DeletedAt        sql.NullTime `json:"deleted_at"`
 	CreatedAt        time.Time    `json:"created_at"`
 	UpdatedAt        time.Time    `json:"updated_at"`
+}
+
+type AppSocialPlatform struct {
+	ID           int64              `json:"id"`
+	PlatformCode SocialPlatformType `json:"platform_code"`
+	Logo         sql.NullString     `json:"logo"`
+	Name         string             `json:"name"`
+	Hint         string             `json:"hint"`
+	IsActive     bool               `json:"is_active"`
+	CreatedAt    time.Time          `json:"created_at"`
+	UpdatedAt    time.Time          `json:"updated_at"`
+	DeletedAt    sql.NullTime       `json:"deleted_at"`
+}
+
+type AppSocialPlatformChange struct {
+	ID                 int64              `json:"id"`
+	Action             ActionChangeType   `json:"action"`
+	ProfileID          uuid.UUID          `json:"profile_id"`
+	SocialPlatformID   int64              `json:"social_platform_id"`
+	BeforePlatformCode SocialPlatformType `json:"before_platform_code"`
+	BeforeLogo         sql.NullString     `json:"before_logo"`
+	BeforeName         string             `json:"before_name"`
+	BeforeHint         string             `json:"before_hint"`
+	BeforeIsActive     bool               `json:"before_is_active"`
+	AfterPlatformCode  SocialPlatformType `json:"after_platform_code"`
+	AfterLogo          sql.NullString     `json:"after_logo"`
+	AfterName          string             `json:"after_name"`
+	AfterHint          string             `json:"after_hint"`
+	AfterIsActive      bool               `json:"after_is_active"`
+	CreatedAt          time.Time          `json:"created_at"`
+	UpdatedAt          time.Time          `json:"updated_at"`
+	DeletedAt          sql.NullTime       `json:"deleted_at"`
 }
 
 type AppTokenProduct struct {

@@ -54,6 +54,8 @@ import (
 	payment_method_service "postmatic-api/internal/module/app/payment_method/service"
 	referral_rule_service "postmatic-api/internal/module/app/referral_rule/service"
 	rss_service "postmatic-api/internal/module/app/rss/service"
+	social_platform_handler "postmatic-api/internal/module/app/social_platform/handler"
+	social_platform_service "postmatic-api/internal/module/app/social_platform/service"
 	timezone_service "postmatic-api/internal/module/app/timezone/service"
 	token_product_service "postmatic-api/internal/module/app/token_product/service"
 	business_image_content_service "postmatic-api/internal/module/business/business_image_content/service"
@@ -164,6 +166,8 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	paymentMethodHandler := payment_method_handler.NewHandler(paymentMethodSvc)
 	generativeImageModelHandler := generative_image_model_handler.NewHandler(generativeImageModelSvc)
 	generativeTextModelHandler := generative_text_model_handler.NewHandler(generativeTextModelSvc)
+	socialPlatformSvc := social_platform_service.NewService(store)
+	socialPlatformHandler := social_platform_handler.NewHandler(socialPlatformSvc)
 	// CREATOR
 	creatorImageHandler := creator_image_handler.NewHandler(creatorImageSvc)
 	// AFFILIATOR
@@ -238,6 +242,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 		r.Mount("/payment-method", paymentMethodHandler.Routes(allAllowed, adminOnly))
 		r.Mount("/generative-image-model", generativeImageModelHandler.Routes(allAllowed, adminOnly))
 		r.Mount("/generative-text-model", generativeTextModelHandler.Routes(allAllowed, adminOnly))
+		r.Mount("/social-platform", socialPlatformHandler.Routes(allAllowed, adminOnly))
 	})
 
 	r.Route("/creator", func(r chi.Router) {
