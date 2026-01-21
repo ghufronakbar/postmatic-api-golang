@@ -129,3 +129,13 @@ UPDATE business_members
 SET answered_at = NOW()
 WHERE id = sqlc.arg(id)
 RETURNING *;
+
+-- name: GetOwnerMemberByBusinessRootId :one
+SELECT
+  bm.profile_id
+FROM business_members bm
+WHERE bm.business_root_id = sqlc.arg(business_root_id)
+AND bm.role = 'owner'
+AND bm.status = 'accepted'
+AND bm.deleted_at IS NULL
+LIMIT 1;

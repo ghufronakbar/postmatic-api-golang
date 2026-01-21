@@ -375,6 +375,24 @@ func (q *Queries) GetMembersByBusinessRootIDs(ctx context.Context, businessRootI
 	return items, nil
 }
 
+const getOwnerMemberByBusinessRootId = `-- name: GetOwnerMemberByBusinessRootId :one
+SELECT
+  bm.profile_id
+FROM business_members bm
+WHERE bm.business_root_id = $1
+AND bm.role = 'owner'
+AND bm.status = 'accepted'
+AND bm.deleted_at IS NULL
+LIMIT 1
+`
+
+func (q *Queries) GetOwnerMemberByBusinessRootId(ctx context.Context, businessRootID int64) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getOwnerMemberByBusinessRootId, businessRootID)
+	var profile_id uuid.UUID
+	err := row.Scan(&profile_id)
+	return profile_id, err
+}
+
 const setBusinessMemberAnsweredAt = `-- name: SetBusinessMemberAnsweredAt :one
 UPDATE business_members
 SET answered_at = NOW()

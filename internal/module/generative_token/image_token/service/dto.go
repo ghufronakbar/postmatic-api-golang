@@ -27,3 +27,11 @@ type GetTokenTransactionsFilter struct {
 	Page           int
 	Limit          int
 }
+
+// DeductTokenInput is input for deducting token from image post generation
+type DeductTokenInput struct {
+	ProfileID            uuid.UUID
+	BusinessRootID       int64
+	GeneratedImagePostID int64
+	Amount               int64
+}

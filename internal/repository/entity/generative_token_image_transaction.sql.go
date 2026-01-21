@@ -61,7 +61,7 @@ INSERT INTO generative_token_image_transactions (
     payment_history_id
 ) VALUES (
     $1, $2, $3, $4, $5
-) RETURNING id, type, amount, profile_id, business_root_id, payment_history_id, created_at, updated_at, deleted_at
+) RETURNING id, type, amount, profile_id, business_root_id, payment_history_id, created_at, updated_at, deleted_at, generated_image_post_id
 `
 
 type CreateGenerativeTokenImageTransactionParams struct {
@@ -91,12 +91,57 @@ func (q *Queries) CreateGenerativeTokenImageTransaction(ctx context.Context, arg
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.GeneratedImagePostID,
+	)
+	return i, err
+}
+
+const createTokenTransactionForImagePost = `-- name: CreateTokenTransactionForImagePost :one
+INSERT INTO generative_token_image_transactions (
+    type,
+    amount,
+    profile_id,
+    business_root_id,
+    generated_image_post_id
+) VALUES (
+    $1, $2, $3, $4, $5
+) RETURNING id, type, amount, profile_id, business_root_id, payment_history_id, created_at, updated_at, deleted_at, generated_image_post_id
+`
+
+type CreateTokenTransactionForImagePostParams struct {
+	Type                 TokenTransactionType `json:"type"`
+	Amount               int64                `json:"amount"`
+	ProfileID            uuid.UUID            `json:"profile_id"`
+	BusinessRootID       int64                `json:"business_root_id"`
+	GeneratedImagePostID sql.NullInt64        `json:"generated_image_post_id"`
+}
+
+func (q *Queries) CreateTokenTransactionForImagePost(ctx context.Context, arg CreateTokenTransactionForImagePostParams) (GenerativeTokenImageTransaction, error) {
+	row := q.db.QueryRowContext(ctx, createTokenTransactionForImagePost,
+		arg.Type,
+		arg.Amount,
+		arg.ProfileID,
+		arg.BusinessRootID,
+		arg.GeneratedImagePostID,
+	)
+	var i GenerativeTokenImageTransaction
+	err := row.Scan(
+		&i.ID,
+		&i.Type,
+		&i.Amount,
+		&i.ProfileID,
+		&i.BusinessRootID,
+		&i.PaymentHistoryID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.GeneratedImagePostID,
 	)
 	return i, err
 }
 
 const getAllTokenTransactionsByBusiness = `-- name: GetAllTokenTransactionsByBusiness :many
-SELECT t.id, t.type, t.amount, t.profile_id, t.business_root_id, t.payment_history_id, t.created_at, t.updated_at, t.deleted_at
+SELECT t.id, t.type, t.amount, t.profile_id, t.business_root_id, t.payment_history_id, t.created_at, t.updated_at, t.deleted_at, t.generated_image_post_id
 FROM generative_token_image_transactions t
 WHERE
     t.deleted_at IS NULL
@@ -164,6 +209,7 @@ func (q *Queries) GetAllTokenTransactionsByBusiness(ctx context.Context, arg Get
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
+			&i.GeneratedImagePostID,
 		); err != nil {
 			return nil, err
 		}
@@ -179,7 +225,7 @@ func (q *Queries) GetAllTokenTransactionsByBusiness(ctx context.Context, arg Get
 }
 
 const getGenerativeTokenImageTransactionByPaymentHistoryId = `-- name: GetGenerativeTokenImageTransactionByPaymentHistoryId :one
-SELECT id, type, amount, profile_id, business_root_id, payment_history_id, created_at, updated_at, deleted_at FROM generative_token_image_transactions
+SELECT id, type, amount, profile_id, business_root_id, payment_history_id, created_at, updated_at, deleted_at, generated_image_post_id FROM generative_token_image_transactions
 WHERE payment_history_id = $1 AND deleted_at IS NULL
 `
 
@@ -196,6 +242,7 @@ func (q *Queries) GetGenerativeTokenImageTransactionByPaymentHistoryId(ctx conte
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
+		&i.GeneratedImagePostID,
 	)
 	return i, err
 }

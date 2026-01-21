@@ -38,6 +38,7 @@ import (
 
 	business_creator_image_handler "postmatic-api/internal/module/creator/business_creator_image/handler"
 	creator_image_handler "postmatic-api/internal/module/creator/creator_image/handler"
+	image_post_handler "postmatic-api/internal/module/generative_content/image_post/handler"
 	gen_token_image_handler "postmatic-api/internal/module/generative_token/image_token/handler"
 
 	// Module services
@@ -69,6 +70,7 @@ import (
 	business_timezone_pref_service "postmatic-api/internal/module/business/business_timezone_pref/service"
 	business_creator_image_service "postmatic-api/internal/module/creator/business_creator_image/service"
 	creator_image_service "postmatic-api/internal/module/creator/creator_image/service"
+	image_post_service "postmatic-api/internal/module/generative_content/image_post/service"
 	gen_token_image_service "postmatic-api/internal/module/generative_token/image_token/service"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/midtrans"
@@ -142,6 +144,8 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	businessCreatorImageSvc := business_creator_image_service.NewService(store, creatorImageSvc)
 	// GENERATIVE TOKEN
 	genTokenImageSvc := gen_token_image_service.NewService(store)
+	// GENERATIVE CONTENT
+	imagePostSvc := image_post_service.NewService(store, generativeImageModelSvc, busKnowledgeSvc, busProductSvc, busRoleSvc, genTokenImageSvc, queueProducer)
 	// PAYMENT
 	imageTokenPaymentSvc := image_token_service.NewService(store, tokenProductSvc, paymentMethodSvc, referralBasicSvc, midtransSvc, queueProducer)
 	paymentCommonSvc := payment_common_service.NewService(store, midtransSvc, queueProducer, genTokenImageSvc)
@@ -176,6 +180,8 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	// CREATOR
 	creatorImageHandler := creator_image_handler.NewHandler(creatorImageSvc)
 	businessCreatorImageHandler := business_creator_image_handler.NewHandler(businessCreatorImageSvc, ownedMw)
+	// GENERATIVE CONTENT
+	imagePostHandler := image_post_handler.NewHandler(imagePostSvc, ownedMw)
 	// AFFILIATOR
 	referralBasicHandler := referral_basic_handler.NewHandler(referralBasicSvc)
 	// PAYMENT
@@ -270,6 +276,12 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	r.Route("/generative-token", func(r chi.Router) {
 		r.Use(allAllowed)
 		r.Mount("/image-token", genTokenImageHandler.Routes())
+	})
+
+	// Generative Content routes
+	r.Route("/generative-content", func(r chi.Router) {
+		r.Use(allAllowed)
+		r.Mount("/image-post", imagePostHandler.Routes())
 	})
 
 	// Payment routes

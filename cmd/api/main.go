@@ -13,8 +13,14 @@ import (
 	"postmatic-api/config"
 	"postmatic-api/internal"
 	"postmatic-api/internal/internal_middleware"
+	image_post_service "postmatic-api/internal/module/generative_content/image_post/service"
+	image_token_service "postmatic-api/internal/module/generative_token/image_token/service"
+	"postmatic-api/internal/module/headless/cloudinary_uploader"
+	"postmatic-api/internal/module/headless/google_genai"
 	"postmatic-api/internal/module/headless/mailer"
+	openai_svc "postmatic-api/internal/module/headless/openai"
 	"postmatic-api/internal/module/headless/queue"
+	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
@@ -41,8 +47,32 @@ func main() {
 	asynqClient := config.NewAsynqClient(cfg)
 	defer asynqClient.Close()
 
+	// Store for worker handlers
+	store := entity.NewStore(db)
+
+	// Connect AI providers for worker
+	openaiClient := config.ConnectOpenAI(cfg)
+	googleGenAIClient := config.ConnectGoogleGenAI(cfg)
+
+	// Connect Cloudinary
+	cldClient := config.ConnectCloudinary(cfg)
+
+	// Create services for worker
+	openaiSvc := openai_svc.NewService(openaiClient)
+	googleGenAISvc := google_genai.NewService(googleGenAIClient)
+	cloudinarySvc := cloudinary_uploader.NewService(cfg, cldClient)
+	imageTokenSvc := image_token_service.NewService(store)
+
 	// worker (dequeue)
 	mailerSvc := mailer.NewService(cfg)
+	imagePostWorker := image_post_service.NewWorkerHandler(
+		cfg,
+		store,
+		openaiSvc,
+		googleGenAISvc,
+		cloudinarySvc,
+		imageTokenSvc,
+	)
 	asynqServer := config.NewAsynqServer(cfg, asynq.Config{
 		Concurrency: 10,
 		Queues: map[string]int{
@@ -51,7 +81,9 @@ func main() {
 	})
 	go func() {
 		w := queue.NewWorker(asynqServer)
-		w.RegisterMailer(mailerSvc) // ✅ tanpa *
+		w.RegisterMailer(mailerSvc)          // ✅ Mailer
+		w.RegisterImagePost(imagePostWorker) // ✅ Image Post
+		logger.L().Info("[QUEUE] Worker started with Mailer and ImagePost handlers")
 		if err := w.Run(); err != nil {
 			log.Fatal(err)
 		}

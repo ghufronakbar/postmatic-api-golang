@@ -481,6 +481,95 @@ func (ns NullDiscountType) Value() (driver.Value, error) {
 	return string(ns.DiscountType), nil
 }
 
+type GeneratedImagePostMode string
+
+const (
+	GeneratedImagePostModeGenerate   GeneratedImagePostMode = "generate"
+	GeneratedImagePostModeRegenerate GeneratedImagePostMode = "regenerate"
+	GeneratedImagePostModeRss        GeneratedImagePostMode = "rss"
+	GeneratedImagePostModeMask       GeneratedImagePostMode = "mask"
+)
+
+func (e *GeneratedImagePostMode) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = GeneratedImagePostMode(s)
+	case string:
+		*e = GeneratedImagePostMode(s)
+	default:
+		return fmt.Errorf("unsupported scan type for GeneratedImagePostMode: %T", src)
+	}
+	return nil
+}
+
+type NullGeneratedImagePostMode struct {
+	GeneratedImagePostMode GeneratedImagePostMode `json:"generated_image_post_mode"`
+	Valid                  bool                   `json:"valid"` // Valid is true if GeneratedImagePostMode is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullGeneratedImagePostMode) Scan(value interface{}) error {
+	if value == nil {
+		ns.GeneratedImagePostMode, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.GeneratedImagePostMode.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullGeneratedImagePostMode) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.GeneratedImagePostMode), nil
+}
+
+type GeneratedImagePostStatus string
+
+const (
+	GeneratedImagePostStatusPending    GeneratedImagePostStatus = "pending"
+	GeneratedImagePostStatusProcessing GeneratedImagePostStatus = "processing"
+	GeneratedImagePostStatusRetry      GeneratedImagePostStatus = "retry"
+	GeneratedImagePostStatusSuccess    GeneratedImagePostStatus = "success"
+	GeneratedImagePostStatusFailed     GeneratedImagePostStatus = "failed"
+)
+
+func (e *GeneratedImagePostStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = GeneratedImagePostStatus(s)
+	case string:
+		*e = GeneratedImagePostStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for GeneratedImagePostStatus: %T", src)
+	}
+	return nil
+}
+
+type NullGeneratedImagePostStatus struct {
+	GeneratedImagePostStatus GeneratedImagePostStatus `json:"generated_image_post_status"`
+	Valid                    bool                     `json:"valid"` // Valid is true if GeneratedImagePostStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullGeneratedImagePostStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.GeneratedImagePostStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.GeneratedImagePostStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullGeneratedImagePostStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.GeneratedImagePostStatus), nil
+}
+
 type ImageProvider string
 
 const (
@@ -1246,16 +1335,85 @@ type CreatorImageTypeCategory struct {
 	CreatedAt      sql.NullTime `json:"created_at"`
 }
 
+type GeneratedImagePost struct {
+	ID                        int64                    `json:"id"`
+	Status                    GeneratedImagePostStatus `json:"status"`
+	ErrorLog                  sql.NullString           `json:"error_log"`
+	GeneratedImagePrompt      sql.NullString           `json:"generated_image_prompt"`
+	GeneratedCaptionPrompt    sql.NullString           `json:"generated_caption_prompt"`
+	BusinessRootID            int64                    `json:"business_root_id"`
+	BusinessProductID         int64                    `json:"business_product_id"`
+	AppGenerativeImageModelID int64                    `json:"app_generative_image_model_id"`
+	AppGenerativeTextModelID  sql.NullInt64            `json:"app_generative_text_model_id"`
+	RecordedModelName         string                   `json:"recorded_model_name"`
+	RecordedModelProvider     string                   `json:"recorded_model_provider"`
+	Mode                      GeneratedImagePostMode   `json:"mode"`
+	NumOfImages               int32                    `json:"num_of_images"`
+	Ratio                     string                   `json:"ratio"`
+	AdditionalPrompt          sql.NullString           `json:"additional_prompt"`
+	DesignStyle               sql.NullString           `json:"design_style"`
+	Category                  sql.NullString           `json:"category"`
+	ReferenceImageUrl         sql.NullString           `json:"reference_image_url"`
+	MaskImageUrl              sql.NullString           `json:"mask_image_url"`
+	ImageSize                 sql.NullString           `json:"image_size"`
+	CurrentCaption            sql.NullString           `json:"current_caption"`
+	AdvBkName                 bool                     `json:"adv_bk_name"`
+	AdvBkCategory             bool                     `json:"adv_bk_category"`
+	AdvBkDescription          bool                     `json:"adv_bk_description"`
+	AdvBkLocation             bool                     `json:"adv_bk_location"`
+	AdvBkLogo                 bool                     `json:"adv_bk_logo"`
+	AdvBkUniqueSellingPoint   bool                     `json:"adv_bk_unique_selling_point"`
+	AdvBkWebsite              bool                     `json:"adv_bk_website"`
+	AdvBkVisionMission        bool                     `json:"adv_bk_vision_mission"`
+	AdvBkColorTone            bool                     `json:"adv_bk_color_tone"`
+	AdvPdName                 bool                     `json:"adv_pd_name"`
+	AdvPdCategory             bool                     `json:"adv_pd_category"`
+	AdvPdDescription          bool                     `json:"adv_pd_description"`
+	AdvPdPrice                bool                     `json:"adv_pd_price"`
+	AdvRlHashtags             bool                     `json:"adv_rl_hashtags"`
+	RssTitle                  sql.NullString           `json:"rss_title"`
+	RssUrl                    sql.NullString           `json:"rss_url"`
+	RssPublishedAt            sql.NullTime             `json:"rss_published_at"`
+	RssImageUrl               sql.NullString           `json:"rss_image_url"`
+	RssSummary                sql.NullString           `json:"rss_summary"`
+	RssPublisher              sql.NullString           `json:"rss_publisher"`
+	CreatedAt                 time.Time                `json:"created_at"`
+	UpdatedAt                 time.Time                `json:"updated_at"`
+	DeletedAt                 sql.NullTime             `json:"deleted_at"`
+	Attempts                  int32                    `json:"attempts"`
+}
+
+type GeneratedImagePostCaption struct {
+	ID                   int64        `json:"id"`
+	GeneratedImagePostID int64        `json:"generated_image_post_id"`
+	CaptionText          string       `json:"caption_text"`
+	TokenUsed            int32        `json:"token_used"`
+	CreatedAt            time.Time    `json:"created_at"`
+	UpdatedAt            time.Time    `json:"updated_at"`
+	DeletedAt            sql.NullTime `json:"deleted_at"`
+}
+
+type GeneratedImagePostItem struct {
+	ID                   int64        `json:"id"`
+	GeneratedImagePostID int64        `json:"generated_image_post_id"`
+	ImageUrl             string       `json:"image_url"`
+	TokenUsed            int32        `json:"token_used"`
+	CreatedAt            time.Time    `json:"created_at"`
+	UpdatedAt            time.Time    `json:"updated_at"`
+	DeletedAt            sql.NullTime `json:"deleted_at"`
+}
+
 type GenerativeTokenImageTransaction struct {
-	ID               int64                `json:"id"`
-	Type             TokenTransactionType `json:"type"`
-	Amount           int64                `json:"amount"`
-	ProfileID        uuid.UUID            `json:"profile_id"`
-	BusinessRootID   int64                `json:"business_root_id"`
-	PaymentHistoryID uuid.NullUUID        `json:"payment_history_id"`
-	CreatedAt        time.Time            `json:"created_at"`
-	UpdatedAt        time.Time            `json:"updated_at"`
-	DeletedAt        sql.NullTime         `json:"deleted_at"`
+	ID                   int64                `json:"id"`
+	Type                 TokenTransactionType `json:"type"`
+	Amount               int64                `json:"amount"`
+	ProfileID            uuid.UUID            `json:"profile_id"`
+	BusinessRootID       int64                `json:"business_root_id"`
+	PaymentHistoryID     uuid.NullUUID        `json:"payment_history_id"`
+	CreatedAt            time.Time            `json:"created_at"`
+	UpdatedAt            time.Time            `json:"updated_at"`
+	DeletedAt            sql.NullTime         `json:"deleted_at"`
+	GeneratedImagePostID sql.NullInt64        `json:"generated_image_post_id"`
 }
 
 type PaymentHistory struct {

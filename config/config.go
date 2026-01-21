@@ -92,6 +92,10 @@ type Config struct {
 	// AI PROVIDERS
 	GOOGLE_GENAI_API_KEY string
 	OPENAI_API_KEY       string
+
+	// FALLBACK TOKEN (used when AI provider doesn't return token usage)
+	FALLBACK_TOKEN_PER_IMAGE   int64
+	FALLBACK_TOKEN_PER_CAPTION int64
 }
 
 func Load() *Config {
@@ -207,6 +211,10 @@ func Load() *Config {
 		// AI PROVIDERS
 		GOOGLE_GENAI_API_KEY: getEnv("GOOGLE_GENAI_API_KEY"),
 		OPENAI_API_KEY:       getEnv("OPENAI_API_KEY"),
+
+		// FALLBACK TOKEN
+		FALLBACK_TOKEN_PER_IMAGE:   getEnvIntOptional("FALLBACK_TOKEN_PER_IMAGE", 3000),
+		FALLBACK_TOKEN_PER_CAPTION: getEnvIntOptional("FALLBACK_TOKEN_PER_CAPTION", 1500),
 	}
 }
 
@@ -220,6 +228,15 @@ func getEnv(key string) string {
 func getEnvOptional(key string, def string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
+	}
+	return def
+}
+
+func getEnvIntOptional(key string, def int64) int64 {
+	if value, ok := os.LookupEnv(key); ok {
+		if intVal, err := strconv.ParseInt(value, 10, 64); err == nil {
+			return intVal
+		}
 	}
 	return def
 }

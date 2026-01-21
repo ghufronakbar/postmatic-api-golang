@@ -16,6 +16,10 @@ func (w *Worker) RegisterMailer(mailerSvc MailerService) {
 	registerMailerHandlers(w.mux, mailerSvc) // welcome + verification sama-sama di sini
 }
 
+func (w *Worker) RegisterImagePost(handler ImagePostHandler) {
+	registerImagePostHandlers(w.mux, handler)
+}
+
 func (w *Worker) Run() error {
 	return w.server.Run(w.mux)
 }

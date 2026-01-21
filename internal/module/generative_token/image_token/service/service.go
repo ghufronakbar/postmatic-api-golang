@@ -135,6 +135,26 @@ func (s *ImageTokenService) GetTokenStatus(ctx context.Context, businessRootID i
 	return response, nil
 }
 
+// DeductTokenForImagePost creates an OUT transaction linked to a generated_image_post
+func (s *ImageTokenService) DeductTokenForImagePost(ctx context.Context, input DeductTokenInput) error {
+	log := logger.From(ctx)
+
+	_, err := s.store.CreateTokenTransactionForImagePost(ctx, entity.CreateTokenTransactionForImagePostParams{
+		Type:                 entity.TokenTransactionTypeOut,
+		Amount:               input.Amount,
+		ProfileID:            input.ProfileID,
+		BusinessRootID:       input.BusinessRootID,
+		GeneratedImagePostID: sql.NullInt64{Int64: input.GeneratedImagePostID, Valid: true},
+	})
+	if err != nil {
+		log.Error("Failed to deduct token", "postId", input.GeneratedImagePostID, "amount", input.Amount, "error", err)
+		return errs.NewInternalServerError(err)
+	}
+
+	log.Info("Token deducted successfully", "postId", input.GeneratedImagePostID, "amount", input.Amount)
+	return nil
+}
+
 // GetTokenTransactions returns paginated token transactions for a business
 func (s *ImageTokenService) GetTokenTransactions(ctx context.Context, filter GetTokenTransactionsFilter) ([]TokenTransactionResponse, *pagination.Pagination, error) {
 	// Convert type string to NullTokenTransactionType

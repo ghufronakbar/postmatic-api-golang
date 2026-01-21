@@ -9,6 +9,17 @@ INSERT INTO generative_token_image_transactions (
     $1, $2, $3, $4, $5
 ) RETURNING *;
 
+-- name: CreateTokenTransactionForImagePost :one
+INSERT INTO generative_token_image_transactions (
+    type,
+    amount,
+    profile_id,
+    business_root_id,
+    generated_image_post_id
+) VALUES (
+    $1, $2, $3, $4, $5
+) RETURNING *;
+
 -- name: GetGenerativeTokenImageTransactionByPaymentHistoryId :one
 SELECT * FROM generative_token_image_transactions
 WHERE payment_history_id = $1 AND deleted_at IS NULL;

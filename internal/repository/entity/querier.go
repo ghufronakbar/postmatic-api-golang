@@ -30,6 +30,7 @@ type Querier interface {
 	CountBusinessImageContentsByBusinessRootId(ctx context.Context, arg CountBusinessImageContentsByBusinessRootIdParams) (int64, error)
 	CountBusinessProductsByBusinessRootId(ctx context.Context, arg CountBusinessProductsByBusinessRootIdParams) (int64, error)
 	CountBusinessRssSubscriptionsByBusinessRootID(ctx context.Context, arg CountBusinessRssSubscriptionsByBusinessRootIDParams) (int64, error)
+	CountGeneratedImagePostsByBusinessId(ctx context.Context, arg CountGeneratedImagePostsByBusinessIdParams) (int64, error)
 	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
 	CountReferralCodeUsage(ctx context.Context, profileReferralCodeID int64) (int32, error)
 	CountSavedCreatorImageByBusinessId(ctx context.Context, arg CountSavedCreatorImageByBusinessIdParams) (int64, error)
@@ -44,6 +45,12 @@ type Querier interface {
 	CreateBusinessRoot(ctx context.Context) (int64, error)
 	CreateBusinessRssSubscription(ctx context.Context, arg CreateBusinessRssSubscriptionParams) (BusinessRssSubscription, error)
 	CreateCreatorImage(ctx context.Context, arg CreateCreatorImageParams) (CreateCreatorImageRow, error)
+	// internal/repository/queries/generated_image_post.sql
+	CreateGeneratedImagePost(ctx context.Context, arg CreateGeneratedImagePostParams) (GeneratedImagePost, error)
+	// internal/repository/queries/generated_image_post_caption.sql
+	CreateGeneratedImagePostCaption(ctx context.Context, arg CreateGeneratedImagePostCaptionParams) (GeneratedImagePostCaption, error)
+	// internal/repository/queries/generated_image_post_item.sql
+	CreateGeneratedImagePostItem(ctx context.Context, arg CreateGeneratedImagePostItemParams) (GeneratedImagePostItem, error)
 	CreateGenerativeImageModel(ctx context.Context, arg CreateGenerativeImageModelParams) (AppGenerativeImageModel, error)
 	CreateGenerativeImageModelChange(ctx context.Context, arg CreateGenerativeImageModelChangeParams) (AppGenerativeImageModelChange, error)
 	CreateGenerativeTextModel(ctx context.Context, arg CreateGenerativeTextModelParams) (AppGenerativeTextModel, error)
@@ -57,6 +64,7 @@ type Querier interface {
 	CreateProfileReferralCode(ctx context.Context, arg CreateProfileReferralCodeParams) (ProfileReferralCode, error)
 	CreateReferralRecord(ctx context.Context, arg CreateReferralRecordParams) (ReferralRecord, error)
 	CreateSavedCreatorImage(ctx context.Context, arg CreateSavedCreatorImageParams) (BusinessSavedTemplateCreatorImage, error)
+	CreateTokenTransactionForImagePost(ctx context.Context, arg CreateTokenTransactionForImagePostParams) (GenerativeTokenImageTransaction, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAppSocialPlatform(ctx context.Context, id int64) (AppSocialPlatform, error)
 	DeletePaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) error
@@ -66,6 +74,7 @@ type Querier interface {
 	GetAllAppCreatorImageTypeCategories(ctx context.Context, arg GetAllAppCreatorImageTypeCategoriesParams) ([]GetAllAppCreatorImageTypeCategoriesRow, error)
 	GetAllAppSocialPlatforms(ctx context.Context, arg GetAllAppSocialPlatformsParams) ([]AppSocialPlatform, error)
 	GetAllCreatorImage(ctx context.Context, arg GetAllCreatorImageParams) ([]GetAllCreatorImageRow, error)
+	GetAllGeneratedImagePostsByBusinessId(ctx context.Context, arg GetAllGeneratedImagePostsByBusinessIdParams) ([]GetAllGeneratedImagePostsByBusinessIdRow, error)
 	GetAllGenerativeImageModels(ctx context.Context, arg GetAllGenerativeImageModelsParams) ([]AppGenerativeImageModel, error)
 	GetAllGenerativeTextModels(ctx context.Context, arg GetAllGenerativeTextModelsParams) ([]AppGenerativeTextModel, error)
 	GetAllPaymentHistories(ctx context.Context, arg GetAllPaymentHistoriesParams) ([]PaymentHistory, error)
@@ -95,6 +104,9 @@ type Querier interface {
 	GetBusinessRssSubscriptionsByBusinessRootID(ctx context.Context, arg GetBusinessRssSubscriptionsByBusinessRootIDParams) ([]GetBusinessRssSubscriptionsByBusinessRootIDRow, error)
 	GetBusinessTimezonePrefByBusinessRootId(ctx context.Context, businessRootID int64) (BusinessTimezonePref, error)
 	GetCreatorImageById(ctx context.Context, id int64) (CreatorImage, error)
+	GetGeneratedImagePostById(ctx context.Context, id int64) (GeneratedImagePost, error)
+	GetGeneratedImagePostCaptionByPostId(ctx context.Context, generatedImagePostID int64) (GeneratedImagePostCaption, error)
+	GetGeneratedImagePostItemsByPostId(ctx context.Context, generatedImagePostID int64) ([]GeneratedImagePostItem, error)
 	GetGenerativeImageModelById(ctx context.Context, id int64) (AppGenerativeImageModel, error)
 	GetGenerativeImageModelByIdAdmin(ctx context.Context, id int64) (AppGenerativeImageModel, error)
 	GetGenerativeImageModelByIdUser(ctx context.Context, id int64) (AppGenerativeImageModel, error)
@@ -114,6 +126,7 @@ type Querier interface {
 	GetMembersByBusinessRootID(ctx context.Context, businessRootID int64) ([]GetMembersByBusinessRootIDRow, error)
 	GetMembersByBusinessRootIDWithStatus(ctx context.Context, arg GetMembersByBusinessRootIDWithStatusParams) ([]GetMembersByBusinessRootIDWithStatusRow, error)
 	GetMembersByBusinessRootIDs(ctx context.Context, businessRootIds []int64) ([]GetMembersByBusinessRootIDsRow, error)
+	GetOwnerMemberByBusinessRootId(ctx context.Context, businessRootID int64) (uuid.UUID, error)
 	GetPaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) ([]PaymentHistoryAction, error)
 	GetPaymentHistoryById(ctx context.Context, id uuid.UUID) (PaymentHistory, error)
 	GetPaymentHistoryByIdAndBusiness(ctx context.Context, arg GetPaymentHistoryByIdAndBusinessParams) (PaymentHistory, error)
@@ -161,6 +174,9 @@ type Querier interface {
 	UpdateBusinessMemberStatus(ctx context.Context, arg UpdateBusinessMemberStatusParams) (BusinessMember, error)
 	UpdateBusinessProduct(ctx context.Context, arg UpdateBusinessProductParams) (BusinessProduct, error)
 	UpdateCreatorImage(ctx context.Context, arg UpdateCreatorImageParams) (UpdateCreatorImageRow, error)
+	UpdateGeneratedImagePostError(ctx context.Context, arg UpdateGeneratedImagePostErrorParams) error
+	UpdateGeneratedImagePostPrompts(ctx context.Context, arg UpdateGeneratedImagePostPromptsParams) error
+	UpdateGeneratedImagePostStatus(ctx context.Context, arg UpdateGeneratedImagePostStatusParams) error
 	UpdateGenerativeImageModel(ctx context.Context, arg UpdateGenerativeImageModelParams) (AppGenerativeImageModel, error)
 	UpdateGenerativeTextModel(ctx context.Context, arg UpdateGenerativeTextModelParams) (AppGenerativeTextModel, error)
 	UpdateManyBusinessMemberStatus(ctx context.Context, arg UpdateManyBusinessMemberStatusParams) error
