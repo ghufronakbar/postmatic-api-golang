@@ -36,7 +36,7 @@ internal/module/creator/business_creator_image/
 
 ## 4. Endpoints
 
-### GET /api/creator/business-creator-image/{businessId}
+### GET /api/creator/business-saved-creator-image/{businessId}
 
 List all saved creator images untuk business tertentu.
 
@@ -89,7 +89,7 @@ List all saved creator images untuk business tertentu.
 
 ---
 
-### POST /api/creator/business-creator-image/{businessId}
+### POST /api/creator/business-saved-creator-image/{businessId}
 
 Simpan creator image ke collection business.
 
@@ -129,7 +129,7 @@ Simpan creator image ke collection business.
 
 ---
 
-### DELETE /api/creator/business-creator-image/{businessId}/{creatorImageId}
+### DELETE /api/creator/business-saved-creator-image/{businessId}/{creatorImageId}
 
 Hapus saved creator image dari collection business (soft delete).
 

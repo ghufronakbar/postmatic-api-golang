@@ -257,7 +257,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 			return internal_middleware.ReqFilterMiddleware(next, creator_image_service.SORT_BY)
 		})
 		r.Mount("/image", creatorImageHandler.Routes())
-		r.Mount("/business-creator-image", businessCreatorImageHandler.Routes())
+		r.Mount("/business-saved-creator-image", businessCreatorImageHandler.Routes())
 	})
 
 	r.Route("/affiliator", func(r chi.Router) {
