@@ -9,7 +9,7 @@ import (
 // Formula: SHA512(orderId + statusCode + grossAmount + serverKey)
 func (s *midtransService) VerifySignature(orderID, statusCode, grossAmount, signatureKey string) bool {
 	// Concatenate: orderID + statusCode + grossAmount + serverKey
-	raw := orderID + statusCode + grossAmount + s.serverKey
+	raw := orderID + statusCode + grossAmount + s.client.ServerKey
 
 	// Hash using SHA512
 	hasher := sha512.New()

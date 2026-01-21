@@ -96,12 +96,14 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 
 	ownedMw := internal_middleware.NewOwnedBusiness(store, ownedRepo)
 	cld := config.ConnectCloudinary(cfg)
+	midtransClient := config.ConnectMidtrans(cfg)
 
 	// 2. =========== INITIAL SERVICE ===========
 	// HEADLESS
 	tokenSvc := token.NewTokenMaker(cfg)
 	cldSvc := cloudinary_uploader.NewService(cfg, cld)
 	s3Svc := s3_uploader.NewService(cfg)
+	midtransSvc := midtrans.NewService(midtransClient)
 
 	// ✅ asynq client untuk enqueue
 	queueProducer := queue.NewProducer(asynqClient)
@@ -134,8 +136,6 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	referralBasicSvc := referral_basic_service.NewService(store, referralRuleSvc)
 	// CREATOR
 	creatorImageSvc := creator_image_service.NewService(store, catCreatorImageSvc)
-	// HEADLESS
-	midtransSvc := midtrans.NewService(cfg.MIDTRANS_SERVER_KEY, cfg.MIDTRANS_IS_PRODUCTION)
 	// GENERATIVE TOKEN
 	genTokenImageSvc := gen_token_image_service.NewService(store)
 	// PAYMENT

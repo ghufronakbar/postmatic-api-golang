@@ -6,7 +6,6 @@ import (
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
 
-	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
 )
 
@@ -29,31 +28,13 @@ type Service interface {
 
 // midtransService implements the Service interface
 type midtransService struct {
-	client    coreapi.Client
-	serverKey string
+	client coreapi.Client
 }
 
 // NewService creates a new Midtrans service instance
-func NewService(serverKey string, isProduction bool) Service {
-	var env midtrans.EnvironmentType
-	if isProduction {
-		env = midtrans.Production
-	} else {
-		env = midtrans.Sandbox
-	}
-
-	client := coreapi.Client{}
-	client.New(serverKey, env)
-
-	envStr := "sandbox"
-	if isProduction {
-		envStr = "production"
-	}
-	logger.L().Info("Midtrans service initialized", "environment", envStr)
-
+func NewService(client *coreapi.Client) Service {
 	return &midtransService{
-		client:    client,
-		serverKey: serverKey,
+		client: *client,
 	}
 }
 
