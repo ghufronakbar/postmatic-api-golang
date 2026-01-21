@@ -1203,6 +1203,15 @@ type BusinessRssSubscription struct {
 	AppRssFeedID   int64        `json:"app_rss_feed_id"`
 }
 
+type BusinessSavedTemplateCreatorImage struct {
+	ID             int64        `json:"id"`
+	BusinessRootID int64        `json:"business_root_id"`
+	CreatorImageID int64        `json:"creator_image_id"`
+	CreatedAt      time.Time    `json:"created_at"`
+	UpdatedAt      time.Time    `json:"updated_at"`
+	DeletedAt      sql.NullTime `json:"deleted_at"`
+}
+
 type BusinessTimezonePref struct {
 	ID             int32        `json:"id"`
 	BusinessRootID int64        `json:"business_root_id"`

@@ -27,6 +27,25 @@ func NewService(store entity.Store, cat *category_creator_image_service.Category
 	}
 }
 
+// GetCreatorImageDetailById returns creator image detail for validation purposes
+// Used by BusinessCreatorImage service to validate before saving
+func (s *CreatorImageService) GetCreatorImageDetailById(ctx context.Context, id int64) (*CreatorImageDetail, error) {
+	data, err := s.store.GetCreatorImageById(ctx, id)
+	if err == sql.ErrNoRows {
+		return nil, nil // not found
+	}
+	if err != nil {
+		return nil, errs.NewInternalServerError(err)
+	}
+
+	return &CreatorImageDetail{
+		ID:          data.ID,
+		IsPublished: data.IsPublished,
+		IsBanned:    data.IsBanned,
+		IsDeleted:   data.DeletedAt.Valid,
+	}, nil
+}
+
 func unmarshalJSONAny(v any, dst any) error {
 	if v == nil {
 		return nil

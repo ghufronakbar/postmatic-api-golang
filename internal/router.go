@@ -36,6 +36,7 @@ import (
 	business_rss_subscription_handler "postmatic-api/internal/module/business/business_rss_subscription/handler"
 	business_timezone_pref_handler "postmatic-api/internal/module/business/business_timezone_pref/handler"
 
+	business_creator_image_handler "postmatic-api/internal/module/creator/business_creator_image/handler"
 	creator_image_handler "postmatic-api/internal/module/creator/creator_image/handler"
 	gen_token_image_handler "postmatic-api/internal/module/generative_token/image_token/handler"
 
@@ -66,6 +67,7 @@ import (
 	business_role_service "postmatic-api/internal/module/business/business_role/service"
 	business_rss_subscription_service "postmatic-api/internal/module/business/business_rss_subscription/service"
 	business_timezone_pref_service "postmatic-api/internal/module/business/business_timezone_pref/service"
+	business_creator_image_service "postmatic-api/internal/module/creator/business_creator_image/service"
 	creator_image_service "postmatic-api/internal/module/creator/creator_image/service"
 	gen_token_image_service "postmatic-api/internal/module/generative_token/image_token/service"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
@@ -137,6 +139,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	referralBasicSvc := referral_basic_service.NewService(store, referralRuleSvc)
 	// CREATOR
 	creatorImageSvc := creator_image_service.NewService(store, catCreatorImageSvc)
+	businessCreatorImageSvc := business_creator_image_service.NewService(store, creatorImageSvc)
 	// GENERATIVE TOKEN
 	genTokenImageSvc := gen_token_image_service.NewService(store)
 	// PAYMENT
@@ -172,6 +175,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	socialPlatformHandler := social_platform_handler.NewHandler(socialPlatformSvc)
 	// CREATOR
 	creatorImageHandler := creator_image_handler.NewHandler(creatorImageSvc)
+	businessCreatorImageHandler := business_creator_image_handler.NewHandler(businessCreatorImageSvc, ownedMw)
 	// AFFILIATOR
 	referralBasicHandler := referral_basic_handler.NewHandler(referralBasicSvc)
 	// PAYMENT
@@ -253,6 +257,7 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 			return internal_middleware.ReqFilterMiddleware(next, creator_image_service.SORT_BY)
 		})
 		r.Mount("/image", creatorImageHandler.Routes())
+		r.Mount("/business-creator-image", businessCreatorImageHandler.Routes())
 	})
 
 	r.Route("/affiliator", func(r chi.Router) {

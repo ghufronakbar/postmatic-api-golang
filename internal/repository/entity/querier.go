@@ -14,6 +14,7 @@ import (
 type Querier interface {
 	CheckBusinessUsedReferralCode(ctx context.Context, arg CheckBusinessUsedReferralCodeParams) (bool, error)
 	CheckProfileUsedReferralCode(ctx context.Context, arg CheckProfileUsedReferralCodeParams) (bool, error)
+	CheckSavedCreatorImageExists(ctx context.Context, arg CheckSavedCreatorImageExistsParams) (bool, error)
 	CountAllAppCreatorImageProductCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllAppCreatorImageTypeCategories(ctx context.Context, search interface{}) (int64, error)
 	CountAllAppSocialPlatforms(ctx context.Context, arg CountAllAppSocialPlatformsParams) (int64, error)
@@ -31,6 +32,7 @@ type Querier interface {
 	CountBusinessRssSubscriptionsByBusinessRootID(ctx context.Context, arg CountBusinessRssSubscriptionsByBusinessRootIDParams) (int64, error)
 	CountJoinedBusinessesByProfileID(ctx context.Context, arg CountJoinedBusinessesByProfileIDParams) (int64, error)
 	CountReferralCodeUsage(ctx context.Context, profileReferralCodeID int64) (int32, error)
+	CountSavedCreatorImageByBusinessId(ctx context.Context, arg CountSavedCreatorImageByBusinessIdParams) (int64, error)
 	CreateAppSocialPlatform(ctx context.Context, arg CreateAppSocialPlatformParams) (AppSocialPlatform, error)
 	CreateAppSocialPlatformChange(ctx context.Context, arg CreateAppSocialPlatformChangeParams) (AppSocialPlatformChange, error)
 	CreateBusinessImageContent(ctx context.Context, arg CreateBusinessImageContentParams) (BusinessImageContent, error)
@@ -54,6 +56,7 @@ type Querier interface {
 	CreateProfile(ctx context.Context, arg CreateProfileParams) (Profile, error)
 	CreateProfileReferralCode(ctx context.Context, arg CreateProfileReferralCodeParams) (ProfileReferralCode, error)
 	CreateReferralRecord(ctx context.Context, arg CreateReferralRecordParams) (ReferralRecord, error)
+	CreateSavedCreatorImage(ctx context.Context, arg CreateSavedCreatorImageParams) (BusinessSavedTemplateCreatorImage, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAppSocialPlatform(ctx context.Context, id int64) (AppSocialPlatform, error)
 	DeletePaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) error
@@ -70,6 +73,8 @@ type Querier interface {
 	GetAllPaymentMethods(ctx context.Context, arg GetAllPaymentMethodsParams) ([]AppPaymentMethod, error)
 	GetAllRSSCategory(ctx context.Context, arg GetAllRSSCategoryParams) ([]AppRssCategory, error)
 	GetAllRSSFeed(ctx context.Context, arg GetAllRSSFeedParams) ([]AppRssFeed, error)
+	// internal/repository/queries/business_saved_template_creator_image.sql
+	GetAllSavedCreatorImageByBusinessId(ctx context.Context, arg GetAllSavedCreatorImageByBusinessIdParams) ([]GetAllSavedCreatorImageByBusinessIdRow, error)
 	GetAllTokenTransactionsByBusiness(ctx context.Context, arg GetAllTokenTransactionsByBusinessParams) ([]GenerativeTokenImageTransaction, error)
 	GetAppCreatorImageProductCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
 	GetAppCreatorImageTypeCategoriesByIds(ctx context.Context, ids []int64) ([]int64, error)
@@ -127,6 +132,7 @@ type Querier interface {
 	GetPublicPaymentHistoryActionsByPaymentId(ctx context.Context, paymentHistoryID uuid.UUID) ([]PaymentHistoryAction, error)
 	GetReferralRecordById(ctx context.Context, id int64) (ReferralRecord, error)
 	GetRssFeedById(ctx context.Context, id int64) (AppRssFeed, error)
+	GetSavedCreatorImageByBusinessAndCreatorImage(ctx context.Context, arg GetSavedCreatorImageByBusinessAndCreatorImageParams) (BusinessSavedTemplateCreatorImage, error)
 	GetSuccessPaymentIdsWithoutTokenTransaction(ctx context.Context, paymentIds []uuid.UUID) ([]GetSuccessPaymentIdsWithoutTokenTransactionRow, error)
 	GetUploadedImageByHashkey(ctx context.Context, hashkey string) (UploadedImage, error)
 	GetUserByEmailProfile(ctx context.Context, email string) ([]GetUserByEmailProfileRow, error)
@@ -147,6 +153,7 @@ type Querier interface {
 	SoftDeleteGenerativeImageModel(ctx context.Context, id int64) (AppGenerativeImageModel, error)
 	SoftDeleteGenerativeTextModel(ctx context.Context, id int64) (AppGenerativeTextModel, error)
 	SoftDeletePaymentMethod(ctx context.Context, id int64) (AppPaymentMethod, error)
+	SoftDeleteSavedCreatorImage(ctx context.Context, arg SoftDeleteSavedCreatorImageParams) error
 	SumTokenByBusinessAndType(ctx context.Context, arg SumTokenByBusinessAndTypeParams) (int64, error)
 	UpdateAppSocialPlatform(ctx context.Context, arg UpdateAppSocialPlatformParams) (AppSocialPlatform, error)
 	UpdateBusinessImageContent(ctx context.Context, arg UpdateBusinessImageContentParams) (BusinessImageContent, error)
