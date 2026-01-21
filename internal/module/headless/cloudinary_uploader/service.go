@@ -17,11 +17,7 @@ type CloudinaryUploaderService struct {
 	cld *cloudinary.Cloudinary
 }
 
-func NewService(cfg *config.Config) *CloudinaryUploaderService {
-	cld, err := cloudinary.NewFromParams(cfg.CLOUDINARY_CLOUD_NAME, cfg.CLOUDINARY_API_KEY, cfg.CLOUDINARY_API_SECRET)
-	if err != nil {
-		panic("Cannot connect to Cloudinary" + err.Error())
-	}
+func NewService(cfg *config.Config, cld *cloudinary.Cloudinary) *CloudinaryUploaderService {
 	return &CloudinaryUploaderService{
 		cfg: cfg,
 		cld: cld,

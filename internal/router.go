@@ -95,11 +95,12 @@ func NewRouter(db *sql.DB, cfg *config.Config, asynqClient *asynq.Client, rdb *r
 	invitationLimiterRepo := invitation_limiter_repository.NewLimiterInvitationRepository(rdb)
 
 	ownedMw := internal_middleware.NewOwnedBusiness(store, ownedRepo)
+	cld := config.ConnectCloudinary(cfg)
 
 	// 2. =========== INITIAL SERVICE ===========
 	// HEADLESS
 	tokenSvc := token.NewTokenMaker(cfg)
-	cldSvc := cloudinary_uploader.NewService(cfg)
+	cldSvc := cloudinary_uploader.NewService(cfg, cld)
 	s3Svc := s3_uploader.NewService(cfg)
 
 	// ✅ asynq client untuk enqueue
