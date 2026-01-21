@@ -10,8 +10,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awsCfg "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/smithy-go"
 )
@@ -22,41 +20,11 @@ type S3UploaderService struct {
 	presign *s3.PresignClient
 }
 
-func NewService(cfg *config.Config) *S3UploaderService {
-	loaded, err := awsCfg.LoadDefaultConfig(context.Background(),
-		awsCfg.WithRegion(cfg.S3_REGION),
-		awsCfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			cfg.S3_ACCESS_KEY_ID,
-			cfg.S3_SECRET_ACCESS_KEY,
-			"",
-		)),
-		awsCfg.WithEndpointResolverWithOptions(
-			aws.EndpointResolverWithOptionsFunc(func(service, region string, _ ...interface{}) (aws.Endpoint, error) {
-				// Force S3 client to use R2 endpoint
-				if service == s3.ServiceID {
-					return aws.Endpoint{
-						URL:               cfg.S3_ENDPOINT_URL,
-						SigningRegion:     cfg.S3_REGION,
-						HostnameImmutable: true,
-					}, nil
-				}
-				return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-			}),
-		),
-	)
-	if err != nil {
-		panic("Cannot connect to S3" + err.Error())
-	}
-
-	client := s3.NewFromConfig(loaded, func(o *s3.Options) {
-		// Banyak S3-compatible (termasuk R2) lebih aman pakai path-style.
-		o.UsePathStyle = true
-	})
-
+func NewService(cfg *config.Config, s3Client *config.S3Client) *S3UploaderService {
 	return &S3UploaderService{
 		cfg:     cfg,
-		s3:      client,
-		presign: s3.NewPresignClient(client),
+		s3:      s3Client.Client,
+		presign: s3Client.Presign,
 	}
 }
 
