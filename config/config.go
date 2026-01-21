@@ -88,6 +88,10 @@ type Config struct {
 	MIDTRANS_CLIENT_KEY    string
 	MIDTRANS_MERCHANT_ID   string
 	MIDTRANS_IS_PRODUCTION bool
+
+	// AI PROVIDERS
+	GOOGLE_GENAI_API_KEY string
+	OPENAI_API_KEY       string
 }
 
 func Load() *Config {
@@ -199,6 +203,10 @@ func Load() *Config {
 		MIDTRANS_CLIENT_KEY:    getEnv("MIDTRANS_CLIENT_KEY"),
 		MIDTRANS_MERCHANT_ID:   getEnv("MIDTRANS_MERCHANT_ID"),
 		MIDTRANS_IS_PRODUCTION: getEnvOptional("MIDTRANS_IS_PRODUCTION", "false") == "true",
+
+		// AI PROVIDERS
+		GOOGLE_GENAI_API_KEY: getEnv("GOOGLE_GENAI_API_KEY"),
+		OPENAI_API_KEY:       getEnv("OPENAI_API_KEY"),
 	}
 }
 
