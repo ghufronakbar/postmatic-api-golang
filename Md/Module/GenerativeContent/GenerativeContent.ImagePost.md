@@ -148,35 +148,44 @@ Sesuaikan juga untuk producer/consumernya
 ### Phase 1: Foundation & mode=generate (CURRENT)
 
 - [x] Migration schema created
-- [ ] SQL Queries (`generated_image_post.sql`, `generated_image_post_item.sql`, `generated_image_post_caption.sql`)
-- [ ] Service DTOs (`dto.go`, `viewmodel.go`, `filter.go`)
-- [ ] Service Interface (`service.go`) - dengan semua method signatures
-- [ ] Common Methods (`common.go`) - GetAllImagePosts dengan pagination
-- [ ] Prompt Builder (`prompt_builder.go`) - BuildImagePrompt, BuildCaptionPrompt
-- [ ] Caption Generator (`caption.go`) - GenerateCaption via text model
-- [ ] Generate Mode (`generate.go`) - FULL IMPLEMENTATION
-- [ ] Stub Files (throw error `METHOD_NOT_IMPLEMENTED`):
-  - [ ] `regenerate.go`
-  - [ ] `rss.go`
-  - [ ] `mask.go`
-- [ ] Queue Producer & Handler (`generative_content_image_post.go`)
-- [ ] HTTP Handler (`handler.go`)
-- [ ] Router Wiring
+- [x] SQL Queries (`generated_image_post.sql`, `generated_image_post_item.sql`, `generated_image_post_caption.sql`)
+- [x] Service DTOs (`dto.go`, `viewmodel.go`, `filter.go`)
+- [x] Service Interface (`service.go`) - dengan semua method signatures
+- [x] Common Methods (`common.go`) - GetAllImagePosts dengan pagination
+- [x] Prompt Builder (`prompt_builder.go`) - **ENHANCED** dengan:
+  - `PromptBuilder` struct dengan semua methods
+  - `BuildNegativePrompt()` - Avoid artifacts, watermarks, distortions
+  - `BuildCaptionInstruction()` - Professional copywriter prompts
+  - `BuildImagePromptForGenerate()` - Knowledge design instruction
+  - `BuildImagePromptForRegenerate()` - Minimal invasive edits
+  - `BuildImagePromptForRSS()` - Trend integration
+  - `BuildImagePromptForMask()` - Mask-based editing
+  - Helper methods: buildBusinessKnowledge, buildProductKnowledge, buildRoleKnowledge, buildCompositionRules, buildBrandRules
+- [x] Caption Generator (`caption.go`) - GenerateCaption (TODO: integrate text AI)
+- [x] Generate Mode (`generate.go`) - FULL IMPLEMENTATION
+- [x] Queue Producer & Handler (`generative_content_image_post.go`)
+- [x] Worker Handler (`worker.go`) - OpenAI + Google GenAI + Cloudinary + Token Deduction
+- [x] HTTP Handler (`handler.go`)
+- [x] Router Wiring
+- [x] Stub Files (throw error `METHOD_NOT_IMPLEMENTED`):
+  - [x] `regenerate.go`
+  - [x] `rss.go`
+  - [x] `mask.go`
 
 ### Phase 2: mode=regenerate (FUTURE)
 
 - [ ] Implement `regenerate.go`
-- [ ] Update `prompt_builder.go` for regenerate context
+- [x] Update `prompt_builder.go` for regenerate context → `BuildImagePromptForRegenerate()`
 
 ### Phase 3: mode=rss (FUTURE)
 
 - [ ] Implement `rss.go`
-- [ ] Update `prompt_builder.go` for RSS context
+- [x] Update `prompt_builder.go` for RSS context → `BuildImagePromptForRSS()`
 
 ### Phase 4: mode=mask (FUTURE)
 
 - [ ] Implement `mask.go`
-- [ ] Update `prompt_builder.go` for mask context
+- [x] Update `prompt_builder.go` for mask context → `BuildImagePromptForMask()`
 
 ---
 

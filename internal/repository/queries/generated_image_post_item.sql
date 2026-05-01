@@ -16,3 +16,9 @@ SELECT * FROM generated_image_post_items
 WHERE generated_image_post_id = @generated_image_post_id
   AND deleted_at IS NULL
 ORDER BY id ASC;
+
+-- name: GetGeneratedImagePostItemsByPostIds :many
+SELECT * FROM generated_image_post_items
+WHERE generated_image_post_id = ANY(sqlc.arg(post_ids)::bigint[])
+  AND deleted_at IS NULL
+ORDER BY generated_image_post_id, id ASC;

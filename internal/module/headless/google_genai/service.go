@@ -3,6 +3,9 @@ package google_genai
 
 import (
 	"context"
+	"io"
+	"net/http"
+	"strings"
 
 	"postmatic-api/pkg/errs"
 	"postmatic-api/pkg/logger"
@@ -99,7 +102,7 @@ func (s *googleGenAIService) GenerateText(ctx context.Context, input GenerateTex
 // GenerateImage generates images using Gemini Multimodal model (via GenerateContent)
 func (s *googleGenAIService) GenerateImage(ctx context.Context, input GenerateImageInput) (*GenerateImageResponse, error) {
 	log := logger.From(ctx)
-	log.Info("Generating image via GenerateContent", "model", input.Model)
+	log.Info("Generating image via GenerateContent", "model", input.Model, "refCount", len(input.ReferenceImageURLs))
 
 	// 1. Build Prompt & Config
 	// Gemini menangani Aspect Ratio lebih baik via instruksi prompt daripada config parameter
@@ -111,21 +114,63 @@ func (s *googleGenAIService) GenerateImage(ctx context.Context, input GenerateIm
 	config := &genai.GenerateContentConfig{}
 
 	// Mapping NumberOfImages ke CandidateCount
-	// Note: Tidak semua model Gemini support > 1 candidate.
-	// Jika error, mungkin perlu di-force ke 1 atau looping request.
 	if input.NumberOfImages != nil {
 		config.CandidateCount = int32(*input.NumberOfImages)
 	}
 
-	// 2. Call GenerateContent
-	// Kita mengirim Text Prompt, tapi mengharapkan balasan berupa Image (Multimodal generation)
-	resp, err := s.client.Models.GenerateContent(ctx, input.Model, genai.Text(finalPrompt), config)
+	// 2. Build parts with prompt and reference images
+	var parts []*genai.Part
+	parts = append(parts, &genai.Part{Text: finalPrompt})
+
+	// Download and attach reference images
+	if len(input.ReferenceImageURLs) > 0 {
+		log.Info("[GOOGLE_GENAI] Downloading reference images", "count", len(input.ReferenceImageURLs))
+		for i, url := range input.ReferenceImageURLs {
+			log.Info("[GOOGLE_GENAI] Downloading image", "index", i, "url", url)
+
+			resp, err := http.Get(url)
+			if err != nil {
+				log.Error("[GOOGLE_GENAI] Failed to download image", "url", url, "error", err)
+				continue
+			}
+
+			data, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if err != nil {
+				log.Error("[GOOGLE_GENAI] Failed to read image body", "url", url, "error", err)
+				continue
+			}
+
+			mimeType := resp.Header.Get("Content-Type")
+			if mimeType == "" {
+				mimeType = "image/png"
+			}
+			// Clean MIME type - remove charset and other parameters (e.g. "image/jpeg; charset=utf-8" -> "image/jpeg")
+			if idx := strings.Index(mimeType, ";"); idx != -1 {
+				mimeType = strings.TrimSpace(mimeType[:idx])
+			}
+
+			parts = append(parts, &genai.Part{
+				InlineData: &genai.Blob{
+					MIMEType: mimeType,
+					Data:     data,
+				},
+			})
+			log.Info("[GOOGLE_GENAI] Added reference image", "index", i, "size", len(data), "mimeType", mimeType)
+		}
+	}
+
+	log.Info("[GOOGLE_GENAI] Calling GenerateContent", "model", input.Model, "partCount", len(parts), "promptLength", len(finalPrompt))
+
+	// 3. Build Content and call GenerateContent
+	content := genai.NewContentFromParts(parts, genai.RoleUser)
+	resp, err := s.client.Models.GenerateContent(ctx, input.Model, []*genai.Content{content}, config)
 	if err != nil {
-		log.Error("Failed to generate content", "model", input.Model, "error", err)
+		log.Error("[GOOGLE_GENAI] Failed to generate content", "model", input.Model, "error", err)
 		return nil, errs.NewBadRequest("GOOGLE_GENAI_GENERATE_FAILED")
 	}
 
-	// 3. Map Response (Parsing InlineData)
+	// 4. Map Response (Parsing InlineData)
 	images := make([]GeneratedImage, 0)
 
 	// Loop semua candidates (jawaban alternatif)
@@ -152,11 +197,10 @@ func (s *googleGenAIService) GenerateImage(ctx context.Context, input GenerateIm
 	// Validasi apakah ada gambar yang dihasilkan
 	if len(images) == 0 {
 		log.Warn("Model returned success but no images found in candidates", "model", input.Model)
-		// Opsional: Cek apakah model me-reject request (Safety Ratings)
 		return nil, errs.NewBadRequest("IMAGE_GENERATION_EMPTY_RESPONSE")
 	}
 
-	log.Info("Images generated successfully", "model", input.Model, "count", len(images))
+	log.Info("[GOOGLE_GENAI] Images generated successfully", "model", input.Model, "count", len(images))
 
 	return &GenerateImageResponse{
 		Images: images,

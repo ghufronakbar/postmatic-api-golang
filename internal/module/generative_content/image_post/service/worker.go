@@ -10,6 +10,9 @@ import (
 	"net/http"
 
 	"postmatic-api/config"
+	business_knowledge_service "postmatic-api/internal/module/business/business_knowledge/service"
+	business_product_service "postmatic-api/internal/module/business/business_product/service"
+	business_role_service "postmatic-api/internal/module/business/business_role/service"
 	image_token_service "postmatic-api/internal/module/generative_token/image_token/service"
 	"postmatic-api/internal/module/headless/cloudinary_uploader"
 	"postmatic-api/internal/module/headless/google_genai"
@@ -209,25 +212,42 @@ func (w *ImagePostWorkerHandler) generateWithOpenAI(ctx context.Context, post en
 		size = post.ImageSize.String
 	}
 
+	// Collect reference images (product image, logo, reference image)
+	refImages := w.collectReferenceImages(ctx, post)
+	log.Info("[QUEUE] Collected reference images", "count", len(refImages), "urls", refImages)
+
 	result, err := w.openaiSvc.GenerateImage(ctx, openai_svc.GenerateImageInput{
-		Model:  post.RecordedModelName,
-		Prompt: prompt,
-		N:      &n,
-		Size:   &size,
+		Model:              post.RecordedModelName,
+		Prompt:             prompt,
+		N:                  &n,
+		Size:               &size,
+		ReferenceImageURLs: refImages,
 	})
 	if err != nil {
 		return nil, 0, err
 	}
 
-	// OpenAI returns temp URLs, need to upload to Cloudinary
+	// OpenAI may return URL or Base64, need to handle both
 	var finalURLs []string
 	for _, img := range result.Images {
-		if img.URL != "" {
-			uploadedURL, err := w.uploadFromURL(ctx, img.URL)
-			if err != nil {
-				log.Error("[QUEUE] Failed to upload from URL", "url", img.URL, "error", err)
-				continue
-			}
+		var uploadedURL string
+		var uploadErr error
+
+		if img.Base64Data != "" {
+			// gpt-image-1 returns Base64
+			log.Info("[QUEUE] OpenAI returned Base64, uploading to Cloudinary")
+			uploadedURL, uploadErr = w.uploadFromBase64(ctx, img.Base64Data, img.MimeType)
+		} else if img.URL != "" {
+			// DALL-E 2/3 returns URL
+			log.Info("[QUEUE] OpenAI returned URL, downloading and re-uploading")
+			uploadedURL, uploadErr = w.uploadFromURL(ctx, img.URL)
+		}
+
+		if uploadErr != nil {
+			log.Error("[QUEUE] Failed to upload OpenAI image", "error", uploadErr)
+			continue
+		}
+		if uploadedURL != "" {
 			finalURLs = append(finalURLs, uploadedURL)
 		}
 	}
@@ -248,11 +268,16 @@ func (w *ImagePostWorkerHandler) generateWithGoogle(ctx context.Context, post en
 		aspectRatio = "1:1"
 	}
 
+	// Collect reference images (product image, logo, reference image)
+	refImages := w.collectReferenceImages(ctx, post)
+	log.Info("[QUEUE] Collected reference images", "count", len(refImages), "urls", refImages)
+
 	result, err := w.googleGenAISvc.GenerateImage(ctx, google_genai.GenerateImageInput{
-		Model:          post.RecordedModelName,
-		Prompt:         prompt,
-		NumberOfImages: &n,
-		AspectRatio:    &aspectRatio,
+		Model:              post.RecordedModelName,
+		Prompt:             prompt,
+		NumberOfImages:     &n,
+		AspectRatio:        &aspectRatio,
+		ReferenceImageURLs: refImages,
 	})
 	if err != nil {
 		return nil, 0, err
@@ -306,35 +331,194 @@ func (w *ImagePostWorkerHandler) uploadFromBase64(ctx context.Context, base64Dat
 	return result.ImageUrl, nil
 }
 
+// collectReferenceImages collects product image, logo, and reference image URLs based on advanceGenerate flags
+// Order: #1 Product Image, #2 Reference/Template, #3 Logo
+func (w *ImagePostWorkerHandler) collectReferenceImages(ctx context.Context, post entity.GeneratedImagePost) []string {
+	log := logger.L().With("postID", post.ID, "businessRootID", post.BusinessRootID)
+	log.Info("[COLLECT_IMAGES] Starting to collect reference images")
+
+	var images []string
+
+	// 1. Product Image (first image_url from business_products.image_urls)
+	productRow, err := w.store.GetBusinessProductByBusinessProductId(ctx, post.BusinessProductID)
+	if err != nil {
+		log.Error("[COLLECT_IMAGES] Failed to get product", "error", err)
+	} else if len(productRow.ImageUrls) > 0 {
+		productImageURL := productRow.ImageUrls[0]
+		images = append(images, productImageURL)
+		log.Info("[COLLECT_IMAGES] Added product image", "url", productImageURL)
+	} else {
+		log.Warn("[COLLECT_IMAGES] Product has no images", "productID", post.BusinessProductID)
+	}
+
+	// 2. Reference Image (from request input)
+	if post.ReferenceImageUrl.Valid && post.ReferenceImageUrl.String != "" {
+		images = append(images, post.ReferenceImageUrl.String)
+		log.Info("[COLLECT_IMAGES] Added reference image", "url", post.ReferenceImageUrl.String)
+	}
+
+	// 3. Logo (if advBkLogo flag is true)
+	if post.AdvBkLogo {
+		bkRow, err := w.store.GetBusinessKnowledgeByBusinessRootID(ctx, post.BusinessRootID)
+		if err != nil {
+			log.Error("[COLLECT_IMAGES] Failed to get business knowledge", "error", err)
+		} else if bkRow.PrimaryLogoUrl.Valid && bkRow.PrimaryLogoUrl.String != "" {
+			images = append(images, bkRow.PrimaryLogoUrl.String)
+			log.Info("[COLLECT_IMAGES] Added logo image", "url", bkRow.PrimaryLogoUrl.String)
+		} else {
+			log.Warn("[COLLECT_IMAGES] Business has no logo but advBkLogo=true")
+		}
+	}
+
+	log.Info("[COLLECT_IMAGES] Finished collecting images", "totalCount", len(images), "urls", images)
+	return images
+}
+
 // buildImagePromptFromPost builds image prompt from post + knowledge data
 func (w *ImagePostWorkerHandler) buildImagePromptFromPost(ctx context.Context, post entity.GeneratedImagePost) string {
-	// TODO: Fetch business knowledge, product, role and build prompt
-	// For now, use additionalPrompt + designStyle + category
+	log := logger.L().With("postID", post.ID, "businessRootID", post.BusinessRootID)
+	log.Info("[PROMPT_BUILDER] Starting to build prompt")
+
+	// 1. Fetch Business Knowledge
+	bkRow, err := w.store.GetBusinessKnowledgeByBusinessRootID(ctx, post.BusinessRootID)
+	if err != nil {
+		log.Error("[PROMPT_BUILDER] Failed to get business knowledge", "error", err)
+	} else {
+		log.Info("[PROMPT_BUILDER] Got business knowledge", "name", bkRow.Name, "category", bkRow.Category)
+	}
+
+	// 2. Fetch Product Knowledge
+	productRow, err := w.store.GetBusinessProductByBusinessProductId(ctx, post.BusinessProductID)
+	if err != nil {
+		log.Error("[PROMPT_BUILDER] Failed to get product knowledge", "error", err)
+	} else {
+		log.Info("[PROMPT_BUILDER] Got product knowledge", "name", productRow.Name, "category", productRow.Category)
+	}
+
+	// 3. Fetch Role Knowledge
+	roleRow, err := w.store.GetBusinessRoleByBusinessRootID(ctx, post.BusinessRootID)
+	if err != nil {
+		log.Error("[PROMPT_BUILDER] Failed to get role knowledge", "error", err)
+	} else {
+		log.Info("[PROMPT_BUILDER] Got role knowledge", "tone", roleRow.Tone)
+	}
+
+	// 4. Build AdvanceGenerateInput from post's adv_* fields
+	advInput := &AdvanceGenerateInput{
+		BusinessKnowledge: &BusinessKnowledgeFlags{
+			Name:               post.AdvBkName,
+			Category:           post.AdvBkCategory,
+			Description:        post.AdvBkDescription,
+			Location:           post.AdvBkLocation,
+			Logo:               post.AdvBkLogo,
+			UniqueSellingPoint: post.AdvBkUniqueSellingPoint,
+			Website:            post.AdvBkWebsite,
+			VisionMission:      post.AdvBkVisionMission,
+			ColorTone:          post.AdvBkColorTone,
+		},
+		ProductKnowledge: &ProductKnowledgeFlags{
+			Name:        post.AdvPdName,
+			Category:    post.AdvPdCategory,
+			Description: post.AdvPdDescription,
+			Price:       post.AdvPdPrice,
+		},
+		RoleKnowledge: &RoleKnowledgeFlags{
+			Hashtags: post.AdvRlHashtags,
+		},
+	}
+	log.Info("[PROMPT_BUILDER] Built AdvanceGenerateInput",
+		"bkName", advInput.BusinessKnowledge.Name,
+		"bkLogo", advInput.BusinessKnowledge.Logo,
+		"bkColorTone", advInput.BusinessKnowledge.ColorTone,
+		"pdName", advInput.ProductKnowledge.Name,
+		"rlHashtags", advInput.RoleKnowledge.Hashtags)
+
+	// 5. Map to BusinessKnowledgeResponse for PromptBuilder
+	var websiteUrl *string
+	if bkRow.WebsiteUrl.Valid && bkRow.WebsiteUrl.String != "" {
+		websiteUrl = &bkRow.WebsiteUrl.String
+	}
+	var primaryLogoUrl string
+	if bkRow.PrimaryLogoUrl.Valid {
+		primaryLogoUrl = bkRow.PrimaryLogoUrl.String
+	}
+
+	businessKnowledge := business_knowledge_service.BusinessKnowledgeResponse{
+		Name:               bkRow.Name,
+		Category:           bkRow.Category,
+		Description:        nullStringToString(bkRow.Description),
+		Location:           nullStringToString(bkRow.Location),
+		UniqueSellingPoint: nullStringToString(bkRow.UniqueSellingPoint),
+		VisionMission:      nullStringToString(bkRow.VisionMission),
+		ColorTone:          nullStringToString(bkRow.ColorTone),
+		WebsiteUrl:         websiteUrl,
+		PrimaryLogoUrl:     primaryLogoUrl,
+	}
+
+	// 6. Map to BusinessProductResponse for PromptBuilder
+	productKnowledge := business_product_service.BusinessProductResponse{
+		Name:        productRow.Name,
+		Category:    productRow.Category,
+		Description: nullStringToString(productRow.Description),
+		Price:       productRow.Price,
+		Currency:    productRow.Currency,
+	}
+
+	// 7. Map to BusinessRoleResponse for PromptBuilder
+	var hashtags []string
+	if roleRow.Hashtags != nil {
+		hashtags = roleRow.Hashtags
+	}
+	roleKnowledge := business_role_service.BusinessRoleResponse{
+		Tone:            roleRow.Tone,
+		CallToAction:    roleRow.CallToAction,
+		TargetAudience:  roleRow.TargetAudience,
+		AudiencePersona: roleRow.AudiencePersona,
+		Goals:           nullStringToString(roleRow.Goals),
+		Hashtags:        hashtags,
+	}
+
+	// 8. Build PromptBuilder
+	builder := &PromptBuilder{
+		Business:          businessKnowledge,
+		Product:           productKnowledge,
+		Role:              roleKnowledge,
+		Adv:               advInput,
+		AdditionalPrompt:  nullStringToString(post.AdditionalPrompt),
+		DesignStyle:       nullStringToString(post.DesignStyle),
+		Category:          nullStringToString(post.Category),
+		Ratio:             post.Ratio,
+		HasReferenceImage: post.ReferenceImageUrl.Valid && post.ReferenceImageUrl.String != "",
+		HasLogo:           advInput.BusinessKnowledge.Logo && primaryLogoUrl != "",
+	}
+
+	// 9. Build prompt based on mode
 	var prompt string
-
-	if post.AdditionalPrompt.Valid && post.AdditionalPrompt.String != "" {
-		prompt = post.AdditionalPrompt.String
+	switch post.Mode {
+	case entity.GeneratedImagePostModeGenerate:
+		prompt = builder.BuildImagePromptForGenerate()
+	case entity.GeneratedImagePostModeRegenerate:
+		prompt = builder.BuildImagePromptForRegenerate(nullStringToString(post.AdditionalPrompt))
+	case entity.GeneratedImagePostModeRss:
+		prompt = builder.BuildImagePromptForRSS()
+	case entity.GeneratedImagePostModeMask:
+		prompt = builder.BuildImagePromptForMask(nullStringToString(post.AdditionalPrompt))
+	default:
+		prompt = builder.BuildImagePromptForGenerate()
 	}
 
-	if post.DesignStyle.Valid && post.DesignStyle.String != "" {
-		if prompt != "" {
-			prompt += " "
-		}
-		prompt += "Style: " + post.DesignStyle.String
-	}
-
-	if post.Category.Valid && post.Category.String != "" {
-		if prompt != "" {
-			prompt += ". "
-		}
-		prompt += "Category: " + post.Category.String
-	}
-
-	if prompt == "" {
-		prompt = "Generate a high-quality marketing image"
-	}
+	log.Info("[PROMPT_BUILDER] Prompt built successfully", "promptLength", len(prompt), "mode", post.Mode)
+	log.Debug("[PROMPT_BUILDER] Full prompt", "prompt", prompt)
 
 	return prompt
+}
+
+// nullStringToString converts sql.NullString to string
+func nullStringToString(ns sql.NullString) string {
+	if ns.Valid {
+		return ns.String
+	}
+	return ""
 }
 
 // markAsFailed updates post status to failed with error log

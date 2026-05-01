@@ -4,7 +4,6 @@ package image_post_service
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 
 	"postmatic-api/internal/repository/entity"
 	"postmatic-api/pkg/errs"
@@ -42,7 +41,7 @@ func (s *ImagePostService) GetAllImagePosts(ctx context.Context, filter GetImage
 		params.BusinessProductID = sql.NullInt64{Int64: *filter.BusinessProductID, Valid: true}
 	}
 
-	// Query
+	// Query posts
 	rows, err := s.store.GetAllGeneratedImagePostsByBusinessId(ctx, params)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, nil, errs.NewInternalServerError(err)
@@ -68,10 +67,60 @@ func (s *ImagePostService) GetAllImagePosts(ctx context.Context, filter GetImage
 		Limit: filter.PageLimit,
 	})
 
-	// Map to response
+	// If no posts, return empty
+	if len(rows) == 0 {
+		return []ImagePostResponse{}, &pag, nil
+	}
+
+	// Collect post IDs for batch queries
+	postIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		postIDs = append(postIDs, row.ID)
+	}
+
+	// Batch fetch items
+	allItems, err := s.store.GetGeneratedImagePostItemsByPostIds(ctx, postIDs)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	// Batch fetch captions
+	allCaptions, err := s.store.GetGeneratedImagePostCaptionsByPostIds(ctx, postIDs)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, nil, errs.NewInternalServerError(err)
+	}
+
+	// Build maps for quick lookup
+	itemsMap := make(map[int64][]ImagePostItemResponse)
+	for _, item := range allItems {
+		itemsMap[item.GeneratedImagePostID] = append(itemsMap[item.GeneratedImagePostID], ImagePostItemResponse{
+			ID:        item.ID,
+			ImageURL:  item.ImageUrl,
+			TokenUsed: int(item.TokenUsed),
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	captionsMap := make(map[int64]*ImagePostCaptionResponse)
+	for _, cap := range allCaptions {
+		captionsMap[cap.GeneratedImagePostID] = &ImagePostCaptionResponse{
+			ID:          cap.ID,
+			CaptionText: cap.CaptionText,
+			TokenUsed:   int(cap.TokenUsed),
+			CreatedAt:   cap.CreatedAt,
+		}
+	}
+
+	// Map to response with items and captions
 	res := make([]ImagePostResponse, 0, len(rows))
 	for _, row := range rows {
-		resp := mapRowToResponse(row)
+		resp := mapRowToResponseSimple(row)
+		if items, ok := itemsMap[row.ID]; ok {
+			resp.Items = items
+		}
+		if caption, ok := captionsMap[row.ID]; ok {
+			resp.Caption = caption
+		}
 		res = append(res, resp)
 	}
 
@@ -130,8 +179,9 @@ func (s *ImagePostService) GetImagePostById(ctx context.Context, id int64, busin
 	return resp, nil
 }
 
-// mapRowToResponse maps GetAllGeneratedImagePostsByBusinessIdRow ke ImagePostResponse
-func mapRowToResponse(row entity.GetAllGeneratedImagePostsByBusinessIdRow) ImagePostResponse {
+// mapRowToResponseSimple maps GetAllGeneratedImagePostsByBusinessIdRow ke ImagePostResponse
+// Items and captions are populated separately via batch queries
+func mapRowToResponseSimple(row entity.GetAllGeneratedImagePostsByBusinessIdRow) ImagePostResponse {
 	res := ImagePostResponse{
 		ID:                        row.ID,
 		Status:                    string(row.Status),
@@ -181,30 +231,6 @@ func mapRowToResponse(row entity.GetAllGeneratedImagePostsByBusinessIdRow) Image
 	}
 	if row.CurrentCaption.Valid {
 		res.CurrentCaption = &row.CurrentCaption.String
-	}
-
-	// Parse items JSON - Items is interface{}, need to marshal first
-	if row.Items != nil {
-		var items []ImagePostItemResponse
-		// row.Items is already deserialized by sqlc as interface{}
-		b, err := json.Marshal(row.Items)
-		if err == nil {
-			_ = json.Unmarshal(b, &items)
-		}
-		if items != nil {
-			res.Items = items
-		}
-	}
-
-	// Parse caption JSON - Caption is also interface{}
-	if row.Caption != nil {
-		var caption ImagePostCaptionResponse
-		b, err := json.Marshal(row.Caption)
-		if err == nil {
-			if err := json.Unmarshal(b, &caption); err == nil && caption.ID != 0 {
-				res.Caption = &caption
-			}
-		}
 	}
 
 	return res

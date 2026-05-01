@@ -22,5 +22,7 @@ type GenerateImageResponse struct {
 // GeneratedImage represents a single generated image
 type GeneratedImage struct {
 	URL           string `json:"url"`
+	Base64Data    string `json:"base64Data"`
+	MimeType      string `json:"mimeType"`
 	RevisedPrompt string `json:"revisedPrompt"`
 }

@@ -21,13 +21,15 @@ type ChatMessage struct {
 	Content string `json:"content" validate:"required"`
 }
 
-// GenerateImageInput is the input DTO for generating images with DALL-E
+// GenerateImageInput is the input DTO for generating images with DALL-E or gpt-image-1
 type GenerateImageInput struct {
-	Model  string `json:"model" validate:"required"` // dall-e-2 or dall-e-3
+	Model  string `json:"model" validate:"required"` // dall-e-2, dall-e-3, or gpt-image-1
 	Prompt string `json:"prompt" validate:"required"`
 	// Optional parameters
 	N       *int    `json:"n"`       // Number of images (1-10 for dall-e-2, 1 for dall-e-3)
 	Size    *string `json:"size"`    // 256x256, 512x512, 1024x1024, 1792x1024, 1024x1792
 	Quality *string `json:"quality"` // standard or hd (dall-e-3 only)
 	Style   *string `json:"style"`   // vivid or natural (dall-e-3 only)
+	// Reference images for editing (gpt-image-1) - URLs that will be downloaded and sent
+	ReferenceImageURLs []string `json:"referenceImageUrls"`
 }

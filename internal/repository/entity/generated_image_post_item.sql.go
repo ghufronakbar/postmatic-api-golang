@@ -7,6 +7,8 @@ package entity
 
 import (
 	"context"
+
+	"github.com/lib/pq"
 )
 
 const createGeneratedImagePostItem = `-- name: CreateGeneratedImagePostItem :one
@@ -53,6 +55,44 @@ ORDER BY id ASC
 
 func (q *Queries) GetGeneratedImagePostItemsByPostId(ctx context.Context, generatedImagePostID int64) ([]GeneratedImagePostItem, error) {
 	rows, err := q.db.QueryContext(ctx, getGeneratedImagePostItemsByPostId, generatedImagePostID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GeneratedImagePostItem
+	for rows.Next() {
+		var i GeneratedImagePostItem
+		if err := rows.Scan(
+			&i.ID,
+			&i.GeneratedImagePostID,
+			&i.ImageUrl,
+			&i.TokenUsed,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getGeneratedImagePostItemsByPostIds = `-- name: GetGeneratedImagePostItemsByPostIds :many
+SELECT id, generated_image_post_id, image_url, token_used, created_at, updated_at, deleted_at FROM generated_image_post_items
+WHERE generated_image_post_id = ANY($1::bigint[])
+  AND deleted_at IS NULL
+ORDER BY generated_image_post_id, id ASC
+`
+
+func (q *Queries) GetGeneratedImagePostItemsByPostIds(ctx context.Context, postIds []int64) ([]GeneratedImagePostItem, error) {
+	rows, err := q.db.QueryContext(ctx, getGeneratedImagePostItemsByPostIds, pq.Array(postIds))
 	if err != nil {
 		return nil, err
 	}

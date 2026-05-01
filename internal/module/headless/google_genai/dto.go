@@ -14,11 +14,13 @@ type GenerateTextInput struct {
 	TopK            *int     `json:"topK"`
 }
 
-// GenerateImageInput is the input DTO for generating images (Imagen)
+// GenerateImageInput is the input DTO for generating images (Imagen or Gemini with images)
 type GenerateImageInput struct {
 	Model  string `json:"model" validate:"required"`
 	Prompt string `json:"prompt" validate:"required"`
 	// Optional parameters
 	NumberOfImages *int    `json:"numberOfImages"` // 1-4
 	AspectRatio    *string `json:"aspectRatio"`    // e.g., "1:1", "16:9", "9:16"
+	// Reference images for image editing - URLs that will be downloaded and sent as context
+	ReferenceImageURLs []string `json:"referenceImageUrls"`
 }

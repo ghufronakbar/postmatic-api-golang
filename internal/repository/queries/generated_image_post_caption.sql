@@ -15,3 +15,8 @@ INSERT INTO generated_image_post_captions (
 SELECT * FROM generated_image_post_captions
 WHERE generated_image_post_id = @generated_image_post_id
   AND deleted_at IS NULL;
+
+-- name: GetGeneratedImagePostCaptionsByPostIds :many
+SELECT * FROM generated_image_post_captions
+WHERE generated_image_post_id = ANY(sqlc.arg(post_ids)::bigint[])
+  AND deleted_at IS NULL;

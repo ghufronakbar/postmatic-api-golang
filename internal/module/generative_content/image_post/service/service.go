@@ -84,6 +84,10 @@ func (s *ImagePostService) CreateImagePost(ctx context.Context, input CreateImag
 	if product.BusinessRootID != input.BusinessRootID {
 		return CreateImagePostResponse{}, errs.NewForbidden("PRODUCT_NOT_BELONGS_TO_BUSINESS")
 	}
+	// Validate product has at least one image
+	if len(product.ImageUrls) == 0 {
+		return CreateImagePostResponse{}, errs.NewBadRequest("PRODUCT_HAS_NO_IMAGES")
+	}
 
 	// 4. Validate knowledge flags jika ada advanceGenerate
 	if input.AdvanceGenerate != nil {

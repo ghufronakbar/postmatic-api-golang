@@ -7,6 +7,8 @@ package entity
 
 import (
 	"context"
+
+	"github.com/lib/pq"
 )
 
 const createGeneratedImagePostCaption = `-- name: CreateGeneratedImagePostCaption :one
@@ -63,4 +65,41 @@ func (q *Queries) GetGeneratedImagePostCaptionByPostId(ctx context.Context, gene
 		&i.DeletedAt,
 	)
 	return i, err
+}
+
+const getGeneratedImagePostCaptionsByPostIds = `-- name: GetGeneratedImagePostCaptionsByPostIds :many
+SELECT id, generated_image_post_id, caption_text, token_used, created_at, updated_at, deleted_at FROM generated_image_post_captions
+WHERE generated_image_post_id = ANY($1::bigint[])
+  AND deleted_at IS NULL
+`
+
+func (q *Queries) GetGeneratedImagePostCaptionsByPostIds(ctx context.Context, postIds []int64) ([]GeneratedImagePostCaption, error) {
+	rows, err := q.db.QueryContext(ctx, getGeneratedImagePostCaptionsByPostIds, pq.Array(postIds))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GeneratedImagePostCaption
+	for rows.Next() {
+		var i GeneratedImagePostCaption
+		if err := rows.Scan(
+			&i.ID,
+			&i.GeneratedImagePostID,
+			&i.CaptionText,
+			&i.TokenUsed,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
