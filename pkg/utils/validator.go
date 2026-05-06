@@ -75,8 +75,8 @@ func ValidateStruct(body io.Reader, dst any) *errs.AppError {
 	}
 
 	// 2) Scan semua unknown fields berdasarkan schema struct (json tag)
-	unknowns := make(map[string]string)
-	collectUnknownFields(raw, rootType, "", unknowns)
+	// unknowns := make(map[string]string)
+	// collectUnknownFields(raw, rootType, "", unknowns)
 
 	// 3) Unmarshal ke struct (tanpa DisallowUnknownFields),
 	//    supaya kita tidak stop di error unknown field pertama.
@@ -108,7 +108,8 @@ func ValidateStruct(body io.Reader, dst any) *errs.AppError {
 	}
 
 	// 5) Gabungkan semua error: unknown + type mismatch + validator
-	merged := mergeErrors(unknowns, typeErrs, valErrs)
+	merged := mergeErrors(typeErrs, valErrs)
+	// merged := mergeErrors(unknowns, typeErrs, valErrs)
 	if len(merged) > 0 {
 		return errs.NewValidationFailed(merged)
 	}
