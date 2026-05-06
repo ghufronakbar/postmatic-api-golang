@@ -1,0 +1,4 @@
+# Caddyfile
+api-rework.postmatic.id {
+    reverse_proxy api:2001
+}

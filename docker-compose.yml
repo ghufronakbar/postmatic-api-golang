@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  migrator:
+    image: golang:1.25.4-alpine
+    container_name: postmatic_migrator
+    working_dir: /app
+    volumes:
+      - ./migrations:/app/migrations
+    # Hapus env_file dan langsung berikan URL secara absolut
+    command:
+      - go
+      - run
+      - github.com/pressly/goose/v3/cmd/goose@v3.26.0
+      - -dir
+      - /app/migrations
+      - postgres
+      - postgres://postgres:postmatic_password@postgres:5432/postmatic_staging?sslmode=disable
+      - up
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - postmatic_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postmatic_api
+    restart: unless-stopped
+    ports:
+      - "2001:2001"
+    env_file:
+      - .env.staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - postmatic_network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postmatic_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postmatic_password
+      POSTGRES_DB: postmatic_staging
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postmatic_staging"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - postmatic_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: postmatic_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - postmatic_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  postmatic_network:
+    driver: bridge
